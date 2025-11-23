@@ -2,31 +2,25 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Kolom yang tidak boleh di-mass assign
+     * Sebaiknya gunakan guarded untuk keamanan
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = ['id'];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Kolom yang disembunyikan saat mengambil data user
      */
     protected $hidden = [
         'password',
@@ -34,15 +28,31 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Casting otomatis
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed', // Laravel 10+ auto hash
+    ];
+
+    /**
+     * Jika ingin dukung Laravel < 10 untuk hash manual
+     * maka tetap gunakan setter seperti di bawah
+     * (tidak wajib jika pakai 'hashed' cast)
+     */
+    public function setPasswordAttribute($password)
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        if ($password && !Hash::needsRehash($password)) {
+            $this->attributes['password'] = Hash::make($password);
+        }
+    }
+
+    /**
+     * Contoh relasi jika user juga bisa jadi seller
+     * Nanti bisa digunakan seperti: $user->sellerDetail
+     */
+    public function sellerDetail()
+    {
+        return $this->hasOne(SellerDetail::class, 'user_id');
     }
 }
