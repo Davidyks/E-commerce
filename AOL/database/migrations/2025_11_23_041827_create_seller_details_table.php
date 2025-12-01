@@ -22,8 +22,8 @@ return new class extends Migration
             $table->integer('followers')->default(0);
             $table->integer('total_products')->default(0);
 
-            $table->float('rating')->default(0);
             $table->integer('response_time_hours')->nullable();
+            $table->timestamp('last_active_at')->nullable();
             $table->date('joined_at')->nullable();
             $table->timestamps();
         });

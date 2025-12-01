@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    protected $guarded = ['id'];
+    use HasFactory;
+
+    protected $guarded = [];
 
     public function seller()
     {
@@ -18,34 +21,28 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
-    /**
-     * Produk punya varian atau tidak
-     */
-    public function getHasVariantAttribute()
+    public function ratings()
     {
-        return $this->variants()->exists();
+        return $this->hasMany(ProductRating::class);
     }
 
-    /**
-     * Harga final
-     */
+    // Accessor utk rating ui
+    public function getRatingAverageAttribute()
+    {
+        return round($this->ratings()->avg('rating'), 1) ?? 0;
+    }
+
+    public function getRatingCountAttribute()
+    {
+        return $this->ratings()->count();
+    }
+
+    // Harga utama (jika ada varian pakai min-max price)
     public function getDisplayPriceAttribute()
     {
-        if ($this->has_variant) {
-            return $this->min_price . ' - ' . $this->max_price;
+        if ($this->min_price && $this->max_price) {
+            return "{$this->min_price} - {$this->max_price}";
         }
-        return $this->price;
-    }
-
-    /**
-     * Stock produk jika tanpa varian
-     */
-    public function getDisplayStockAttribute()
-    {
-        if ($this->has_variant) {
-            return $this->variants()->sum('stock');
-        }
-        return $this->stock;
+        return $this->price ?: '-';
     }
 }
-

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('seller_id')->constrained('seller_details')->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();
-            
+
             // Harga & stok langsung untuk produk tanpa varian
             $table->decimal('price', 15, 2)->nullable();
             $table->integer('stock')->nullable();
@@ -24,6 +24,11 @@ return new class extends Migration
             // Support range harga jika ada variant
             $table->decimal('min_price', 15, 2)->nullable();
             $table->decimal('max_price', 15, 2)->nullable();
+
+            $table->float('rating')->default(0);
+
+            $table->integer('min_order_qty')->default(1);
+            $table->integer('delivery_estimate_days')->nullable();
 
             $table->integer('sold_count')->default(0);
             $table->string('product_image')->nullable();

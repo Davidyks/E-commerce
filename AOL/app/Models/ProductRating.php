@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductRating extends Model
 {
-    protected $fillable = ['product_id', 'user_id', 'rating', 'review'];
+    use HasFactory;
+
+    protected $guarded = [];
 
     public function product()
     {
@@ -18,4 +21,3 @@ class ProductRating extends Model
         return $this->belongsTo(User::class);
     }
 }
-
