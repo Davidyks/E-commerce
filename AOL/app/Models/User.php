@@ -42,10 +42,11 @@ class User extends Authenticatable
      */
     public function setPasswordAttribute($password)
     {
-        if ($password && !Hash::needsRehash($password)) {
+        if ($password) {
             $this->attributes['password'] = Hash::make($password);
         }
     }
+
 
     /**
      * Contoh relasi jika user juga bisa jadi seller
@@ -53,16 +54,6 @@ class User extends Authenticatable
      */
     public function sellerDetail()
     {
-        return $this->hasOne(SellerDetail::class);
-    }
-
-    public function productRatings()
-    {
-        return $this->hasMany(ProductRating::class);
-    }
-
-    public function wishlist()
-    {
-        return $this->hasMany(Wishlist::class);
+        return $this->hasOne(SellerDetail::class, 'user_id');
     }
 }
