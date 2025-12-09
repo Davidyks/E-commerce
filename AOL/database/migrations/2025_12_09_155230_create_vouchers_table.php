@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('store_vouchers', function (Blueprint $table) {
+        Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('seller_id')
-                ->constrained('seller_details')
-                ->onDelete('cascade');
-
             $table->string('code')->unique();
             $table->string('title');
 
@@ -26,15 +22,13 @@ return new class extends Migration
             $table->decimal('max_discount', 15, 2)->nullable();
             $table->decimal('min_purchase', 15, 2)->default(0);
 
-            $table->integer('usage_limit')->nullable();      // total limit
-            $table->integer('per_user_limit')->nullable();   // per user limit
+            $table->integer('usage_limit')->nullable();
+            $table->integer('per_user_limit')->nullable();
 
             $table->timestamp('start_at')->nullable();
             $table->timestamp('end_at')->nullable();
-
             $table->timestamps();
         });
-
     }
 
     /**
@@ -42,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('store_vouchers');
+        Schema::dropIfExists('vouchers');
     }
 };
