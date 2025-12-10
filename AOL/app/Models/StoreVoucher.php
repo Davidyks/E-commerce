@@ -20,8 +20,4 @@ class StoreVoucher extends Model
     {
         return $this->belongsTo(SellerDetail::class);
     }
-    public function appliedCarts()
-    {
-        return $this->hasMany(CartAppliedVoucher::class, 'store_voucher_id');
-    }
 }
