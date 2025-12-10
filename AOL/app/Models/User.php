@@ -54,37 +54,6 @@ class User extends Authenticatable
      */
     public function sellerDetail()
     {
-        return $this->hasOne(SellerDetail::class);
-    }
-
-    public function productRatings()
-    {
-        return $this->hasMany(ProductRating::class);
-    }
-
-    public function wishlist()
-    {
-        return $this->hasMany(Wishlist::class);
-    }
-
-    public function addresses()
-    {
-        return $this->hasMany(UserAddress::class);
-    }
-
-    public function cart()
-    {
-        return $this->hasOne(Cart::class);
-    }
-
-    public function orders()
-    {
-        return $this->hasMany(Order::class);
-    }
-
-    public function vouchers()
-    {
-        return $this->belongsToMany(Voucher::class, 'voucher_user')
-                    ->withPivot('used_at');
+        return $this->hasOne(SellerDetail::class, 'user_id');
     }
 }

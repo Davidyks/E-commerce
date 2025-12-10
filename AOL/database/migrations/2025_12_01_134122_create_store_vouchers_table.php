@@ -13,25 +13,13 @@ return new class extends Migration
     {
         Schema::create('store_vouchers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('seller_id')
-                ->constrained('seller_details')
-                ->onDelete('cascade');
-
-            $table->string('code')->unique();
+            $table->foreignId('seller_id')->constrained('seller_details')->onDelete('cascade');
             $table->string('title');
-
-            $table->enum('discount_type', ['percentage', 'fixed'])->default('percentage');
-            $table->decimal('discount_value', 15, 2);
-
+            $table->integer('discount_percent');
             $table->decimal('max_discount', 15, 2)->nullable();
             $table->decimal('min_purchase', 15, 2)->default(0);
-
-            $table->integer('usage_limit')->nullable();      // total limit
-            $table->integer('per_user_limit')->nullable();   // per user limit
-
             $table->timestamp('start_at')->nullable();
             $table->timestamp('end_at')->nullable();
-
             $table->timestamps();
         });
 
