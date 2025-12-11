@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User as UserModel;
+use App\Models\User as User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -17,30 +21,67 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         // Validasi input
-        $request->validate([
-            'login' => 'required',
-            'password' => 'required|min:8',
+        $validator = Validator::make($request->all(), [
+            'username' => 'required',
+            'password' => 'required',
         ], [
-            'login.required' => 'Username / Email / No HP wajib diisi',
+            'username.required' => 'Username / Email / No HP wajib diisi',
             'password.required' => 'Password wajib diisi',
         ]);
 
-        // Ambil input login
-        $login = $request->login;
-        $password = $request->password;
-
-        // Tentukan field berdasarkan input (email / phone / username)
-        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' :
-                 (is_numeric($login) ? 'phone_number' : 'username');
-
-        // Coba login
-        if (Auth::attempt([$field => $login, 'password' => $password])) {
-            $request->session()->regenerate();
-            return redirect()->intended('/dashboard')->with('success', 'Login berhasil!');
+        if($validator->fails()){
+            return redirect()->back()
+                        ->withInput()
+                        ->withErrors($validator);
         }
 
-        return back()->withErrors(['login' => 'Kredensial tidak valid'])->withInput();
+        $user = User::where('email', $request->username)
+                    ->orWhere('username', $request->username)
+                    ->orWhere('phone_number', $request->username)
+                    ->first();
+
+        if (!$user) {
+            return redirect()->back()
+                ->withInput()
+                ->with('danger', 'User tidak ditemukan');
+        }
+
+        if (!Hash::check($request->password, $user->password)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('danger', 'Password salah');
+        }
+
+        Auth::login($user);
+
+        return redirect()->route('home')->with('success', 'Login berhasil!');
     }
+
+    public function redirect()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function callback()
+    {
+        $googleUser = Socialite::driver('google')->user();
+
+        $user = User::where('email', $googleUser->getEmail())->first();
+
+        if (!$user) {
+            $user = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'password' => bcrypt(Str::random(16)), //pasword random
+                'google_id' => $googleUser->getId(),
+            ]);
+        }
+
+        Auth::login($user);
+
+        return redirect()->route('home')->with('success', 'Login dengan Google berhasil!');
+    }
+
 
     // Register Page 1 Input No HP
     public function registerPhonePage()
@@ -90,7 +131,7 @@ class AuthController extends Controller
         $phone = session('register_phone');
 
         // Simpan user baru
-        $user = UserModel::create([
+        $user = User::create([
             'phone_number' => $phone,
             'password' => $request->password,
         ]);
