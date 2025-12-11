@@ -17,4 +17,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [HomeController::class, 'showBeforeLogin'])->name('show.beforelogin');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/home', function () {
+        return view('user.dashboard');
+    })->name('home');
+    Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
+    Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
 Route::resource('products', SellerProductController::class);
