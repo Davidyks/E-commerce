@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('seller_id')->constrained('seller_details')->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
 
             // Harga & stok langsung untuk produk tanpa varian
             $table->decimal('price', 15, 2)->nullable();
