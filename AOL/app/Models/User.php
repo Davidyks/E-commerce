@@ -40,12 +40,6 @@ class User extends Authenticatable
      * maka tetap gunakan setter seperti di bawah
      * (tidak wajib jika pakai 'hashed' cast)
      */
-    public function setPasswordAttribute($password)
-    {
-        if ($password) {
-            $this->attributes['password'] = Hash::make($password);
-        }
-    }
 
 
     /**

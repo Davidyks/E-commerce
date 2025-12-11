@@ -16,6 +16,11 @@ class Product extends Model
         return $this->belongsTo(SellerDetail::class, 'seller_id');
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
