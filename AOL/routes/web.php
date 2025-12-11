@@ -1,12 +1,9 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SellerProductController;
-
-Route::get('/', function () {
-    return view('layout.sebelum_login.master');
-});
 
 Route::get('/login', [AuthController::class, 'loginPage'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
@@ -17,5 +14,7 @@ Route::get('/register', [AuthController::class, 'registerPage'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.attempt');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/', [HomeController::class, 'showBeforeLogin'])->name('show.beforelogin');
 
 Route::resource('products', SellerProductController::class);

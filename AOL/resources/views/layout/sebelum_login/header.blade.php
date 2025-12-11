@@ -1,4 +1,4 @@
-<header style="background-color:#e63939">
+<header style="background-color:#e63939;  position: fixed; top: 0; left:0; width:100%; z-index: 999;">
 
     <!-- Top bar -->
     <div class="container d-flex justify-content-between py-1 text-white small">
@@ -40,7 +40,7 @@
         </div>
 
         <!-- Cart -->
-        <a href="#" class="">
+        <a href="{{ route('login') }}" class="">
             <img src="{{ asset('asset/images/sebelum_login/Shopping cart.png') }}" height="32" class="me-4">
         </a>
     </div>
