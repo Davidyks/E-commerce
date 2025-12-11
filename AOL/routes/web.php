@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
-    return view('layout(sebelum login).master');
+    return view('layout.sebelum_login.master');
 });
 
 Route::get('/login', [AuthController::class, 'loginPage'])->name('login');

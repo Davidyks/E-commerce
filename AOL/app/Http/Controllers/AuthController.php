@@ -54,7 +54,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('home')->with('success', 'Login berhasil!');
+        return redirect('/')->with('success', 'Login berhasil!');
     }
 
     public function redirect()
@@ -79,7 +79,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('home')->with('success', 'Login dengan Google berhasil!');
+        return redirect('/')->with('success', 'Login dengan Google berhasil!');
     }
 
 
@@ -144,7 +144,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('home')->with('success', 'Registrasi berhasil!');
+        return redirect('/')->with('success', 'Registrasi berhasil!');
     }
 
     public function logout(Request $request)

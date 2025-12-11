@@ -1,4 +1,4 @@
-<header class="bg-danger">
+<header style="background-color:#e63939">
 
     <!-- Top bar -->
     <div class="container d-flex justify-content-between py-1 text-white small">
@@ -9,26 +9,24 @@
 
         <div class="d-flex gap-3 align-items-center">
             <a class="text-white text-decoration-none d-flex align-items-center gap-1" href="#">
-                <img src="{{ asset('img/Icon.png') }}" width="16"> Notification
+                <img src="{{ asset('asset/images/sebelum_login/Icon.png') }}" width="16"> Notification
             </a>
 
             <a class="text-white text-decoration-none d-flex align-items-center gap-1" href="#">
-                <img src="{{ asset('img/Help Icon.png') }}" width="16"> Help
+                <img src="{{ asset('asset/images/sebelum_login/Help Icon.png') }}" width="16"> Help
             </a>
 
-            <a class="text-white text-decoration-none" href="#">Login</a>|
-            <!-- <a class="text-white text-decoration-none" href="#">|</a> -->
-            <a class="text-white text-decoration-none" href="#">Register</a>
-
+            <a class="text-white text-decoration-none" href="{{ route('login') }}">Login</a>|
+            <a class="text-white text-decoration-none" href="{{ route('register') }}">Register</a>
         </div>
     </div>
 
     <!-- Main Header -->
-    <div class="container py-3 d-flex justify-content-between align-items-center">
+    <div class="container d-flex justify-content-between align-items-center">
 
         <!-- Logo -->
         <a href="#">
-            <img src="{{ asset('img/Logobgputih.png') }}" height="100">
+            <img src="{{ asset('asset/images/sebelum_login/Logobgputih.png') }}" height="100">
         </a>
 
         <!-- Search -->
@@ -36,16 +34,14 @@
             <form class="input-group">
                 <input type="text" class="form-control" placeholder="Search">
                 <button class="btn btn-light border" type="submit">
-                    <img src="{{ asset('img/search.png') }}" width="18">
+                    <img src="{{ asset('asset/images/sebelum_login/search.png') }}" width="18">
                 </button>
             </form>
-            <div class="small text-white ms-1 mt-1">Suggestion</div>
         </div>
 
         <!-- Cart -->
         <a href="#" class="">
-            <img src="{{ asset('img/Shopping cart.png') }}" height="32">
+            <img src="{{ asset('asset/images/sebelum_login/Shopping cart.png') }}" height="32" class="me-4">
         </a>
-
     </div>
 </header>

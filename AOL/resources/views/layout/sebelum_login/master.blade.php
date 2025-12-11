@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BuyBuy.com</title>
 
-    <!-- @include('layout(sebelum login).bootstrap') -->
-    <link rel="stylesheet" href="{{ asset('bootstrap5.2/css/bootstrap.min.css') }}">
-
+    @include('layout.sebelum_login.bootstrap')
 </head>
 
 <body>
 
     {{-- HEADER --}}
-    @include('layout(sebelum login).header')
+    @include('layout.sebelum_login.header')
 
     {{-- MAIN CONTENT --}}
     <main class="min-vh-100">
@@ -21,7 +19,7 @@
     </main>
 
     {{-- FOOTER --}}
-    @include('layout(sebelum login).footer')
+    @include('layout.sebelum_login.footer')
 
     <!-- Bootstrap JS -->
     <script src="{{ asset('css/bootstrap5.2/js/bootstrap.bundle.min.js') }}"></script>

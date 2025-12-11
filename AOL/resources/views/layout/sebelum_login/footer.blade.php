@@ -49,27 +49,27 @@
             <div class="col-lg-3 mb-4">
                 <h6 class="fw-bold mb-2">Payment</h6>
                 <div class="d-flex flex-wrap gap-2 mb-4">
-                    <img src="{{ asset('img/alfamart.png') }}" height="20">
-                    <img src="{{ asset('img/bsi.png') }}" height="20">
-                    <img src="{{ asset('img/bni.png') }}" height="20">
-                    <img src="{{ asset('img/mastercard.png') }}" height="20">
-                    <img src="{{ asset('img/cimb niaga.png') }}" height="20">
-                    <img src="{{ asset('img/alfamide.png') }}" height="20">
-                    <img src="{{ asset('img/mandiri.png') }}" height="20">
-                    <img src="{{ asset('img/bca.png') }}" height="20">
-                    <img src="{{ asset('img/bri.png') }}" height="20">
-                    <img src="{{ asset('img/indomare.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/alfamart.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/bsi.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/bni.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/mastercard.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/cimb niaga.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/alfamide.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/mandiri.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/bca.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/bri.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/indomare.png') }}" height="20">
                 </div>
 
                 <h6 class="fw-bold mb-2">Delivery</h6>
                 <div class="d-flex flex-wrap gap-2">
-                    <img src="{{ asset('img/jne.png') }}" height="20">
-                    <img src="{{ asset('img/gosend.png') }}" height="20">
-                    <img src="{{ asset('img/ninja express.png') }}" height="20">
-                    <img src="{{ asset('img/sicepat.png') }}" height="20">
-                    <img src="{{ asset('img/grab.png') }}" height="20">
-                    <img src="{{ asset('img/id express.png') }}" height="20">
-                    <img src="{{ asset('img/jntcargo.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/jne.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/gosend.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/ninja express.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/sicepat.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/grab.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/id express.png') }}" height="20">
+                    <img src="{{ asset('asset/images/sebelum_login/jntcargo.png') }}" height="20">
                 </div>
             </div>
 
@@ -77,28 +77,21 @@
                 <h6 class="fw-bold mb-2">Follow Us</h6>
                 <div class="d-flex flex-column gap-2 mb-4 small text-muted">
                     <div class="d-flex align-items-center gap-2">
-                        <img src="{{ asset('img/facebook.png') }}" width="20" height="20"> 
+                        <img src="{{ asset('asset/images/sebelum_login/facebook.png') }}" width="20" height="20"> 
                         <span>Facebook</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <img src="{{ asset('img/instagram.png') }}" width="20" height="20"> 
+                        <img src="{{ asset('asset/images/sebelum_login/instagram.png') }}" width="20" height="20"> 
                         <span>Instagram</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <img src="{{ asset('img/twitter.png') }}" width="20" height="20"> 
+                        <img src="{{ asset('asset/images/sebelum_login/twitter.png') }}" width="20" height="20"> 
                         <span>X (Twitter)</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                        <img src="{{ asset('img/linkedin.png') }}" width="20" height="20"> 
+                        <img src="{{ asset('asset/images/sebelum_login/linkedin.png') }}" width="20" height="20"> 
                         <span>LinkedIn</span>
                     </div>
-                </div>
-
-                <h6 class="fw-bold mb-2">Download BuyBuy.com</h6>
-                <div class="d-flex flex-column gap-2">
-                    <img src="{{ asset('img/app galery.png') }}" style="max-width: 100px; cursor: pointer;">
-                    <img src="{{ asset('img/googleplay.png') }}" style="max-width: 100px; cursor: pointer;">
-                    <img src="{{ asset('img/appstore.png') }}" style="max-width: 100px; cursor: pointer;">
                 </div>
             </div>
 
