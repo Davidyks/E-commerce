@@ -83,66 +83,68 @@ class AuthController extends Controller
     }
 
 
-    // Register Page 1 Input No HP
-    public function registerPhonePage()
+    public function registerPage()
     {
-        return view('auth.register_phone');
+        return view('auth.register');
     }
 
-    public function registerPhone(Request $request)
+    public function register(Request $request)
     {
-        $request->validate([
-            'phone_number' => 'required|numeric|unique:users,phone_number',
+        $validator = Validator::make($request->all(), [
+            'identifier' => 'required|min:5|max:40', // Bisa email / phone / username
+            'password' => 'required|max:18|min:6|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
+            'password_confirmation' => 'required|same:password',
         ], [
-            'phone_number.required' => 'Nomor HP wajib diisi',
-            'phone_number.unique' => 'Nomor HP sudah terdaftar',
+            'identifier.required' => 'Email / No HP / Username wajib diisi',
+            'identifier.min' => 'Username minimal 5 karakter',
+            'identifier.max' => 'Username maximal 40 karakter',
+            'password.required' => 'Password wajib diisi',
+            'password.min' => 'Password minimal 6 karakter',
+            'password.max' => 'Password maximal 18 karakter',
+            'password.regex' => 'Password harus mengandung huruf besar, huruf kecil, angka, dan simbol',
+            'password_confirmation.required' => 'Konfirmasi password wajib diisi',
+            'password_confirmation.same' => 'Konfirmasi password tidak sama',
         ]);
 
-        // Simpan nomor HP sementara di session
-        session(['register_phone' => $request->phone_number]);
-
-        return redirect()->route('register.passwordPage');
-    }
-
-    // Register Page 2 Input Password
-    public function registerPasswordPage()
-    {
-        // Pastikan nomor HP sudah ada di session
-        if (!session()->has('register_phone')) {
-            return redirect()->route('register.phonePage');
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        return view('auth.register_password');
-    }
+        $identifier = $request->identifier;
 
-    public function registerPassword(Request $request)
-    {
-        $request->validate([
-            'password' => 'required|min:8',
-            'password_confirmation' => 'required|same:password'
-        ], [
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal harus 8 karakter.',
-            'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
-            'password_confirmation.same' => 'Konfirmasi password tidak cocok dengan password.',
-        ]);
+        // Tentukan tipe input
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            $field = 'email';
+        } elseif (preg_match('/^[0-9]{8,15}$/', $identifier)) {
+            $field = 'phone_number';
+        } elseif (preg_match('/^\d+$/', $identifier)) {
+            return back()->withErrors(['username' => 'Username tidak boleh hanya angka dan format nomor telpon tidak sesuai']);
+        } else {
+            $field = 'username';
+        }
 
-        // Ambil nomor HP dari session
-        $phone = session('register_phone');
+        // Cek apakah user sudah terdaftar
+        $existing = User::where($field, $identifier)->first();
+        if ($existing) {
+            return redirect()->back()
+                ->withInput()
+                ->with('danger', ucfirst($field) . ' sudah digunakan');
+        }
 
-        // Simpan user baru
+        // Buat user baru
         $user = User::create([
-            'phone_number' => $phone,
-            'password' => $request->password,
+            'username' => $field == 'username' ? $identifier : null,
+            'email' => $field == 'email' ? $identifier : null,
+            'phone_number' => $field == 'phone_number' ? $identifier : null,
+            'password' => Hash::make($request->password),
         ]);
 
-        // Hapus session
-        session()->forget('register_phone');
-
-        // Auto login setelah register
         Auth::login($user);
 
-        return redirect('/dashboard')->with('success', 'Registrasi berhasil!');
+        return redirect()->route('home')->with('success', 'Registrasi berhasil!');
     }
 
     public function logout(Request $request)
@@ -150,6 +152,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+        return redirect('/home');
     }
 }
