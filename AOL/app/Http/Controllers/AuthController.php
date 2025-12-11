@@ -54,7 +54,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Login berhasil!');
+        return redirect('/home')->with('success', 'Login berhasil!');
     }
 
     public function redirect()
@@ -79,7 +79,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Login dengan Google berhasil!');
+        return redirect('/home')->with('success', 'Login dengan Google berhasil!');
     }
 
 
@@ -144,7 +144,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Registrasi berhasil!');
+        return redirect('/home')->with('success', 'Registrasi berhasil!');
     }
 
     public function logout(Request $request)
@@ -152,6 +152,46 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/home');
+        return redirect('/');
+    }
+
+    public function showProfile()
+    {
+        $user = Auth::user();
+        return view('user.profile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user(); 
+
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'phone_number' => 'nullable|numeric|unique:users,phone_number,'.$user->id, 
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'password' => 'nullable|min:6',
+        ]);
+
+        if ($request->hasFile('profile_picture')) {
+            if ($user->profile_picture && Storage::exists('public/' . $user->profile_picture)) {
+                Storage::delete('public/' . $user->profile_picture);
+            }
+
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $user->profile_picture = $path;
+        }
+
+        $user->name = $request->name;
+        $user->address = $request->address;
+        $user->email = $request->email;
+        $user->phone_number = $request->phone_number;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->save(); 
+        return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
     }
 }
