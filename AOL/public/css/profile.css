@@ -1,0 +1,26 @@
+.form-control-custom {
+    background-color: #e0e0e0;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 16px;
+    color: #555;
+}
+.form-control-custom:focus {
+    background-color: #d6d6d6;
+    box-shadow: none;
+    outline: none;
+}
+
+.edit-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 8px;
+    padding-top: 2px;
+    cursor: pointer;
+    border: 3px solid white;
+}

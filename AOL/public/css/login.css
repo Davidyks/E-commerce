@@ -33,6 +33,7 @@ body {
     padding: 30px;
     border-radius: 15px;
     margin-right: 180px;
+    margin-bottom: 30px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     background: #fff;
 }
@@ -64,6 +65,15 @@ input {
     font-size: 16px;
     cursor: pointer;
     margin-top: 10px;
+}
+
+.back {
+    color: #e63939;
+    font-size: 20px;
+    text-decoration: none;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: 80px;
 }
 
 .small-text {

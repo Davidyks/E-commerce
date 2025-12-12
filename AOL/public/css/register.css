@@ -76,6 +76,13 @@ input {
     background: #f3f3f3;
 }
 
+.back {
+    color: #e63939;
+    font-size: 20px;
+    text-decoration: none;
+    margin-right: 80px;
+}
+
 .login-btn {
     width: 100%;
     padding: 12px;

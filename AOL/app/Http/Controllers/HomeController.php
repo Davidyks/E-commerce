@@ -12,4 +12,10 @@ class HomeController extends Controller
 
         return view('layout.sebelum_login.home', compact('categories'));
     }
+
+    public function showProducts(){
+        $categories = Category::all();
+
+        return view('user.dashboard', compact('categories'));
+    }
 }

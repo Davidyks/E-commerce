@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User as User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -165,20 +166,37 @@ class AuthController extends Controller
     {
         $user = Auth::user(); 
 
-        $request->validate([
-            'name' => 'nullable|string|max:255',
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|min:5|max:40',
             'address' => 'nullable|string',
             'phone_number' => 'nullable|numeric|unique:users,phone_number,'.$user->id, 
             'email' => 'required|email|unique:users,email,'.$user->id,
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
-            'password' => 'nullable|min:6',
+            'password' => 'nullable|max:18|min:6|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
+        ], [
+            'name.min' => 'Name minimal 5 karakter',
+            'name.max' => 'Name maximal 40 karakter',
+            'email.required' => 'Email wajib diisi',
+            'email.unique' => 'Email telah digunakan',
+            'email.email' => 'Email tidak sesuai format',
+            'phone_number.unique' => 'Nomor tersebut telah digunakan',
+            'phone_number.numeric' => 'Phone number harus numeric',
+            'password.min' => 'Password minimal 6 karakter',
+            'password.max' => 'Password maximal 18 karakter',
+            'password.regex' => 'Password harus mengandung huruf besar, huruf kecil, angka, dan simbol',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         if ($request->hasFile('profile_picture')) {
             if ($user->profile_picture && Storage::exists('public/' . $user->profile_picture)) {
                 Storage::delete('public/' . $user->profile_picture);
             }
-
             $path = $request->file('profile_picture')->store('profile_pictures', 'public');
             $user->profile_picture = $path;
         }

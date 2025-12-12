@@ -1,36 +1,19 @@
 @extends('layout.sesudah_login.master')
 
 @section('content')
-<style>
-    /* Custom Style untuk Input */
-    .form-control-custom {
-        background-color: #E0E0E0;
-        border: none;
-        border-radius: 10px;
-        padding: 12px 20px;
-        font-size: 16px;
-        color: #555;
-    }
-    .form-control-custom:focus {
-        background-color: #d6d6d6;
-        box-shadow: none;
-        outline: none;
-    }
-    /* Style tombol edit foto */
-    .edit-icon {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        background-color: #dc3545;
-        color: white;
-        border-radius: 50%;
-        padding: 8px;
-        cursor: pointer;
-        border: 3px solid white;
-    }
-</style>
+@section('title', 'Profile')
+@section('css', 'css/profile.css')
+<a href="{{ route('home') }}" class="position-absolute text-decoration-none fw-bold ms-5 mt-4" style="font-size: 20px;color: #e63939">
+    Back
+</a>
+<div class="container d-flex justify-content-center flex-column align-items-center mb-5 {{ session('success') ? 'pt-0' : 'pt-5' }}">
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show position-relative top-0" role="alert" style="width: 500px;">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-<div class="container d-flex justify-content-center align-items-center my-5">
     <div class="card shadow-lg p-4" style="width: 500px; border-radius: 20px; border: none;">
         
         <h4 class="text-center text-danger fw-bold mb-4">Personal Details</h4>
@@ -40,7 +23,7 @@
             
             <div class="d-flex justify-content-center mb-4 position-relative">
                 <div style="position: relative; width: 120px; height: 120px;">
-                    <img src="{{ Auth::user()->profile_picture ? asset('storage/'.Auth::user()->profile_picture) : asset('asset/images/default-avatar.png') }}" 
+                    <img src="{{ Auth::user()->profile_picture ? asset('storage/'.Auth::user()->profile_picture) : asset('asset/images/sesudah_login/defaultprofile.jpg') }}" 
                          class="rounded-circle w-100 h-100" 
                          style="object-fit: cover; border: 4px solid #f0f0f0;"
                          id="preview-image">
@@ -55,30 +38,56 @@
             </div>
 
             <div class="mb-3">
-                <input type="text" class="form-control form-control-custom" name="name" 
-                       placeholder="Display Name" value="{{ old('name', Auth::user()->name) }}">
+                <input type="text" class="form-control form-control-custom @error('name') is-invalid
+                @enderror" name="name" placeholder="Display Name" value="{{ old('name', Auth::user()->name) }}">
+                @error('name')
+                <div class="invalid-feedback" role="alert">
+                    {{ $message }}
+                </div>
+                @enderror
             </div>
-
+            
             <div class="mb-3">
-                <input type="text" class="form-control form-control-custom" name="address" 
-                       placeholder="Address" value="{{ old('address', Auth::user()->address) }}">
+                <input type="text" class="form-control form-control-custom @error('address') is-invalid
+                @enderror" name="address" placeholder="Address" value="{{ old('address', Auth::user()->address) }}">
+                @error('address')
+                <div class="invalid-feedback" role="alert">
+                    {{ $message }}
+                </div>
+                @enderror
             </div>
 
             <hr class="my-4 text-muted" style="width: 50%; margin: auto;">
 
             <div class="mb-3">
-                <input type="email" class="form-control form-control-custom" name="email" 
-                       placeholder="Email" value="{{ old('email', Auth::user()->email) }}">
+                <input type="email" class="form-control form-control-custom @error('email') is-invalid
+                @enderror" name="email" placeholder="Email" value="{{ old('email', Auth::user()->email) }}">
+                @error('email')
+                <div class="invalid-feedback" role="alert">
+                    {{ $message }}
+                </div>
+                @enderror
             </div>
 
+            <!-- nanti perlu diganti -->
             <div class="mb-3">
-                <input type="password" class="form-control form-control-custom" name="password" 
-                       placeholder="Password (Isi jika ingin mengganti)">
+                <input type="password" class="form-control form-control-custom @error('password') is-invalid
+                @enderror" name="password" placeholder="Password (Isi jika ingin mengganti)">
+                @error('password')
+                <div class="invalid-feedback" role="alert">
+                    {{ $message }}
+                </div>
+                @enderror
             </div>
 
             <div class="mb-4">
-                <input type="text" class="form-control form-control-custom" name="phone_number" 
-                       placeholder="Phone Number" value="{{ old('phone_number', Auth::user()->phone_number) }}">
+                <input type="text" class="form-control form-control-custom @error('phone_number') is-invalid
+                @enderror" name="phone_number" placeholder="Phone Number" value="{{ old('phone_number', Auth::user()->phone_number) }}">
+                @error('phone_number')
+                <div class="invalid-feedback" role="alert">
+                    {{ $message }}
+                </div>
+                @enderror
             </div>
 
             <div class="d-grid">
@@ -87,11 +96,12 @@
                 </button>
             </div>
             
-        </form> <div class="d-grid mt-3">
+        </form> 
+        <div class="d-grid mt-3">
             <button type="button" class="btn btn-outline-secondary py-2 fw-bold" 
-                    style="border-radius: 10px;" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#logoutModal"> Logout
+                style="border-radius: 10px;" 
+                data-bs-toggle="modal" 
+                data-bs-target="#logoutModal"> Logout
             </button>
         </div>
 
@@ -114,16 +124,12 @@
     }
 </script>
 
-@if(session('success'))
-    <script>alert("{{ session('success') }}");</script>
-@endif
-
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius: 15px;">
             
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="logoutModalLabel">Konfirmasi Logout</h5>
+                <h5 class="modal-title-center fw-bold" id="logoutModalLabel">Konfirmasi Logout</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
