@@ -23,5 +23,76 @@
             @endforeach
         </div>
     </div>
+
+    <div class="flashsale-container">
+    <div class="flashsale-header">
+        <span class="flashsale-title">FlashSale</span>
+        <a href="#" class="see-all">See all</a>
+    </div>
+
+    <div class="flashsale-items">
+        <div class="flashsale-card">
+            <div class="position-relative">
+                <img src="{{ asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
+                <span class="flashsale-stock">10/100 left</span>
+                <span class="flashsale-timer" id="flashsale-timer">01:00:00</span>
+                <div class="flashsale-rate">
+                    4.7 <span style="color:#ffb400; font-size: 20px;;">★</span>
+                </div>
+            </div>
+            <p class="price">Rp. 2.030.000</p>
+            <a class="restricted-btn" href="#">See Detail</a>
+        </div>
+        <div class="flashsale-card">
+            <div class="position-relative">
+                <img src="{{ asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
+                <span class="flashsale-stock">10/100 left</span>
+                <span class="flashsale-timer" id="flashsale-timer">01:00:00</span>
+                <div class="flashsale-rate">
+                    4.7 <span style="color:#ffb400; font-size: 20px;;">★</span>
+                </div>
+            </div>
+            <p class="price">Rp. 250.000</p>
+            <a class="restricted-btn" href="#">See Detail</a>
+        </div>
+        <div class="flashsale-card">
+            <div class="position-relative">
+                <img src="{{ asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
+                <span class="flashsale-stock">10/100 left</span>
+                <span class="flashsale-timer" id="flashsale-timer">01:00:00</span>
+                <div class="flashsale-rate">
+                    4.7 <span style="color:#ffb400; font-size: 20px;;">★</span>
+                </div>
+            </div>
+            <p class="price">Rp. 230.000</p>
+            <a class="restricted-btn" href="#">See Detail</a>
+        </div>
+        <div class="flashsale-card">
+            <div class="position-relative">
+                <img src="{{ asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
+                <span class="flashsale-stock">10/100 left</span>
+                <span class="flashsale-timer" id="flashsale-timer">01:00:00</span>
+                <div class="flashsale-rate">
+                    4.7 <span style="color:#ffb400; font-size: 20px;;">★</span>
+                </div>
+            </div>
+            <p class="price">Rp. 2.030.000</p>
+            <a class="restricted-btn" href="#">See Detail</a>
+        </div>
+        <div class="flashsale-card">
+            <div class="position-relative">
+                <img src="{{ asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
+                <span class="flashsale-stock">10/100 left</span>
+                <span class="flashsale-timer" id="flashsale-timer">01:00:00</span>
+                <div class="flashsale-rate">
+                    4.7 <span style="color:#ffb400; font-size: 20px;;">★</span>
+                </div>
+            </div>
+            <p class="price fw-medium">Rp. 2.030.000</p>
+            <a class="restricted-btn" href="#">See Detail</a>
+        </div>
+    </div>
+    </div>
+
 </div>
 @endsection

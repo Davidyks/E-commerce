@@ -6,9 +6,9 @@
 <a href="{{ route('home') }}" class="position-absolute text-decoration-none fw-bold ms-5 mt-4" style="font-size: 20px;color: #e63939">
     Back
 </a>
-<div class="container d-flex justify-content-center flex-column align-items-center mb-5 {{ session('success') ? 'pt-0' : 'pt-5' }}">
+<div id="container" class="container d-flex justify-content-center flex-column align-items-center mb-5 {{ session('success') ? 'pt-0' : 'pt-5' }}">
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show position-relative top-0" role="alert" style="width: 500px;">
+        <div id="alert" class="alert alert-success alert-dismissible fade show position-relative top-0" role="alert" style="width: 500px;">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -122,6 +122,16 @@
             }
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        let alertBox = document.getElementById('alert');
+
+        if (alertBox) {
+            alertBox.addEventListener('closed.bs.alert', function () {
+                document.getElementById('container').classList.add('pt-5');
+            });
+        }
+    });
 </script>
 
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">

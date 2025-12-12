@@ -1,12 +1,7 @@
 <header style="background-color:#e63939;  position: fixed; top: 0; left:0; width:100%; z-index: 999;">
 
     <!-- Top bar -->
-    <div class="container d-flex justify-content-between py-1 text-white small">
-        <div>
-            <a href="#" class="text-white text-decoration-none fw-semibold me-2">Sales Centre</a> |
-            <a href="#" class="text-white text-decoration-none fw-semibold ms-2">Start Selling</a>
-        </div>
-
+    <div class="container d-flex justify-content-end py-1 text-white small">
         <div class="d-flex gap-3 align-items-center">
             <a class="text-white text-decoration-none d-flex align-items-center gap-1" href="#">
                 <img src="{{ asset('asset/images/sebelum_login/Icon.png') }}" width="16"> Notification
