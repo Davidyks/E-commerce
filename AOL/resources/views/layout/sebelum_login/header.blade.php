@@ -16,8 +16,8 @@
                 <img src="{{ asset('asset/images/sebelum_login/Help Icon.png') }}" width="16"> Help
             </a>
 
-            <a class="text-white text-decoration-none" href="{{ route('login') }}">Login</a>|
-            <a class="text-white text-decoration-none" href="{{ route('register') }}">Register</a>
+            <a class="text-white text-decoration-none fw-bold" href="{{ route('login') }}">Login</a>|
+            <a class="text-white text-decoration-none fw-bold" href="{{ route('register') }}">Register</a>
         </div>
     </div>
 

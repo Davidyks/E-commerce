@@ -14,40 +14,44 @@
       <img id="logo" src="{{ asset('asset/images/Logo.png') }}" alt="Illustration" />
       <img id="illustration" src="{{ asset('asset/images/login-register/image1.png') }}" alt="Illustration" />
     </div>
-
-    <div class="form-card">
-      <h2>Login to BuyBuy</h2>
-      <form action="{{ route('login.attempt') }}" method="POST">
-        @csrf
-        @if(session('danger'))
+    <div class="d-flex flex-column justify-content-center">
+      <a href="{{ route('show.beforelogin') }}" class="back fw-semibold">
+        Back
+      </a>
+      <div class="form-card">
+        <h2>Login to BuyBuy</h2>
+        <form action="{{ route('login.attempt') }}" method="POST">
+          @csrf
+          @if(session('danger'))
           <div class="alert alert-danger">
             {{ session('danger') }}
           </div>
-        @endif
-        <input type="text" class="@error('username') is-invalid @enderror" name="username" placeholder="No.handphone/Email/Username" value="{{ old('username') }}"/>
-        @error('username')
+          @endif
+          <input type="text" class="@error('username') is-invalid @enderror" name="username" placeholder="No.handphone/Email/Username" value="{{ old('username') }}"/>
+          @error('username')
           <div class="invalid-feedback" role="alert">
-              {{ $message }}
+            {{ $message }}
           </div>
-        @enderror
-        <input type="password" class="@error('password') is-invalid @enderror" name="password" style="margin-top:7px" placeholder="Password" value="{{ old('password') }}"/>
-        @error('password')
+          @enderror
+          <input type="password" class="@error('password') is-invalid @enderror" name="password" style="margin-top:7px" placeholder="Password" value="{{ old('password') }}"/>
+          @error('password')
           <div class="invalid-feedback" role="alert">
-              {{ $message }}
+            {{ $message }}
           </div>
-        @enderror
-
+          @enderror
+          
         <button class="login-btn" type="submit">Login</button>
         
         <div class="small-text">
           Don't have an account? <a href="{{ route('register') }}" class="fw-bold">Sign Up</a>
         </div>
       </form>
-        
+      
       <hr style="margin: 25px 0;" />
-
+      
       <div class="social-btns">
         <a href="{{ route('google.redirect') }}"><img src="https://www.svgrepo.com/show/355037/google.svg" width="18" /> Google</a>
+      </div>
       </div>
     </div>
   </div>
