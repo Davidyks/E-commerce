@@ -3,12 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ProductVariant extends Model
+class FlashSale extends Model
 {
-    use HasFactory;
-
+    //
     protected $guarded = [];
 
     public function product()
@@ -16,9 +14,8 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function flashSales()
+    public function variant()
     {
-        return $this->hasMany(FlashSale::class);
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
-
 }
