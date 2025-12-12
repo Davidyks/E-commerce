@@ -1,7 +1,12 @@
 <header style="background-color:#e63939">
 
     <!-- Top bar -->
-    <div class="container d-flex justify-content-end py-1 text-white small" style="background-color:#e63939">
+    <div class="container d-flex justify-content-between py-1 text-white small" style="background-color:#e63939">
+
+        <div>
+            <a href="#" class="text-white text-decoration-none fw-semibold me-2">Sales Centre</a> |
+            <a href="{{ route('start.selling') }}" class="text-white text-decoration-none fw-semibold ms-2">Start Selling</a>
+        </div>
 
         <div class="d-flex gap-3 align-items-center">
             
