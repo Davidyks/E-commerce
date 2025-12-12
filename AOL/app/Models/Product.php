@@ -31,6 +31,12 @@ class Product extends Model
         return $this->hasMany(ProductRating::class);
     }
 
+    public function flashSales()
+    {
+        return $this->hasMany(FlashSale::class);
+    }
+
+
     // Accessor utk rating ui
     public function getRatingAverageAttribute()
     {
