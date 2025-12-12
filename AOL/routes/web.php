@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerProductController;
 
 Route::get('/login', [AuthController::class, 'loginPage'])->name('login');
@@ -24,6 +25,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::resource('seller/products', SellerProductController::class);
+    Route::get('/start-selling', [SellerController::class, 'startSelling'])->name('start.selling');
 });
-
-Route::resource('products', SellerProductController::class);
