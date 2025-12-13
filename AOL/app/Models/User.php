@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Cart;
+use App\Models\Voucher;
 
 class User extends Authenticatable
 {
@@ -49,5 +51,16 @@ class User extends Authenticatable
     public function sellerDetail()
     {
         return $this->hasOne(SellerDetail::class, 'user_id');
+    }
+    public function cartItems()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function vouchers()
+    {
+        return $this->belongsToMany(Voucher::class, 'voucher_user')
+                    ->withPivot('used_at')
+                    ->withTimestamps();
     }
 }
