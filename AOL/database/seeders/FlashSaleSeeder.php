@@ -1,0 +1,53 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\FlashSale;
+use Faker\Factory as Faker;
+use Carbon\Carbon;
+
+class FlashSaleSeeder extends Seeder
+{
+    // php artisan db:seed --class=FlashSaleSeeder
+
+    public function run(): void
+    {
+        $faker = Faker::create();
+
+        $products = Product::with('variants')->get();
+
+        foreach ($products as $product) {
+            if ($faker->boolean(30)) { // 30% produk masuk flash sale
+                $start = Carbon::now()->addDays(rand(-1, 3));
+                $end = (clone $start)->addHours(rand(2, 12));
+
+                if ($product->variants->isNotEmpty()) {
+                    // Flash sale per variant
+                    foreach ($product->variants as $variant) {
+                        if ($faker->boolean(50)) {
+                            FlashSale::create([
+                                'product_variant_id' => $variant->id,
+                                'start_time' => $start,
+                                'end_time' => $end,
+                                'flash_price' => $variant->price * 0.7,
+                                'flash_stock' => rand(1, $variant->stock),
+                            ]);
+                        }
+                    }
+                } else {
+                    // Flash sale tanpa variant
+                    FlashSale::create([
+                        'product_id' => $product->id,
+                        'start_time' => $start,
+                        'end_time' => $end,
+                        'flash_price' => $product->price * 0.75,
+                        'flash_stock' => rand(1, $product->stock),
+                    ]);
+                }
+            }
+        }
+    }
+}
