@@ -7,6 +7,12 @@ use App\Models\SellerDetail;
 
 class SellerController extends Controller
 {
+    public function index()
+    {
+        $user = Auth::user();
+
+        return view('layout.seller.home', compact('user'));
+    }
     public function startSelling()
     {
         $user = Auth::user();

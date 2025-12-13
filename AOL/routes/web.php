@@ -29,4 +29,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/voucher/apply', [CartController::class, 'applyVoucher'])->name('cart.voucher.apply');
     Route::delete('/cart/voucher/remove', [CartController::class, 'removeVoucher'])->name('cart.voucher.remove');
+    Route::get('/seller/home', [SellerController::class, 'index'])->name('seller.home');
 });
