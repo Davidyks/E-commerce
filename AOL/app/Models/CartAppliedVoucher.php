@@ -8,12 +8,15 @@ class CartAppliedVoucher extends Model
 {
     //
     protected $guarded = [];
-
+    
     public function seller()
     {
         return $this->belongsTo(SellerDetail::class);
     }
-
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
+    }
     public function cart()
     {
         return $this->belongsTo(Cart::class);

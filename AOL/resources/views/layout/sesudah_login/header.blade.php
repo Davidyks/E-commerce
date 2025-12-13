@@ -53,7 +53,7 @@
         </div>
 
         <!-- Cart -->
-        <a href="#" class="">
+        <a href="{{ route('cart.index') }}" class="">
             <img src="{{ asset('asset/images/sebelum_login/Shopping cart.png') }}" height="32" class="me-4">
         </a>
     </div>
