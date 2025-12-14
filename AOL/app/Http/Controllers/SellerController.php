@@ -23,13 +23,14 @@ class SellerController extends Controller
             $user->save();
 
             // Cek apakah sellerDetail sudah ada
-            if (!$user->sellerDetail) {
-                SellerDetail::create([
-                    'user_id' => $user->id,
-                    'store_name' => $user->name . "'s Store",
-                    // bisa tambahkan default lainnya jika perlu
-                ]);
-            }
+            SellerDetail::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'store_name'  => $user->name,
+                    'store_logo'  => $user->profile_picture,
+                    'joined_at'   => now(),
+                ]
+            );
         }
 
         // Redirect ke dashboard seller
