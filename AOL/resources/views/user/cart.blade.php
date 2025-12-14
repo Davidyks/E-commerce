@@ -1,5 +1,6 @@
 @extends('layout.sesudah_login.master')
 
+@section('title','Cart')
 @section('content')
 <div class="container py-4">
 
@@ -21,7 +22,12 @@
         </div>
     @endif
 
-    <h3 class="text-danger fw-bold mb-4">Cart</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-danger fw-bold mb-0">Cart</h3>
+        <a href="{{ url()->previous() }}" class="fs-5 fw-semibold text-decoration-none" style="color: #e63939;">
+            Back
+        </a>
+    </div>
 
     <div class="row">
         <div class="col-md-8">

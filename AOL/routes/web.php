@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SellerController;
@@ -15,8 +16,6 @@ Route::get('/auth/google/callback', [AuthController::class, 'callback'])->name('
 Route::get('/register', [AuthController::class, 'registerPage'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.attempt');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 Route::get('/', [HomeController::class, 'showBeforeLogin'])->name('show.beforelogin');
 
 Route::middleware(['auth'])->group(function () {
@@ -30,4 +29,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/voucher/apply', [CartController::class, 'applyVoucher'])->name('cart.voucher.apply');
     Route::delete('/cart/voucher/remove', [CartController::class, 'removeVoucher'])->name('cart.voucher.remove');
     Route::get('/seller/home', [SellerController::class, 'index'])->name('seller.home');
+
+    Route::get('/products', [ProductController::class, 'displayProducts'])->name('products');
+    Route::get('/flashsales', [ProductController::class, 'displayFlashsales'])->name('flashsales');
+    Route::get('/products/{id}', [ProductController::class, 'productDetail'])->name('products.detail');
+    Route::get('/flashsales/{id}', [ProductController::class, 'flashsaleDetail'])->name('flashsales.detail');
 });
