@@ -16,7 +16,8 @@ class SellerProductController extends Controller
      */
     public function index()
     {
-        $products = ProductModel::where('seller_id', Auth::user()->sellerDetail->id)->get();
+        $user = Auth::user();
+        $products = ProductModel::where('seller_id', $user->sellerDetail->id)->get();
         return view('seller.products.index', compact('products'));
     }
 

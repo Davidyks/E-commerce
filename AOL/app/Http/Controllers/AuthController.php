@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User as User;
+use App\Models\SellerDetail as SellerDetail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -210,6 +211,25 @@ class AuthController extends Controller
             $user->password = Hash::make($request->password);
         }
         $user->save(); 
+
+        // Sync User with Seller Detail
+        if ($user->role === 'seller' && $user->sellerDetail) {
+
+            $sellerDetail = $user->sellerDetail;
+
+            // Update store name jika name berubah
+            if ($request->filled('name')) {
+                $sellerDetail->store_name = $user->name;
+            }
+
+            // Update store logo jika upload foto baru
+            if ($request->hasFile('profile_picture')) {
+                $sellerDetail->store_logo = $user->profile_picture;
+            }
+
+            $sellerDetail->save();
+        }
+
         return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
     }
 }

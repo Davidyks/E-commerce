@@ -17,19 +17,22 @@ class SellerController extends Controller
     {
         $user = Auth::user();
 
-        // Jika bukan seller → update role & buat seller_detail
-        if ($user->role !== 'seller') {
-            $user->role = 'seller';
-            $user->save();
+        if (empty($user->name)) {
+            return redirect()
+                ->route('profile')
+                ->with('warning', 'Lengkapi nama profil terlebih dahulu sebelum mulai berjualan.');
+        }
 
-            // Cek apakah sellerDetail sudah ada
-            if (!$user->sellerDetail) {
-                SellerDetail::create([
-                    'user_id' => $user->id,
-                    'store_name' => $user->name . "'s Store",
-                    // bisa tambahkan default lainnya jika perlu
-                ]);
-            }
+        if ($user->role !== 'seller') {
+            $user->update(['role' => 'seller']);
+        }
+
+        if (!$user->sellerDetail) {
+            SellerDetail::create([
+                'user_id'    => $user->id,
+                'store_name' => $user->name,
+                'joined_at'  => now(),
+            ]);
         }
 
         // Redirect ke dashboard seller

@@ -13,6 +13,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    @if (session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show position-relative top-0" 
+            role="alert" style="width: 500px;">
+            {{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
 
     <div class="card shadow-lg p-4" style="width: 500px; border-radius: 20px; border: none;">
         
