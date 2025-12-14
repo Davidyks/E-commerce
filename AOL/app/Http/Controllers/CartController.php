@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Voucher;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,7 @@ class CartController extends Controller
 
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
 
-        $appliedVoucher = \App\Models\CartAppliedVoucher::where('user_id', $user->id)
+        $appliedVoucher = CartAppliedVoucher::where('user_id', $user->id)
                             ->with('voucher')
                             ->first();
 
@@ -35,7 +36,7 @@ class CartController extends Controller
         $groupedItems = $cartItems->groupBy(function ($item) {
             return $item->product->seller_id;
         });
-        $availableVouchers = \App\Models\Voucher::where('start_at', '<=', now())
+        $availableVouchers = Voucher::where('start_at', '<=', now())
             ->where('end_at', '>=', now())
             ->where('usage_limit', '>', 0)
             ->get();
