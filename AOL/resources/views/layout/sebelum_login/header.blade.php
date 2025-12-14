@@ -26,8 +26,8 @@
 
         <!-- Search -->
         <div class="flex-grow-1 mx-4">
-            <form class="input-group">
-                <input type="text" class="form-control" placeholder="Search">
+            <form class="input-group" action="{{ route('products') }}" method="GET">
+                <input type="text" class="form-control" placeholder="Search..." name="q" value="{{ request('q') }}" >
                 <button class="btn btn-light border" type="submit">
                     <img src="{{ asset('asset/images/sebelum_login/search.png') }}" width="18">
                 </button>

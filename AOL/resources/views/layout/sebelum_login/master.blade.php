@@ -9,7 +9,7 @@
     @include('layout.sebelum_login.bootstrap')
 </head>
 
-<body>
+<body style="padding-top:150px">
 
     {{-- HEADER --}}
     @include('layout.sebelum_login.header')

@@ -32,15 +32,15 @@ class ProductSeeder extends Seeder
             $hasVariant = $faker->boolean(50); // 50% chance
 
             $product = Product::create([
-            'seller_id' => $seller->id,
-            'name' => $category->category_name . " Product",
-            'description' => $faker->paragraph,
-            'category_id' => $category->id,
-            'min_order_qty' => 1,
-            'delivery_estimate_days' => $faker->numberBetween(1, 7),
-            'rating' => $faker->randomFloat(1, 1, 5),
-            'sold_count' => $faker->numberBetween(0, 100),
-            'product_image' => 'https://placehold.co/640x480?text=Product'
+                'seller_id' => $seller->id,
+                'name' => $category->category_name . " Product",
+                'description' => $faker->paragraph,
+                'category_id' => $category->id,
+                'min_order_qty' => 1,
+                'delivery_estimate_days' => $faker->numberBetween(1, 7),
+                'rating' => $faker->randomFloat(1, 1, 5),
+                'sold_count' => $faker->numberBetween(0, 100),
+                'product_image' => 'https://placehold.co/640x480?text=Product'
             ]);
 
             if ($hasVariant) {
