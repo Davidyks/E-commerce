@@ -215,12 +215,19 @@ class AuthController extends Controller
         // Sync User with Seller Detail
         if ($user->role === 'seller' && $user->sellerDetail) {
 
-            $user->sellerDetail->update([
-                'store_name' => $user->name,
-                'store_logo' => $request->hasFile('profile_picture')
-                    ? $user->profile_picture
-                    : $user->sellerDetail->store_logo,
-            ]);
+            $sellerDetail = $user->sellerDetail;
+
+            // Update store name jika name berubah
+            if ($request->filled('name')) {
+                $sellerDetail->store_name = $user->name;
+            }
+
+            // Update store logo jika upload foto baru
+            if ($request->hasFile('profile_picture')) {
+                $sellerDetail->store_logo = $user->profile_picture;
+            }
+
+            $sellerDetail->save();
         }
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
