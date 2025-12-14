@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
     @include('layout.logo')
-    <link rel="stylesheet" href=@yield('css')>
+    @yield('css')
     @include('layout.seller.bootstrap')
 </head>
 

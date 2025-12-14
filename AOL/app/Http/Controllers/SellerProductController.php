@@ -17,7 +17,13 @@ class SellerProductController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $products = ProductModel::where('seller_id', $user->sellerDetail->id)->get();
+        // Ambil seller detail (aman dari null)
+        $seller = $user->sellerDetail;
+
+        // Jika seller belum ada → collection kosong
+        $products = $seller
+            ? ProductModel::where('seller_id', $seller->id)->get()
+            : collect();
         return view('seller.products.index', compact('products'));
     }
 
