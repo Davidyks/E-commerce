@@ -20,31 +20,35 @@ class FlashSaleSeeder extends Seeder
         $products = Product::with('variants')->get();
 
         foreach ($products as $product) {
-            if ($faker->boolean(30)) { // 30% produk masuk flash sale
-                $start = Carbon::now()->addDays(rand(-1, 3));
-                $end = (clone $start)->addHours(rand(2, 12));
+            if ($faker->boolean(50)) { // 30% produk masuk flash sale
+                $start = Carbon::now();
+                $end = (clone $start)->addDays(rand(1,3))->addHours(rand(2, 12));
 
                 if ($product->variants->isNotEmpty()) {
                     // Flash sale per variant
                     foreach ($product->variants as $variant) {
+                        $variant_initial_stock = rand(1, $variant->stock);
                         if ($faker->boolean(50)) {
                             FlashSale::create([
                                 'product_variant_id' => $variant->id,
                                 'start_time' => $start,
                                 'end_time' => $end,
                                 'flash_price' => $variant->price * 0.7,
-                                'flash_stock' => rand(1, $variant->stock),
+                                'flash_stock' => $variant_initial_stock,
+                                'initial_stock' => $variant_initial_stock
                             ]);
                         }
                     }
                 } else {
+                    $product_initial_stock = rand(1, $product->stock);
                     // Flash sale tanpa variant
                     FlashSale::create([
                         'product_id' => $product->id,
                         'start_time' => $start,
                         'end_time' => $end,
                         'flash_price' => $product->price * 0.75,
-                        'flash_stock' => rand(1, $product->stock),
+                        'flash_stock' => $product_initial_stock,
+                        'initial_stock' => $product_initial_stock            
                     ]);
                 }
             }

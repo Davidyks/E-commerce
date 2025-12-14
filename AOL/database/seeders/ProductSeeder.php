@@ -40,7 +40,7 @@ class ProductSeeder extends Seeder
             'delivery_estimate_days' => $faker->numberBetween(1, 7),
             'rating' => $faker->randomFloat(1, 1, 5),
             'sold_count' => $faker->numberBetween(0, 100),
-            'product_image' => $faker->imageUrl(640, 480, 'product', true),
+            'product_image' => 'https://placehold.co/640x480?text=Product'
             ]);
 
             if ($hasVariant) {
@@ -57,7 +57,7 @@ class ProductSeeder extends Seeder
                         'variant_name' => ($i*50) . "ml",
                         'price' => $price,
                         'stock' => $stock,
-                        'image' => $faker->imageUrl(640, 480, 'product', true),
+                        'image' => 'https://placehold.co/640x480?text=Variant'
                     ]);
 
                     $variantPrices[] = $price;
