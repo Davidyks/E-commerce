@@ -51,14 +51,14 @@
                 <tbody>
                 @foreach ($products as $product)
 
-                    {{-- ================= PRODUCT ROW ================= --}}
+                    {{--  PRODUCT ROW  --}}
                     <tr class="product-row">
 
                         {{-- Produk --}}
                         <td>
                             <div class="d-flex align-items-start">
                                 <img
-                                    src="{{ $product->product_image ?? asset('asset/images/default-product.png') }}"
+                                    src="{{ asset($product->product_image ?? 'asset/images/default-product.png') }}"
                                     class="product-thumb me-3"
                                 >
 
@@ -112,7 +112,7 @@
                         </td>
                     </tr>
 
-                    {{-- ================= VARIANT ROWS ================= --}}
+                    {{--  VARIANT ROWS  --}}
                     @if ($product->variants && $product->variants->count())
                         @foreach ($product->variants as $variant)
                             <tr class="variant-row">
@@ -121,7 +121,7 @@
                                 <td>
                                     <div class="d-flex align-items-center ps-5">
                                         <img
-                                            src="{{ $variant->image ?? $product->product_image }}"
+                                            src="{{ asset($variant->image) ?? asset($product->product_image) }}"
                                             class="variant-thumb me-3"
                                         >
 
