@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerProductController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 Route::get('/login', [AuthController::class, 'loginPage'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
@@ -29,9 +30,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/voucher/apply', [CartController::class, 'applyVoucher'])->name('cart.voucher.apply');
     Route::delete('/cart/voucher/remove', [CartController::class, 'removeVoucher'])->name('cart.voucher.remove');
     Route::get('/seller/home', [SellerController::class, 'index'])->name('seller.home');
-
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::post('/address/store', [App\Http\Controllers\CheckoutController::class, 'addAddress'])->name('address.store');
     Route::get('/products', [ProductController::class, 'displayProducts'])->name('products');
     Route::get('/flashsales', [ProductController::class, 'displayFlashsales'])->name('flashsales');
     Route::get('/products/{id}', [ProductController::class, 'productDetail'])->name('products.detail');
     Route::get('/flashsales/{id}', [ProductController::class, 'flashsaleDetail'])->name('flashsales.detail');
+    Route::post('/checkout/apply-voucher', [App\Http\Controllers\CheckoutController::class, 'applyVoucher'])->name('checkout.apply.voucher');
+    Route::post('/buy-now/{id}', [App\Http\Controllers\CartController::class, 'buyNow'])->name('buy.now');
+    Route::post('/checkout/remove-voucher', [App\Http\Controllers\CheckoutController::class, 'removeVoucher'])->name('checkout.remove.voucher');
 });

@@ -157,9 +157,9 @@
                     </div>
 
                     <div class="d-grid">
-                        <button class="btn btn-danger fw-bold py-2 fs-5" style="border-radius: 8px;">
+                        <a href="{{ route('checkout.index') }}" class="btn btn-danger fw-bold py-2 fs-5" style="border-radius: 8px;">
                             Buy Now
-                        </button>
+                        </a>
                     </div>
 
                 </div>

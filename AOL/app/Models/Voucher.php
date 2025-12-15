@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Voucher extends Model
 {
-    //
     protected $guarded = [];
 
     protected $casts = [
@@ -14,6 +13,7 @@ class Voucher extends Model
         'end_at' => 'datetime',
         'discount_value' => 'float',
         'min_purchase' => 'float',
+        'max_discount' => 'float',
     ];
 
     public function users()
@@ -44,10 +44,25 @@ class Voucher extends Model
 
         if ($user && $this->per_user_limit) {
             $userUsage = $this->users()->where('user_id', $user->id)->count();
-            
             if ($userUsage >= $this->per_user_limit) return false;
         }
 
         return true;
+    }
+
+    public function calculateDiscount($totalPurchase)
+    {
+        $discount = 0;
+
+        if ($this->discount_type === 'fixed') {
+            $discount = $this->discount_value;
+        } else {
+            $discount = $totalPurchase * ($this->discount_value / 100);
+            if ($this->max_discount && $discount > $this->max_discount) {
+                $discount = $this->max_discount;
+            }
+        }
+
+        return min($discount, $totalPurchase);
     }
 }

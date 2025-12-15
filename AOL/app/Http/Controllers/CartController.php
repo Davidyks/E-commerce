@@ -79,5 +79,13 @@ class CartController extends Controller
 
         return back()->with('success', 'Voucher berhasil dilepas.');
     }
-    
+    public function buyNow(Request $request, $id)
+    {
+        session()->put('direct_buy', [
+            'product_id' => $id,
+            'quantity' => $request->quantity ?? 1 
+        ]);
+
+        return redirect()->route('checkout.index');
+    }
 }

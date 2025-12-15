@@ -1,0 +1,419 @@
+@extends('layout.sesudah_login.master')
+
+@section('title', 'Checkout')
+
+@section('content')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="container py-4">
+    <h3 class="fw-bold text-danger mb-4">Checkout</h3>
+
+    <div class="row">
+        <div class="col-md-8">
+            
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="fw-bold text-danger mb-3">Address</h5>
+                            @if($mainAddress)
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-geo-alt-fill text-danger me-2 fs-5"></i>
+                                    <span class="fw-bold">{{ $mainAddress->label }} - {{ $mainAddress->recipient_name }}</span>
+                                </div>
+                                <p class="text-muted small ms-4 mb-0">
+                                    {{ $mainAddress->address }}<br>
+                                    {{ $mainAddress->city }}, {{ $mainAddress->province }} {{ $mainAddress->postal_code }}<br>
+                                    {{ $mainAddress->phone }}
+                                </p>
+                            @else
+                                <div class="alert alert-warning mb-0">Belum ada alamat utama.</div>
+                            @endif
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                            Change
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @foreach($cartItems as $item)
+            <div class="card shadow-sm mb-4" style="border: 2px solid #0d6efd;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-patch-check-fill text-danger me-2"></i>
+                        <span class="fw-bold">{{ $item->product->seller->store_name ?? 'Seller Store' }}</span>
+                    </div>
+                    <div class="d-flex gap-3 mb-4">
+                        <img src="{{ asset('storage/' . $item->product->product_image) }}" class="rounded" style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;">
+                        <div class="w-100 d-flex justify-content-between">
+                            <div>
+                                <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
+                                <small class="text-muted">Quantity: {{ $item->quantity }}</small>
+                            </div>
+                            <div class="fw-bold text-danger">Rp {{ number_format($item->price, 0, ',', '.') }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light p-3 rounded mb-3 border">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small">Standard Shipping</span>
+                        </div>
+                        <select class="form-select form-select-sm border-0 bg-white mb-1 fw-bold shipping-selector" 
+                                name="shipping_id[]" 
+                                onchange="calculateTotal()">
+                            @foreach($shippings as $ship)
+                                <option value="{{ $ship->id }}" data-cost="{{ $ship->base_cost }}">
+                                    {{ $ship->courier }} - Rp {{ number_format($ship->base_cost, 0, ',', '.') }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted d-block ms-1">Estimated Arrival: {{ now()->addDays(3)->format('d F') }}</small>
+                    </div>
+
+                    <div class="form-check mb-3 ms-1">
+                        <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $item->id }}">
+                        <label class="form-check-label small" for="insurance_{{ $item->id }}">
+                            Shipping Insurance (Rp {{ number_format($insuranceFee ?? 6000, 0, ',', '.') }})
+                        </label>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <div class="col-md-4">
+            
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold text-danger mb-0">Payment Method</h5>
+                        <button type="button" class="btn btn-link text-danger fw-bold small text-decoration-none p-0" 
+                                data-bs-toggle="modal" data-bs-target="#paymentModal">
+                            View All
+                        </button>
+                    </div>
+
+                    <div id="payment-preview-list">
+                        @foreach(array_slice($paymentMethods, 0, 3) as $index => $payment)
+                            <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom" 
+                                 style="cursor: pointer;"
+                                 onclick="selectPayment('{{ $payment['code'] }}')">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ $payment['logo'] }}" style="width: 40px; height: 25px; object-fit: contain;">
+                                    <label class="form-check-label fw-semibold small" style="cursor: pointer;">{{ $payment['name'] }}</label>
+                                </div>
+                                <input class="form-check-input border-secondary" type="radio" 
+                                       name="payment_visual" 
+                                       id="visual_{{ $payment['code'] }}"
+                                       {{ $index === 0 ? 'checked' : '' }}>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div id="selected-payment-display" class="alert alert-light border d-none text-center">
+                        <small class="text-muted">Selected:</small><br>
+                        <strong id="selected-payment-name" class="text-danger"></strong>
+                    </div>
+
+                    <div class="d-grid mt-2">
+                        @if(session('applied_voucher'))
+                            <div class="p-2 border border-danger rounded d-flex justify-content-between align-items-center" style="background-color: #ffeaea;">
+                                
+                                <div class="d-flex align-items-center text-danger">
+                                    <i class="bi bi-ticket-perforated-fill fs-4 me-2"></i>
+                                    <div style="line-height: 1.2;">
+                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">Voucher Terpasang:</span>
+                                        <span class="fw-bold">{{ session('applied_voucher')['code'] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold py-0 px-2" style="height: 28px;" 
+                                            data-bs-toggle="modal" data-bs-target="#voucherModal">
+                                        Ganti
+                                    </button>
+
+                                    {{-- Tombol HAPUS (X) --}}
+                                    <form action="{{ route('checkout.remove.voucher') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm text-secondary p-0 ms-1" title="Lepas Voucher">
+                                            <i class="bi bi-x-circle-fill fs-6"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @else
+                            <button type="button" class="btn btn-danger bg-opacity-10 text-danger border-0 d-flex justify-content-between align-items-center py-2 px-3" 
+                                    style="background-color: #ffeaea;"
+                                    data-bs-toggle="modal" data-bs-target="#voucherModal">
+                                <span class="fw-bold small"><i class="bi bi-ticket-perforated-fill me-2"></i> Use coupons</span>
+                                <i class="bi bi-chevron-right small"></i>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Shopping summary</h5>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Total Price</span>
+                        <span class="fw-bold">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Total Shipping</span>
+                        <span class="fw-bold" id="display_shipping">Rp {{ number_format($defaultShippingCost * $cartItems->count(), 0, ',', '.') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Application Fees</span>
+                        <span class="fw-bold">Rp {{ number_format($applicationFee, 0, ',', '.') }}</span>
+                    </div>
+                    
+                    @if($discountAmount > 0)
+                    <div class="d-flex justify-content-between mb-2 small text-success">
+                        <span>Discount</span>
+                        <span class="fw-bold">- Rp {{ number_format($discountAmount, 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold">Shopping Total</span>
+                        <span class="fw-bold fs-5" id="display_total">Rp {{ number_format($totalPay, 0, ',', '.') }}</span>
+                    </div>
+
+                    <div class="d-grid">
+                        <form action="{{ route('checkout.store') }}" method="POST" id="checkoutForm">
+                            @csrf
+                            <input type="hidden" name="total_price" id="input_total" value="{{ $totalPay }}">
+                            <input type="hidden" name="payment_method" id="real_payment_method" value="{{ $paymentMethods[0]['code'] ?? '' }}">
+                            
+                            <button type="button" onclick="confirmPayment()" class="btn btn-danger fw-bold py-2 w-100 fs-5">
+                                Pay Now
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Select Payment Method</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            @foreach($paymentMethods as $index => $payment)
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom" 
+                     style="cursor: pointer;"
+                     onclick="selectPaymentFromModal('{{ $payment['code'] }}', '{{ $payment['name'] }}')">
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="{{ $payment['logo'] }}" style="width: 50px; height: 30px; object-fit: contain;">
+                        <div>
+                            <label class="form-check-label fw-bold d-block" style="cursor: pointer;">{{ $payment['name'] }}</label>
+                            @if($payment['fee'] > 0)
+                                <small class="text-muted">Fee: Rp {{ number_format($payment['fee'],0,',','.') }}</small>
+                            @endif
+                        </div>
+                    </div>
+                    <input class="form-check-input border-secondary" type="radio" 
+                           name="payment_modal_radio" 
+                           id="modal_radio_{{ $payment['code'] }}" 
+                           {{ $index === 0 ? 'checked' : '' }}>
+                </div>
+            @endforeach
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">Confirm Selection</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="voucherModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Available Coupons</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body bg-light">
+          @if(isset($availableVouchers) && count($availableVouchers) > 0)
+              @foreach($availableVouchers as $voucher)
+                  @php
+                      // Cek apakah voucher ini yang sedang dipakai?
+                      $isUsed = session('applied_voucher') && session('applied_voucher')['code'] == $voucher->code;
+                  @endphp
+
+                  <div class="card mb-2 border-0 shadow-sm {{ $isUsed ? 'border border-danger' : '' }}">
+                      <div class="card-body d-flex justify-content-between align-items-center">
+                          <div>
+                              <h6 class="fw-bold {{ $isUsed ? 'text-danger' : 'text-dark' }} mb-1">
+                                  {{ $voucher->code }} 
+                                  @if($isUsed) <i class="bi bi-check-circle-fill text-danger small"></i> @endif
+                              </h6>
+                              <small class="d-block fw-bold text-muted">{{ $voucher->title }}</small>
+                              <small class="text-muted" style="font-size: 0.75rem;">
+                                  Potongan: Rp {{ number_format($voucher->discount_amount ?? 10000, 0, ',', '.') }}
+                              </small>
+                          </div>
+                          
+                          @if($isUsed)
+                              {{-- Jika Sedang Dipakai: Tampilkan Tombol Mati --}}
+                              <button class="btn btn-sm btn-secondary fw-bold" disabled>Terpakai</button>
+                          @else
+                              {{-- Jika Belum Dipakai: Tampilkan Form Apply --}}
+                              <form action="{{ route('checkout.apply.voucher') }}" method="POST">
+                                  @csrf
+                                  <input type="hidden" name="code" value="{{ $voucher->code }}">
+                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Pakai</button>
+                              </form>
+                          @endif
+                      </div>
+                  </div>
+              @endforeach
+          @else
+              <div class="text-center py-4 text-muted">No coupons available.</div>
+          @endif
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Tambah Alamat Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('address.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row g-3">
+                         <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Label Alamat</label>
+                            <input type="text" name="label" class="form-control" placeholder="Contoh: Rumah, Kantor" required>
+                         </div>
+                         <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Nama Penerima</label>
+                            <input type="text" name="recipient_name" class="form-control" placeholder="Nama Lengkap Penerima" value="{{ Auth::user()->name }}" required>
+                         </div>
+                         <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Nomor HP</label>
+                            <input type="text" name="phone" class="form-control" placeholder="Contoh: 08123456789" required>
+                         </div>
+                         <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Kota</label>
+                            <input type="text" name="city" class="form-control" placeholder="Contoh: Jakarta Barat" required>
+                         </div>
+                         <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">Provinsi</label>
+                            <input type="text" name="province" class="form-control" placeholder="Contoh: DKI Jakarta" required>
+                         </div>
+                         <div class="col-4">
+                            <label class="form-label small fw-bold text-muted">Kode Pos</label>
+                            <input type="text" name="postal_code" class="form-control" placeholder="Contoh: 11480" required>
+                         </div>
+                         <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Alamat Lengkap</label>
+                            <textarea name="address" class="form-control" rows="3" placeholder="Nama Jalan, No. Rumah, RT/RW, Patokan..." required></textarea>
+                         </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger fw-bold">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const subtotal = {{ $subtotal }};
+    const insurance = {{ $insuranceFee }};
+    const appFee = {{ $applicationFee }};
+    
+    const discount = {{ session('applied_voucher')['amount'] ?? 0 }};
+
+    function calculateTotal() {
+        let totalShipping = 0;
+        
+        const selectors = document.querySelectorAll('.shipping-selector');
+        selectors.forEach(select => {
+            const selectedOption = select.options[select.selectedIndex];
+            const cost = parseFloat(selectedOption.getAttribute('data-cost')) || 0;
+            totalShipping += cost;
+        });
+
+        let grandTotal = subtotal + totalShipping + insurance + appFee - discount;
+        
+        if(grandTotal < 0) grandTotal = 0;
+
+        document.getElementById('display_shipping').innerText = formatRupiah(totalShipping);
+        document.getElementById('display_total').innerText = formatRupiah(grandTotal);
+        
+        document.getElementById('input_total').value = grandTotal;
+    }
+
+    function formatRupiah(number) {
+        return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        calculateTotal();
+    });
+
+    function selectPayment(code) {
+        document.getElementById('real_payment_method').value = code;
+        if(document.getElementById('visual_' + code)) document.getElementById('visual_' + code).checked = true;
+        if(document.getElementById('modal_radio_' + code)) document.getElementById('modal_radio_' + code).checked = true;
+    }
+
+    function selectPaymentFromModal(code, name) {
+        document.getElementById('real_payment_method').value = code;
+        document.getElementById('modal_radio_' + code).checked = true;
+        
+        if(document.getElementById('visual_' + code)) {
+            document.getElementById('visual_' + code).checked = true;
+            document.getElementById('selected-payment-display').classList.add('d-none');
+        } else {
+            let radios = document.getElementsByName('payment_visual');
+            radios.forEach(r => r.checked = false);
+            document.getElementById('selected-payment-display').classList.remove('d-none');
+            document.getElementById('selected-payment-name').innerText = name;
+        }
+    }
+
+    function confirmPayment() {
+        Swal.fire({
+            title: 'Processing Order',
+            text: 'Please wait while we process your payment...',
+            icon: 'info',
+            timer: 2000,
+            showConfirmButton: false,
+            willClose: () => {
+                Swal.fire({
+                    title: 'Payment Successful!',
+                    text: 'Your order has been placed successfully.',
+                    icon: 'success',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('checkoutForm').submit();
+                    }
+                });
+            }
+        });
+    }
+</script>
+
+@endsection
