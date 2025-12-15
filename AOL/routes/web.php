@@ -1,4 +1,4 @@
-<?php
+z<?php
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
@@ -36,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/products', [ProductController::class, 'displayProducts'])->name('products');
     Route::get('/flashsales', [ProductController::class, 'displayFlashsales'])->name('flashsales');
     Route::get('/products/{id}', [ProductController::class, 'productDetail'])->name('products.detail');
+    Route::post('/cart/add', [ProductController::class, 'addToCart'])->name('cart.add');
     Route::get('/flashsales/{id}', [ProductController::class, 'flashsaleDetail'])->name('flashsales.detail');
     Route::post('/checkout/apply-voucher', [App\Http\Controllers\CheckoutController::class, 'applyVoucher'])->name('checkout.apply.voucher');
     Route::post('/buy-now/{id}', [App\Http\Controllers\CartController::class, 'buyNow'])->name('buy.now');
