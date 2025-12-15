@@ -77,14 +77,14 @@ class ProductController extends Controller
             'product_id' => 'required|exists:products,id',
             'variant_id' => 'nullable|exists:product_variants,id',
         ], [
-            'quantity.min' => 'Minimal pembelian adalah 1 barang.',
-            'variant_id.required' => 'Silakan pilih varian terlebih dahulu.',
+            'quantity.min' => 'Purchase at least 1 item.',
+            'variant_id.required' => 'Please select a variant first.',
         ]);
 
         if ($request->input('action') === 'buy_now') {
-            return redirect()->route('cart.index')->with('success', 'Produk berhasil ditambahkan, silakan checkout!');
+            return redirect()->route('checkout.index')->with('success', 'Please proceed with your payment!');
         } else {
-            return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke Keranjang!');
+            return redirect()->back()->with('success', 'Product added to cart successfully!');
         }
     }
 

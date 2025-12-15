@@ -102,8 +102,7 @@
                                 </div>
                             </div>
 
-                            {{-- GARIS PEMBATAS 3 (Di atas Tombol / Di bawah Delivery) --}}
-                            <hr class="text-secondary opacity-25 my-4">
+                            <hr class="text-secondary my-4">
 
                             {{-- Action Buttons & Share --}}
                             <div class="d-flex align-items-center justify-content-between">
@@ -128,7 +127,7 @@
                                     </button>
                                 </div>
 
-                                {{-- Kanan: Share & Wishlist --}}
+                                {{-- Share & Wishlist --}}
                                 <div class="d-flex gap-3 text-danger small fw-bold text-nowrap">
                                     <span style="cursor: pointer;">
                                         <i class="fas fa-share-alt me-1"></i> Share
