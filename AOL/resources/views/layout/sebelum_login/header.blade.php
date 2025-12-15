@@ -27,6 +27,11 @@
         <!-- Search -->
         <div class="flex-grow-1 mx-4">
             <form class="input-group" action="{{ route('products') }}" method="GET">
+                @foreach(request()->query() as $key => $value)
+                    @if($key !== 'q')
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
                 <input type="text" class="form-control" placeholder="Search..." name="q" value="{{ request('q') }}" >
                 <button class="btn btn-light border" type="submit">
                     <img src="{{ asset('asset/images/sebelum_login/search.png') }}" width="18">
