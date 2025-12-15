@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product as ProductModel;
-use App\Models\Category as CategoryModel;
 use App\Models\ProductVariant as ProductVariantModel;
+use App\Models\Category as CategoryModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SellerProductController extends Controller
 {
@@ -41,86 +42,94 @@ class SellerProductController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'category_id'    => 'required|exists:categories,id',
-            'price'          => 'nullable|numeric',
-            'stock'          => 'nullable|integer',
-            'product_image'  => 'nullable|image|max:2048',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|min:30',
+            'category_id' => 'required|exists:categories,id',
+            'min_order_qty' => 'required|integer|min:1',
+            'delivery_estimate_days' => 'required|integer|min:1',
+            'product_image' => 'required|image|max:2048',
 
-            // Variant fields (form array)
-            'variants.*.variant_name' => 'nullable|string|max:255',
-            'variants.*.price'        => 'nullable|numeric',
-            'variants.*.stock'        => 'nullable|integer',
-            'variants.*.image'        => 'nullable|image|max:2048',
+            'has_variant' => 'required|boolean',
+
+            // tanpa varian
+            'price' => 'nullable|required_if:has_variant,0|numeric|min:0',
+            'stock' => 'nullable|required_if:has_variant,0|integer|min:0',
+
+
+            // dengan varian
+            'variants.*.variant_name' => 'required_if:has_variant,1',
+            'variants.*.price' => 'required_if:has_variant,1|numeric|min:0',
+            'variants.*.stock' => 'required_if:has_variant,1|integer|min:0',
+            'variants.*.image' => 'nullable|image|max:2048',
         ]);
 
-        // Upload main product image
-        $imagePath = null;
-        if ($request->hasFile('product_image')) {
-            $imagePath = 'img/products/' . time() . '_' . $request->file('product_image')->getClientOriginalName();
-            $request->file('product_image')->move(public_path('img/products'), $imagePath);
-        }
+        $seller = Auth::user()->sellerDetail;
 
-        // Create main product
+        // Simpan Gambar Product
+        $productImageName = Str::uuid() . '.' . $request->product_image->extension();
+        $request->product_image->move(
+            public_path('asset/images/product'),
+            $productImageName
+        );
+
         $product = ProductModel::create([
-            'seller_id'   => Auth::user()->sellerDetail->id,
-            'category_id' => $validated['category_id'],
-            'name'        => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'price'       => $validated['price'] ?? null,
-            'stock'       => $validated['stock'] ?? null,
-            'product_image' => $imagePath,
+            'seller_id' => $seller->id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+            'min_order_qty' => $request->min_order_qty,
+            'delivery_estimate_days' => $request->delivery_estimate_days,
+            'product_image' => 'asset/images/product/' . $productImageName,
         ]);
 
-        // Handle variants
-        $variants = $request->variants;
+        // Jika ada Variant
+        if ($request->has_variant) {
+            $prices = [];
+            $stocks = [];
 
-        $allVariantPrices = [];
-
-        if (!empty($variants)) {
-            foreach ($variants as $variant) {
-
-                if (!isset($variant['variant_name']) || !$variant['variant_name']) continue;
-
-                // Upload variant image
+            foreach ($request->variants as $variant) {
                 $variantImagePath = null;
-                if (isset($variant['image']) && $variant['image']) {
-                    $variantImagePath = 'img/variants/' . time() . '_' . $variant['image']->getClientOriginalName();
-                    $variant['image']->move(public_path('img/variants'), $variantImagePath);
+
+                if (!empty($variant['image'])) {
+                    $variantImageName = Str::uuid() . '.' . $variant['image']->extension();
+                    $variant['image']->move(
+                        public_path('asset/images/variant'),
+                        $variantImageName
+                    );
+
+                    $variantImagePath = 'asset/images/variant/' . $variantImageName;
                 }
 
-                // Create variant
                 ProductVariantModel::create([
-                    'product_id'   => $product->id,
+                    'product_id' => $product->id,
                     'variant_name' => $variant['variant_name'],
-                    'price'        => $variant['price'],
-                    'stock'        => $variant['stock'],
-                    'image'        => $variantImagePath,
+                    'price' => $variant['price'],
+                    'stock' => $variant['stock'],
+                    'image' => $variantImagePath,
                 ]);
 
-                $allVariantPrices[] = floatval($variant['price']);
+                $prices[] = $variant['price'];
+                $stocks[] = $variant['stock'];
             }
-        }
 
-        // Jika ada varian → hitung min_price & max_price
-        if (count($allVariantPrices) > 0) {
             $product->update([
-                'min_price' => min($allVariantPrices),
-                'max_price' => max($allVariantPrices),
+                'min_price' => min($prices),
+                'max_price' => max($prices),
+                'stock' => array_sum($stocks),
             ]);
-        } else {
-            // Jika TIDAK ada variant → min_price & max_price = price
-            if ($product->price) {
-                $product->update([
-                    'min_price' => $product->price,
-                    'max_price' => $product->price,
-                ]);
-            }
+        }
+        // tanpa variant
+        else {
+            $product->update([
+                'price' => $request->price,
+                'stock' => $request->stock,
+            ]);
         }
 
-        return redirect()->route('seller.products.index')->with('success', 'Product created successfully.');
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Produk berhasil ditambahkan');
     }
 
     /**
