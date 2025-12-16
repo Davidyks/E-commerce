@@ -26,7 +26,7 @@
 
         <!-- Search -->
         <div class="flex-grow-1 mx-4">
-            <form class="input-group" action="{{ route('products') }}" method="GET">
+            <form class="input-group" action="{{ request()->routeIs('flashsales*') ? route('flashsales') : route('products') }}" method="GET">
                 @foreach(request()->query() as $key => $value)
                     @if($key !== 'q')
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">

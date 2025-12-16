@@ -96,6 +96,7 @@
             <div class="product-items">
                 @foreach ($products as $p)
                     <div class="product-card">
+                        <a href="{{ route('products.detail', parameters: $p->id) }}" class="text-decoration-none" style="color: black">
                         <div class="position-relative">
                             <div class="image-wrapper">
                                 <img src="{{ $p->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
@@ -126,6 +127,7 @@
                             </div>
                             <a class="restricted-btn" href="{{ route('products.detail', $p->id) }}">See Detail</a>
                         </div>
+                        </a>
                     </div>
                 @endforeach
             </div>
@@ -135,7 +137,7 @@
                     Product belum ada
                 </p>
                 <p class="text-muted mb-0" style="margin-top: -3px">
-                    Barang sedang direstock...
+                    Nantikan product menarik dalam waktu dekat...
                 </p>
             </div>
         @endif

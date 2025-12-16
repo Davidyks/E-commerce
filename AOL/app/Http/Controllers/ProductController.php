@@ -44,12 +44,38 @@ class ProductController extends Controller
         return view('user.products', compact('products', 'categories'));
     }
 
-    public function displayFlashsales(){
+    public function displayFlashsales(Request $request){
+        $categories = Category::all();
         $flashsales = FlashSale::where('start_time', '<=', now())
                     ->where('end_time', '>', now())
                     ->with(['product', 'variant'])
+                    ->when($request->q, function ($q) use ($request) {
+                        $keyword = trim($request->q);
+
+                        $q->where(function ($query) use ($keyword) {
+                            $query->whereHas('product', function ($q) use ($keyword) {
+                                $q->where('name', 'LIKE', "%{$keyword}%")
+                                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+                            })
+                            ->orWhereHas('variant.product', function ($q) use ($keyword) {
+                                $q->where('name', 'LIKE', "%{$keyword}%")
+                                    ->orWhere('description', 'LIKE', "%{$keyword}%");
+                            });
+                        });
+                    })
+                    ->when($request->category, function ($q) use ($request) {
+                        $q->where(function ($query) use ($request) {
+
+                            $query->whereHas('product', function ($q) use ($request) {
+                                $q->where('category_id', $request->category);
+                            })
+                            ->orWhereHas('variant.product', function ($q) use ($request) {
+                                $q->where('category_id', $request->category);
+                            });
+
+                        });
+                    })
                     ->get();
-        $categories = Category::all();
 
         return view('user.flashsales', compact('flashsales', 'categories'));
     }
