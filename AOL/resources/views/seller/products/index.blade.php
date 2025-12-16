@@ -2,7 +2,7 @@
 @section('title', 'My Products')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/seller-products.css') }}">
+<link rel="stylesheet" href="{{ asset('css/seller.css') }}">
 @endsection
 
 @section('content')
@@ -21,7 +21,7 @@
     </div>
 
     {{-- Empty state --}}
-    @if ($products->isEmpty())
+    @if ($products->count() === 0)
         <div class="text-center py-5">
             <p class="fw-bold text-danger fs-5 mb-1">
                 Anda belum memiliki produk
@@ -101,14 +101,21 @@
 
                         {{-- Aksi --}}
                         <td>
-                            <a href="{{ route('products.detail', $product->id) }}"
-                               class="text-primary d-block mb-1">
-                                Detail
-                            </a>
                             <a href="{{ route('products.edit', $product->id) }}"
-                               class="text-primary d-block">
+                                class="text-primary text-decoration-none d-block ">
                                 Edit
                             </a>
+                            <form action="{{ route('products.destroy', $product->id) }}"
+                                method="POST"
+                                class="delete-form d-inline">
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="button"
+                                        class="text-danger border-0 bg-transparent p-0 delete-btn">
+                                    Delete
+                                </button>
+                            </form>
                         </td>
                     </tr>
 
@@ -146,13 +153,41 @@
                             </tr>
                         @endforeach
                     @endif
-
                 @endforeach
                 </tbody>
             </table>
+            <div class="d-flex justify-content-end m-3 gap-5">
+                {{ $products->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
-
     @endif
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const form = this.closest('.delete-form');
+
+            Swal.fire({
+                title: 'Hapus Produk?',
+                text: 'Produk yang dihapus tidak bisa dikembalikan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>
+@endpush
+
 @endsection
