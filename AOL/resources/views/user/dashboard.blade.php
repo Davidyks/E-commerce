@@ -17,10 +17,13 @@
             <div class="category-title">Category</div>
             <div class="category-list">
                 @foreach ($categories as $c)
-                    <div class="category-item">
-                    <img src={{ $c->category_image }} />
-                    <div>{{ $c->category_name }}</div>  
-                    </div>
+                    @php
+                        $isActive = request('category') == $c->id
+                    @endphp
+                    <a href="{{ $isActive ? route('products') : route('products', array_merge(request()->query(), ['category' => $c->id])) }}" class="category-item {{ $isActive ? 'active' : '' }}">
+                        <img src="{{ $c->category_image }}">
+                        <div>{{ $c->category_name }}</div>
+                    </a>
                 @endforeach
             </div>
         </div>
@@ -38,6 +41,7 @@
             <div class="flashsale-items">
                 @foreach ($flashsales as $f)
                     <div class="flashsale-card">
+                        <a href="{{ route('flashsales.detail', parameters: $f->id) }}" class="text-decoration-none" style="color: black">
                         <div class="position-relative">
                             <div class="image-wrapper">
                                 <img src="{{ $f->product->product_image ?? $f->variant->image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
@@ -61,6 +65,7 @@
                             </div>
                             <a class="restricted-btn" href="{{ route('flashsales.detail', $f->id) }}">See Detail</a>
                         </div>
+                        </a>
                     </div>
                 @endforeach
             </div>
@@ -88,6 +93,7 @@
             <div class="flashsale-items">
                 @foreach ($topProducts as $p)
                     <div class="flashsale-card">
+                        <a href="{{ route('products.detail', parameters: $p->id) }}" class="text-decoration-none" style="color: black">
                         <div class="position-relative">
                             <div class="image-wrapper">
                                 <img src="{{ $p->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
@@ -114,6 +120,7 @@
                             </div>
                             <a class="restricted-btn" href="{{ route('products.detail', $p->id) }}">See Detail</a>
                         </div>
+                        </a>
                     </div>
                 @endforeach
             </div>
@@ -123,7 +130,7 @@
                     Product belum ada
                 </p>
                 <p class="text-muted mb-0" style="margin-top: -3px">
-                    Barang sedang direstock...
+                    Nantikan product menarik dalam waktu dekat...
                 </p>
             </div>
         @endif
