@@ -7,6 +7,9 @@
     @include('layout.logo')
     @yield('css')
     @include('layout.seller.bootstrap')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @stack('scripts')
 </head>
 
 <body style="padding-top: 150px">

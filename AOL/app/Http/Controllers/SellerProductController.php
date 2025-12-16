@@ -7,7 +7,7 @@ use App\Models\ProductVariant as ProductVariantModel;
 use App\Models\Category as CategoryModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class SellerProductController extends Controller
@@ -23,8 +23,11 @@ class SellerProductController extends Controller
 
         // Jika seller belum ada → collection kosong
         $products = $seller
-            ? ProductModel::where('seller_id', $seller->id)->get()
-            : collect();
+            ? ProductModel::with('variants')
+            ->where('seller_id', $seller->id)
+            ->latest()
+            ->paginate(10)
+            : ProductModel::whereRaw('1 = 0')->paginate(10);
         return view('seller.products.index', compact('products'));
     }
 
@@ -160,127 +163,179 @@ class SellerProductController extends Controller
     /**
      * Update product + variants.
      */
-    public function update(Request $request, ProductModel $product)
+    public function update(Request $request, $id)
     {
-        $this->authorizeAccess($product);
+        $product = ProductModel::with('variants')->findOrFail($id);
 
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'category_id'    => 'required|exists:categories,id',
-            'price'          => 'nullable|numeric',
-            'stock'          => 'nullable|integer',
-            'product_image'  => 'nullable|image|max:2048',
+        // DETEKSI ADA VARIANT ATAU TIDAK
+        $hasVariant = $request->has('variants') && count($request->variants) > 0;
 
-            // Variant fields (form array)
-            'variants.*.id'            => 'nullable|exists:product_variants,id',
-            'variants.*.variant_name'  => 'nullable|string|max:255',
-            'variants.*.price'         => 'nullable|numeric',
-            'variants.*.stock'         => 'nullable|integer',
-            'variants.*.image'         => 'nullable|image|max:2048',
+        // VALIDASI (DISAMAKAN DENGAN STORE)
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|min:30',
+            'category_id' => 'required|exists:categories,id',
+            'min_order_qty' => 'required|integer|min:1',
+            'delivery_estimate_days' => 'required|integer|min:1',
+            'product_image' => 'nullable|image|max:2048',
+
+            // tanpa varian
+            'price' => $hasVariant ? 'nullable' : 'required|numeric|min:0',
+            'stock' => $hasVariant ? 'nullable' : 'required|integer|min:0',
+
+            // dengan varian
+            'variants.*.variant_name' => $hasVariant ? 'required' : 'nullable',
+            'variants.*.price' => $hasVariant ? 'required|numeric|min:0' : 'nullable',
+            'variants.*.stock' => $hasVariant ? 'required|integer|min:0' : 'nullable',
+            'variants.*.image' => 'nullable|image|max:2048',
         ]);
 
-        // Upload main product image jika ada
+        // Update Gambar Produk
         if ($request->hasFile('product_image')) {
-            // Hapus image lama jika ada
-            if ($product->product_image && file_exists(public_path($product->product_image))) {
-                unlink(public_path($product->product_image));
+            if ($product->product_image && File::exists(public_path($product->product_image))) {
+                File::delete(public_path($product->product_image));
             }
 
-            $imagePath = 'img/products/' . time() . '_' . $request->file('product_image')->getClientOriginalName();
-            $request->file('product_image')->move(public_path('img/products'), $imagePath);
-            $product->product_image = $imagePath;
+            $productImageName = Str::uuid() . '.' . $request->product_image->extension();
+            $request->product_image->move(
+                public_path('asset/images/product'),
+                $productImageName
+            );
+
+            $product->product_image = 'asset/images/product/' . $productImageName;
         }
 
-        // Update main product
+        // Update Data Produk
         $product->update([
-            'category_id' => $validated['category_id'],
-            'name'        => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'price'       => $validated['price'] ?? null,
-            'stock'       => $validated['stock'] ?? null,
+            'name' => $request->name,
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+            'min_order_qty' => $request->min_order_qty,
+            'delivery_estimate_days' => $request->delivery_estimate_days,
         ]);
 
-        // Handle variants
-        $variants = $request->variants;
-        $allVariantPrices = [];
+        // Jika Ada Variant
+        if ($hasVariant) {
 
-        if (!empty($variants)) {
-            foreach ($variants as $variantData) {
-                if (!isset($variantData['variant_name']) || !$variantData['variant_name']) continue;
+            $existingVariantIds = $product->variants->pluck('id')->toArray();
+            $requestVariantIds = collect($request->variants)
+                                    ->pluck('id')
+                                    ->filter()
+                                    ->toArray();
 
-                // Update existing variant
-                if (isset($variantData['id'])) {
+            // HAPUS VARIANT YANG DIHAPUS DARI FORM
+            $deletedVariants = array_diff($existingVariantIds, $requestVariantIds);
+            foreach ($deletedVariants as $variantId) {
+                $variant = ProductVariantModel::find($variantId);
+                if ($variant) {
+                    if ($variant->image && File::exists(public_path($variant->image))) {
+                        File::delete(public_path($variant->image));
+                    }
+                    $variant->delete();
+                }
+            }
+
+            $prices = [];
+            $stocks = [];
+
+            // UPDATE / TAMBAH VARIANT
+            foreach ($request->variants as $variantData) {
+
+                // UPDATE VARIANT
+                if (!empty($variantData['id'])) {
                     $variant = ProductVariantModel::find($variantData['id']);
+
                     if (!$variant) continue;
 
-                    // Upload new image jika ada
-                    if (isset($variantData['image']) && $variantData['image']) {
-                        if ($variant->image && file_exists(public_path($variant->image))) {
-                            unlink(public_path($variant->image));
+                    if (!empty($variantData['image'])) {
+                        if ($variant->image && File::exists(public_path($variant->image))) {
+                            File::delete(public_path($variant->image));
                         }
-                        $variantImagePath = 'img/variants/' . time() . '_' . $variantData['image']->getClientOriginalName();
-                        $variantData['image']->move(public_path('img/variants'), $variantImagePath);
-                        $variant->image = $variantImagePath;
+
+                        $variantImageName = Str::uuid() . '.' . $variantData['image']->extension();
+                        $variantData['image']->move(
+                            public_path('asset/images/variant'),
+                            $variantImageName
+                        );
+
+                        $variant->image = 'asset/images/variant/' . $variantImageName;
                     }
 
                     $variant->update([
                         'variant_name' => $variantData['variant_name'],
-                        'price'        => $variantData['price'],
-                        'stock'        => $variantData['stock'],
+                        'price' => $variantData['price'],
+                        'stock' => $variantData['stock'],
                     ]);
-
-                    if ($variant->price) $allVariantPrices[] = floatval($variant->price);
-                } else {
-                    // Create new variant
+                }
+                // TAMBAH VARIANT BARU
+                else {
                     $variantImagePath = null;
-                    if (isset($variantData['image']) && $variantData['image']) {
-                        $variantImagePath = 'img/variants/' . time() . '_' . $variantData['image']->getClientOriginalName();
-                        $variantData['image']->move(public_path('img/variants'), $variantImagePath);
+
+                    if (!empty($variantData['image'])) {
+                        $variantImageName = Str::uuid() . '.' . $variantData['image']->extension();
+                        $variantData['image']->move(
+                            public_path('asset/images/variant'),
+                            $variantImageName
+                        );
+
+                        $variantImagePath = 'asset/images/variant/' . $variantImageName;
                     }
 
-                    $newVariant = ProductVariantModel::create([
-                        'product_id'   => $product->id,
+                    ProductVariantModel::create([
+                        'product_id' => $product->id,
                         'variant_name' => $variantData['variant_name'],
-                        'price'        => $variantData['price'],
-                        'stock'        => $variantData['stock'],
-                        'image'        => $variantImagePath,
+                        'price' => $variantData['price'],
+                        'stock' => $variantData['stock'],
+                        'image' => $variantImagePath,
                     ]);
-
-                    if ($newVariant->price) $allVariantPrices[] = floatval($newVariant->price);
                 }
-            }
-        }
 
-        // Update min_price & max_price
-        if (count($allVariantPrices) > 0) {
+                $prices[] = $variantData['price'];
+                $stocks[] = $variantData['stock'];
+            }
+
+            // UPDATE AGREGAT PRODUK
             $product->update([
-                'min_price' => min($allVariantPrices),
-                'max_price' => max($allVariantPrices),
+                'price' => null,
+                'min_price' => min($prices),
+                'max_price' => max($prices),
+                'stock' => array_sum($stocks),
             ]);
-        } else {
-            if ($product->price) {
-                $product->update([
-                    'min_price' => $product->price,
-                    'max_price' => $product->price,
-                ]);
-            }
         }
 
-        return redirect()->route('seller.products.index')->with('success', 'Product updated successfully.');
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Produk berhasil diperbarui');
     }
-
 
     /**
      * Delete product.
      */
     public function destroy(ProductModel $product)
     {
-        $this->authorizeAccess($product);
+        $product->load('variants');
 
+        // Hapus Gambar Variant
+        foreach ($product->variants as $variant) {
+            if ($variant->image && File::exists(public_path($variant->image))) {
+                File::delete(public_path($variant->image));
+            }
+        }
+
+        // Hapus Gambar Produk
+        if ($product->product_image && File::exists(public_path($product->product_image))) {
+            File::delete(public_path($product->product_image));
+        }
+
+        // Hapus Data Variant
+        $product->variants()->delete();
+
+        // Hapus Data Product
         $product->delete();
 
-        return redirect()->route('seller.products.index')->with('success', 'Product deleted.');
+        return redirect()
+            ->route('products.index', ['page' => request('page')])
+            ->with('success', 'Produk berhasil dihapus');
     }
 
     /**

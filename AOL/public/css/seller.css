@@ -1,6 +1,6 @@
 .product-thumb {
-    width: 24x;
-    height: 24px;
+    width: 48x;
+    height: 48px;
     object-fit: cover;
     border-radius: 6px;
     border: 1px solid #eee;
@@ -24,4 +24,33 @@
 
 .product-table td {
     vertical-align: top;
+}
+
+.pagination .page-link {
+    color: #E63939 !important;
+    border-color: #E63939 !important;
+    border-radius: 8px;
+    margin: 0 3px;
+}
+
+.pagination .page-link:hover {
+    background-color: #E63939 !important;
+    color: #ffffff !important;
+    border-color: #E63939 !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #E63939 !important;
+    border-color: #E63939 !important;
+    color: #ffffff !important;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #f1a5a5 !important;
+    border-color: #f1a5a5 !important;
+}
+
+.pagination .page-link {
+    background: red !important;
+    color: white !important;
 }
