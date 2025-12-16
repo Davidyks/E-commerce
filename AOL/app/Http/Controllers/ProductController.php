@@ -54,8 +54,38 @@ class ProductController extends Controller
         return view('user.flashsales', compact('flashsales', 'categories'));
     }
 
-    public function productDetail(Request $request){
-        return view('user.productDetail');
+    public function productDetail($id)
+    {
+
+        $product = Product::with(['variants', 'seller', 'ratings.user', 'category'])->findOrFail($id);
+
+        $ratingCounts = [
+            5 => $product->ratings->where('rating', 5)->count(),
+            4 => $product->ratings->where('rating', 4)->count(),
+            3 => $product->ratings->where('rating', 3)->count(),
+            2 => $product->ratings->where('rating', 2)->count(),
+            1 => $product->ratings->where('rating', 1)->count(),
+        ];
+
+        return view('user.productDetail', compact('product', 'ratingCounts'));
+    }
+
+    public function addToCart(Request $request)
+    {
+        $request->validate([
+            'quantity' => 'required|numeric|min:1',
+            'product_id' => 'required|exists:products,id',
+            'variant_id' => 'nullable|exists:product_variants,id',
+        ], [
+            'quantity.min' => 'Purchase at least 1 item.',
+            'variant_id.required' => 'Please select a variant first.',
+        ]);
+
+        if ($request->input('action') === 'buy_now') {
+            return redirect()->route('checkout.index')->with('success', 'Please proceed with your payment!');
+        } else {
+            return redirect()->back()->with('success', 'Product added to cart successfully!');
+        }
     }
 
     public function flashsaleDetail(Request $request){
