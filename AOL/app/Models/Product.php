@@ -40,7 +40,7 @@ class Product extends Model
     // Accessor utk rating ui
     public function getRatingAverageAttribute()
     {
-        return round($this->ratings()->avg('rating'), 1) ?? 0;
+        return round($this->ratings()->avg('rating'), 2) ?? 0;
     }
 
     public function getRatingCountAttribute()

@@ -1,0 +1,33 @@
+.desc-collapsed {
+    display: -webkit-box;
+
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.desc-text {
+    text-align: justify;
+}
+
+.star-rating {
+    position: relative;
+    display: inline-block;
+    font-size: 32px;
+    line-height: 1;
+}
+
+.stars-empty {
+    color: #ccc;
+}
+
+.stars-filled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #f5c518;
+}

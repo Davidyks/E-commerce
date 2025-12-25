@@ -119,7 +119,7 @@
                             <div class="align-items-center d-flex justify-content-between">
                                 <p class="before-discount text-muted text-decoration-none">{{ $p->sold_count }} Sold</p>
                                 <div class="product-rate">
-                                    ★ {{ $p->rating }}
+                                    ★ {{ number_format($p->rating,1) }}
                                 </div>
                             </div>
                             <div class="estimate text-muted">

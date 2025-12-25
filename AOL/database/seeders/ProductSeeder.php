@@ -38,7 +38,7 @@ class ProductSeeder extends Seeder
                 'category_id' => $category->id,
                 'min_order_qty' => 1,
                 'delivery_estimate_days' => $faker->numberBetween(1, 7),
-                'rating' => $faker->randomFloat(1, 1, 5),
+                'rating' => 0,
                 'sold_count' => $faker->numberBetween(0, 100),
                 'product_image' => 'https://placehold.co/640x480?text=Product'
             ]);

@@ -1,5 +1,6 @@
 @extends('layout.sesudah_login.master')
 @section('title', 'Products')
+@section('css',asset( 'css/productDetail.css'))
 
 @section('content')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,9 +23,8 @@
                     {{-- GAMBAR PRODUK --}}
                     <div class="col-md-5">
                         <div class="border rounded bg-white text-center overflow-hidden position-relative">
-                            <img src="{{ asset('asset/images/product/' . $product->product_image) }}"
-                                alt="{{ $product->name }}" class="img-fluid w-100 object-fit-cover"
-                                style="aspect-ratio: 1/1;">
+                            <img src="{{ $product->product_image }}"
+                                alt="{{ $product->name }}" class="img-fluid w-100 h-100 object-fit-cover"/>
                         </div>
                     </div>
 
@@ -35,15 +35,17 @@
                         {{-- Rating & Sold --}}
                         <div class="d-flex align-items-center mb-3 small">
                             <span class="text-warning me-1">
-                                {{ $product->rating_average }} <i class="fas fa-star"></i>
+                                {{ number_format($product->rating_average,1) }} <i class="fas fa-star"></i>
                             </span>
                             <span class="text-muted mx-2">|</span>
-                            <span class="text-muted text-decoration-underline">{{ $product->sold_count }} Sold</span>
+                            <span class="text-muted">{{ $product->sold_count }} Sold</span>
+                            <span class="text-muted mx-2">|</span>
+                            <span class="text-muted">Stocks: <span id="product-stock">{{ $product->stock }}</span></span>
                         </div>
 
                         {{-- Harga --}}
                         <h2 class="text-danger fw-bold mb-4">
-                            Rp {{ $product->display_price }}
+                            $ <span id="product-price">{{ $product->display_price }}</span>
                         </h2>
 
                         {{-- FORM --}}
@@ -57,8 +59,8 @@
                                     <label class="fw-bold mb-2 text-secondary">Variant</label>
                                     <div class="d-flex flex-wrap gap-2">
                                         @foreach ($product->variants as $variant)
-                                            <input type="radio" class="btn-check" name="variant_id"
-                                                id="var_{{ $variant->id }}" value="{{ $variant->id }}" required>
+                                            <input type="radio" class="btn-check variant-radio" name="variant_id"
+                                                id="var_{{ $variant->id }}" value="{{ $variant->id }}" data-price="{{ $variant->price }}" data-stock="{{ $variant->stock }}">
                                             <label class="btn btn-outline-secondary px-4 py-2 rounded-pill"
                                                 for="var_{{ $variant->id }}">
                                                 {{ $variant->variant_name }}
@@ -66,7 +68,7 @@
                                         @endforeach
                                     </div>
                                     @error('variant_id')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                        <div class="text-danger mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
                             @endif
@@ -81,10 +83,12 @@
                                     <li>• Condition: New</li>
                                     <li>• Min. Order: {{ $product->min_order_qty }} Piece</li>
                                 </ul>
-                                <p class="text-secondary small mb-0">
-                                    {{ $product->description }}
-                                    <a href="#" class="text-danger text-decoration-none fw-bold">Read More</a>
-                                </p>
+                                <div class="text-secondary small mb-0 desc-text">
+                                    <span id="product-desc" class="desc-collapsed">{{ $product->description }}</span>
+                                    <a href="#" id="toggle-desc" class="text-danger text-decoration-none fw-bold d-inline">
+                                        Read More
+                                    </a>
+                                </div>
                             </div>
 
                             <hr class="text-secondary opacity-25 my-4">
@@ -106,14 +110,13 @@
 
                             {{-- Action Buttons & Share --}}
                             <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex gap-3 align-items-center flex-grow-1 me-4">
+                                <div class="d-flex gap-3 align-items-center me-4">
                                     {{-- Quantity --}}
                                     <div style="width: 70px;">
-                                        {{-- <label class="form-label fw-bold text-secondary small mb-0">Qty</label> --}}
                                         <input type="number" name="quantity"
                                             value="{{ old('quantity', $product->min_order_qty) }}"
                                             min="{{ $product->min_order_qty }}" class="form-control text-center fw-bold"
-                                            placeholder="1">
+                                            placeholder="{{ $product->min_order_qty }}">
                                     </div>
 
                                     <button type="submit" name="action" value="add_to_cart"
@@ -125,16 +128,6 @@
                                         class="btn btn-danger px-4 py-2 fw-bold">
                                         Buy Now
                                     </button>
-                                </div>
-
-                                {{-- Share & Wishlist --}}
-                                <div class="d-flex gap-3 text-danger small fw-bold text-nowrap">
-                                    <span style="cursor: pointer;">
-                                        <i class="fas fa-share-alt me-1"></i> Share
-                                    </span>
-                                    <span style="cursor: pointer;">
-                                        <i class="far fa-heart me-1"></i> Wishlist
-                                    </span>
                                 </div>
                             </div>
                             @error('quantity')
@@ -161,8 +154,6 @@
                         <div>
                             <h5 class="fw-bold mb-0">{{ $product->seller->store_name ?? 'Official Store' }}</h5>
                             <div class="d-flex gap-2 mt-2">
-                                <button class="btn btn-outline-danger btn-sm px-3"><i class="far fa-comment-dots"></i>
-                                    Chat</button>
                                 <button class="btn btn-outline-secondary btn-sm px-3"><i class="fas fa-store"></i>
                                     Visit</button>
                             </div>
@@ -174,19 +165,15 @@
                         <div class="d-flex justify-content-around text-center">
                             <div>
                                 <span class="text-secondary small">Products</span>
-                                <h5 class="text-danger fw-bold mb-0">180</h5>
+                                <h5 class="text-danger fw-bold mb-0">{{ $sellerProducts }}</h5>
                             </div>
                             <div>
                                 <span class="text-secondary small">Rating</span>
-                                <h5 class="text-danger fw-bold mb-0">5.0</h5>
+                                <h5 class="text-danger fw-bold mb-0">{{ number_format($sellerRating,1) }}</h5>
                             </div>
                             <div>
                                 <span class="text-secondary small">Joined</span>
-                                <h5 class="text-danger fw-bold mb-0">9 Months</h5>
-                            </div>
-                            <div>
-                                <span class="text-secondary small">Response</span>
-                                <h5 class="text-danger fw-bold mb-0">100%</h5>
+                                <h5 class="text-danger fw-bold mb-0">{{ $sellerJoined }}</h5>
                             </div>
                         </div>
                     </div>
@@ -203,40 +190,48 @@
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-4">Product Rating</h5>
 
+                        @php
+                            $rating = $product->rating ?? 0;
+                            $percentage = ($rating / 5) * 100;
+                        @endphp
+
                         {{-- Rating Header --}}
-                        <div class="bg-light p-4 rounded mb-4 border d-flex align-items-center gap-5">
+                        <div class="bg-light p-4 rounded mb-4 border d-flex align-items-center gap-5 justify-content-between">
                             <div class="text-center">
-                                <h2 class="text-danger fw-bold mb-0">5.0 <span class="fs-6 text-muted">out of 5</span>
-                                </h2>
-                                <div class="text-warning"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                        class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                </div>
+                                <h2 class="text-danger fw-bold mb-0">{{ number_format($product->rating,1) }} <span class="fs-6 text-muted">out of 5</span></h2>
                             </div>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button class="btn btn-outline-secondary px-4 active">All</button>
-                                <button class="btn btn-outline-secondary px-4">5 Star</button>
-                                <button class="btn btn-outline-secondary px-4">4 Star</button>
-                                <button class="btn btn-outline-secondary px-4">With Media</button>
+                            <div class="star-rating">
+                                <div class="stars-filled" style="width: {{ $percentage }}%">
+                                    ★★★★★
+                                </div>
+                                <div class="stars-empty">
+                                    ★★★★★
+                                </div>
                             </div>
                         </div>
 
                         {{-- List Review --}}
-                        @forelse($product->ratings as $rating)
+                        @forelse($product->ratings as $rate)
                             <div class="border-bottom pb-3 mb-3">
                                 <div class="d-flex align-items-center mb-1">
-                                    <div class="bg-secondary rounded-circle me-2" style="width: 30px; height: 30px;">
-                                    </div>
+                                    <div class="bg-secondary rounded-circle me-2" style="width: 40px; height: 40px;"></div>
                                     <div>
-                                        <span class="fw-bold text-dark">{{ $rating->user->name ?? 'User' }}</span>
-                                        <div class="text-warning x-small" style="font-size: 0.75rem;">
-                                            @for ($i = 0; $i < $rating->rating; $i++)
-                                                <i class="fas fa-star"></i>
-                                            @endfor
+                                        <div class="fw-bold text-dark" style="margin-bottom: -2px;">{{ $rate->user->username ?? $rate->user->name ?? 'User' }}</div>
+                                        <div class="d-flex align-items-center gap-1" style="margin-top: -3px;">
+                                            <div class="d-inline text-muted" style="font-size:14px">{{ number_format($rate->rating,1) }}</div>
+                                            <div class="star-rating" style="font-size: 20px">
+                                                <div class="stars-filled" style="width: {{ $rate->rating * 20 }}%">
+                                                    ★★★★★
+                                                </div>
+                                                <div class="stars-empty">
+                                                    ★★★★★
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <small class="text-muted ms-auto">{{ $rating->created_at->format('d-m-Y') }}</small>
+                                    <small class="text-muted ms-auto">{{ $rate->created_at->format('d-m-Y') }}</small>
                                 </div>
-                                <p class="text-secondary mt-2 mb-0">{{ $rating->review }}</p>
+                                <p class="text-secondary mt-2 mb-0">{{ $rate->review }}</p>
                             </div>
                         @empty
                             <p class="text-muted fst-italic py-3">No ratings yet.</p>
@@ -264,4 +259,47 @@
 
         </div>
     </div>
+
+<script>
+    let lastChecked = null;
+
+    document.querySelectorAll('.variant-radio').forEach(radio => {
+        radio.addEventListener('click', function(){
+            if (lastChecked === this){
+                this.checked = false;
+                lastChecked = null;
+
+                document.getElementById('product-price').innerText =
+                    '{{ $product->display_price }}'
+                document.getElementById('product-stock').innerText =
+                    '{{ $product->stock }}'
+            } else {
+                lastChecked = this;
+            }
+        })
+        radio.addEventListener('change', function () {
+            if (this.checked){
+                const price = this.dataset.price;
+                const stock = this.dataset.stock;
+                document.getElementById('product-price').innerText =
+                    price;
+                document.getElementById('product-stock').innerText =
+                    stock
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function(){
+        const toggleBtn = document.getElementById('toggle-desc');
+        const desc = document.getElementById('product-desc');
+
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            desc.classList.toggle('desc-collapsed');
+
+            this.innerText = desc.classList.contains('desc-collapsed') ? 'Read More' : 'Read Less';
+        })
+    })
+</script>
 @endsection
