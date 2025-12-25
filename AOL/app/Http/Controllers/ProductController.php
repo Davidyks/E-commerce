@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\FlashSale;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\SellerDetail;
+use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -83,7 +90,11 @@ class ProductController extends Controller
     public function productDetail($id)
     {
 
-        $product = Product::with(['variants', 'seller', 'ratings.user', 'category'])->findOrFail($id);
+        $product = Product::with(['variants', 'ratings.user', 'category'])->findOrFail($id);
+        $seller = SellerDetail::where('id', $product->seller_id)->first();
+        $sellerProducts = Product::where('seller_id', $seller->id)->count();
+        $sellerRating = Product::where('seller_id', $seller->id)->average('rating');
+        $sellerJoined = $this->sellerJoinedLabel($seller->created_at);
 
         $ratingCounts = [
             5 => $product->ratings->where('rating', 5)->count(),
@@ -93,28 +104,81 @@ class ProductController extends Controller
             1 => $product->ratings->where('rating', 1)->count(),
         ];
 
-        return view('user.productDetail', compact('product', 'ratingCounts'));
+        return view('user.productDetail', compact('product', 'ratingCounts', 'seller', 'sellerProducts', 'sellerRating', 'sellerJoined'));
+    }
+
+    private function sellerJoinedLabel($createdAt)
+    {
+        $createdAt = Carbon::parse($createdAt);
+        $now = Carbon::now();
+
+        $days = $createdAt->diffInDays($now);
+
+        if ($days < 1) {
+            return '1 day';
+        }
+
+        if ($days < 30) {
+            return $days . ' days';
+        }
+
+        $months = $createdAt->diffInMonths($now);
+        if ($months < 12) {
+            return $months . ' months';
+        }
+
+        $years = $createdAt->diffInYears($now);
+        return $years . ' years';
     }
 
     public function addToCart(Request $request)
     {
+        $product = Product::findOrFail($request->product_id);
+
         $request->validate([
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:'.$product->min_order_qty,
             'product_id' => 'required|exists:products,id',
-            'variant_id' => 'nullable|exists:product_variants,id',
+            'variant_id' => [
+                'nullable',
+                Rule::exists('product_variants','id')->where('product_id', $product->id)
+            ],
         ], [
-            'quantity.min' => 'Purchase at least 1 item.',
-            'variant_id.required' => 'Please select a variant first.',
+            'quantity.min' => 'Purchase at least :min item(s).',
         ]);
+
+        if ($product->variants()->exists() && !$request->filled('variant_id')) {
+            return back()
+                ->withErrors(['variant_id' => 'Please select a variant first.'])
+                ->withInput();
+        }
 
         if ($request->input('action') === 'buy_now') {
             return redirect()->route('checkout.index')->with('success', 'Please proceed with your payment!');
         } else {
+            $user = Auth::user();
+            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+
+            $variant = null;
+            $unitPrice = $product->price;
+
+            if($request->filled('variant_id')){
+                $variant = ProductVariant::where('id', $request->variant_id)
+                    ->where('product_id', $product->id)
+                    ->firstOrFail();
+
+                $unitPrice = $variant->price;
+            }
+
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'product_id' => $request->product_id,
+                'product_variant_id' => $request->variant_id,
+                'seller_id' => $product->seller_id,
+                'quantity' => $request->quantity,
+                'price' => $request->quantity * $unitPrice,
+            ]);
+
             return redirect()->back()->with('success', 'Product added to cart successfully!');
         }
-    }
-
-    public function flashsaleDetail(Request $request){
-        return view('user.flashsaleDetail');
     }
 }

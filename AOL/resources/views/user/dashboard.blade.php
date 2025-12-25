@@ -41,7 +41,7 @@
             <div class="flashsale-items">
                 @foreach ($flashsales as $f)
                     <div class="flashsale-card">
-                        <a href="{{ route('flashsales.detail', parameters: $f->id) }}" class="text-decoration-none" style="color: black">
+                        <a href="{{ route('products.detail', parameters: $f->product->id ?? $f->variant->product_id) }}" class="text-decoration-none" style="color: black">
                         <div class="position-relative">
                             <div class="image-wrapper">
                                 <img src="{{ $f->product->product_image ?? $f->variant->image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
@@ -60,10 +60,10 @@
                             <div class="align-items-center d-flex justify-content-between">
                                 <p class="before-discount text-muted">${{ $f->variant ? $f->variant->price : $f->product->price }} </p>
                                 <div class="flashsale-rate">
-                                    ★ {{ $f->product->rating ?? $f->variant->product->rating }}
+                                    ★ {{ number_format( $f->product->rating ?? $f->variant->product->rating,1) }}
                                 </div>
                             </div>
-                            <a class="restricted-btn" href="{{ route('flashsales.detail', $f->id) }}">See Detail</a>
+                            <a class="restricted-btn" href="{{ route('products.detail', $f->product->id ?? $f->variant->product_id) }}">See Detail</a>
                         </div>
                         </a>
                     </div>
@@ -112,7 +112,7 @@
                             <div class="align-items-center d-flex justify-content-between">
                                 <p class="before-discount text-muted text-decoration-none">{{ $p->sold_count }} Sold</p>
                                 <div class="flashsale-rate">
-                                    ★ {{ $p->rating }}
+                                    ★ {{ number_format($p->rating,1) }}
                                 </div>
                             </div>
                             <div class="estimate text-muted">

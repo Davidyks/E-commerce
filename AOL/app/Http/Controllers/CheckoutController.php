@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserAddress;
 use App\Models\Shipping;
-use App\Models\Voucher; 
+use App\Models\Voucher;
+use stdClass; 
 
 class CheckoutController extends Controller
 {
