@@ -34,7 +34,10 @@ class CheckoutController extends Controller
             $cartItems = collect([$tempItem]);
 
         } else {
-            $cartItems = $user->cartItems()->with('product.seller')->get();
+            $cart = $user->cart;
+
+            // Jika cart ada, ambil items-nya. Jika tidak, buat collection kosong.
+            $cartItems = $cart ? $cart->items()->with('product.seller')->get() : collect([]);
 
             if($cartItems->isEmpty()) {
                return redirect()->route('cart.index')->with('error', 'Keranjang belanja Anda kosong.');
@@ -59,8 +62,11 @@ class CheckoutController extends Controller
 
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
 
+        $usedVoucherIds = $user->vouchers->pluck('id')->toArray();
+
         $availableVouchers = Voucher::where('start_at', '<=', now())
                             ->where('end_at', '>=', now())
+                            ->whereNotIn('id', $usedVoucherIds) 
                             ->get();
         
         $discountAmount = 0;
@@ -140,9 +146,40 @@ class CheckoutController extends Controller
             return redirect()->back()->with('error', 'Kode voucher tidak valid!');
         }
 
-        $cartItems = $user->cartItems;
-        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+        // --- GANTI MENJADI INI ---
+    
+        // 1. Cek apakah ini transaksi "Buy Now" (dari Session)?
+        $directBuy = session('direct_buy');
+        $subtotal = 0;
 
+        if ($directBuy) {
+            // LOGIKA BUY NOW: Hitung manual dari data session
+            $product = \App\Models\Product::find($directBuy['product_id']);
+            
+            if ($product) {
+                $price = $product->price;
+                
+                // Cek harga varian jika ada
+                if(isset($directBuy['variant_id'])) {
+                    $variant = \App\Models\ProductVariant::find($directBuy['variant_id']);
+                    if($variant) $price = $variant->price;
+                }
+                
+                $subtotal = $price * $directBuy['quantity'];
+            }
+        } else {
+            // LOGIKA CART: Ambil dari database keranjang seperti biasa
+            $cart = $user->cart;
+            
+            if (!$cart || $cart->items->isEmpty()) {
+                return redirect()->back()->with('error', 'Keranjang kosong, tidak bisa pakai voucher.');
+            }
+
+            $cartItems = $cart->items;
+            // Pastikan harga di cart_items adalah harga satuan (sesuai perbaikan ProductController sebelumnya)
+            $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+        }
+        // ---------------------------
         if (!$voucher->isValid($user, $subtotal)) {
             return redirect()->back()->with('error', 'Voucher tidak valid (Min. belanja kurang / Kuota habis).');
         }

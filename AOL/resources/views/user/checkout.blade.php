@@ -7,7 +7,19 @@
 
 <div class="container py-4">
     <h3 class="fw-bold text-danger mb-4">Checkout</h3>
-
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="row">
         <div class="col-md-8">
             
@@ -38,48 +50,61 @@
             </div>
 
             @foreach($cartItems as $item)
-            <div class="card shadow-sm mb-4" style="border: 2px solid #0d6efd;">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-patch-check-fill text-danger me-2"></i>
-                        <span class="fw-bold">{{ $item->product->seller->store_name ?? 'Seller Store' }}</span>
-                    </div>
-                    <div class="d-flex gap-3 mb-4">
-                        <img src="{{ asset('storage/' . $item->product->product_image) }}" class="rounded" style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;">
-                        <div class="w-100 d-flex justify-content-between">
-                            <div>
-                                <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
-                                <small class="text-muted">Quantity: {{ $item->quantity }}</small>
-                            </div>
-                            <div class="fw-bold text-danger">Rp {{ number_format($item->price, 0, ',', '.') }}</div>
+                <div class="card shadow-sm mb-4" style="border: 2px solid #0d6efd;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-patch-check-fill text-danger me-2"></i>
+                            <span class="fw-bold">{{ $item->product->seller->store_name ?? 'Seller Store' }}</span>
                         </div>
-                    </div>
-                    
-                    <div class="bg-light p-3 rounded mb-3 border">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold small">Standard Shipping</span>
-                        </div>
-                        <select class="form-select form-select-sm border-0 bg-white mb-1 fw-bold shipping-selector" 
-                                name="shipping_id[]" 
-                                onchange="calculateTotal()">
-                            @foreach($shippings as $ship)
-                                <option value="{{ $ship->id }}" data-cost="{{ $ship->base_cost }}">
-                                    {{ $ship->courier }} - Rp {{ number_format($ship->base_cost, 0, ',', '.') }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted d-block ms-1">Estimated Arrival: {{ now()->addDays(3)->format('d F') }}</small>
-                    </div>
 
-                    <div class="form-check mb-3 ms-1">
-                        <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $item->id }}">
-                        <label class="form-check-label small" for="insurance_{{ $item->id }}">
-                            Shipping Insurance (Rp {{ number_format($insuranceFee ?? 6000, 0, ',', '.') }})
-                        </label>
+                        <div class="d-flex gap-3 mb-4">
+                            <img src="{{ $item->product->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" 
+                                class="rounded" 
+                                style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
+                                onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
+                            
+                            <div class="w-100 d-flex justify-content-between">
+                                <div>
+                                    <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
+                                    <small class="text-muted">Quantity: {{ $item->quantity }}</small>
+                                </div>
+                                <div class="fw-bold text-danger">Rp {{ number_format($item->price, 0, ',', '.') }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-light p-3 rounded mb-3 border">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold small"><i class="bi bi-truck me-1"></i> Delivery Option</span>
+                            </div>
+                            
+                            <select class="form-select form-select-sm border-0 bg-white mb-2 fw-bold shipping-selector" 
+                                    name="shipping_id[{{ $item->id }}]" 
+                                    id="shipping_{{ $item->id }}"
+                                    onchange="calculateTotal()">
+                                
+                                @foreach($shippings as $ship)
+                                    <option value="{{ $ship->id }}" 
+                                            data-cost="{{ $ship->base_cost }}" 
+                                            data-days="{{ $ship->estimated_days }}">
+                                        {{ $ship->courier }} ({{ $ship->service }}) - Rp {{ number_format($ship->base_cost, 0, ',', '.') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            
+                            <small class="text-muted d-block ms-1" id="estimate_{{ $item->id }}">
+                                Estimated Arrival: {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
+                            </small>
+                        </div>
+
+                        <div class="form-check mb-3 ms-1">
+                            <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $item->id }}" disabled>
+                            <label class="form-check-label small" for="insurance_{{ $item->id }}">
+                                Shipping Insurance (Rp {{ number_format($insuranceFee ?? 6000, 0, ',', '.') }})
+                            </label>
+                        </div>
                     </div>
                 </div>
-            </div>
-            @endforeach
+                @endforeach
         </div>
 
         <div class="col-md-4">
@@ -248,7 +273,6 @@
           @if(isset($availableVouchers) && count($availableVouchers) > 0)
               @foreach($availableVouchers as $voucher)
                   @php
-                      // Cek apakah voucher ini yang sedang dipakai?
                       $isUsed = session('applied_voucher') && session('applied_voucher')['code'] == $voucher->code;
                   @endphp
 
@@ -266,10 +290,8 @@
                           </div>
                           
                           @if($isUsed)
-                              {{-- Jika Sedang Dipakai: Tampilkan Tombol Mati --}}
                               <button class="btn btn-sm btn-secondary fw-bold" disabled>Terpakai</button>
                           @else
-                              {{-- Jika Belum Dipakai: Tampilkan Form Apply --}}
                               <form action="{{ route('checkout.apply.voucher') }}" method="POST">
                                   @csrf
                                   <input type="hidden" name="code" value="{{ $voucher->code }}">
@@ -341,19 +363,29 @@
     const insurance = {{ $insuranceFee }};
     const appFee = {{ $applicationFee }};
     
-    const discount = {{ session('applied_voucher')['amount'] ?? 0 }};
+    const discount = {{ isset($discountAmount) ? $discountAmount : 0 }};
 
     function calculateTotal() {
         let totalShipping = 0;
-        
+        let cartItemCount = 0; 
         const selectors = document.querySelectorAll('.shipping-selector');
+        
         selectors.forEach(select => {
             const selectedOption = select.options[select.selectedIndex];
+            
             const cost = parseFloat(selectedOption.getAttribute('data-cost')) || 0;
             totalShipping += cost;
+
+            const days = parseInt(selectedOption.getAttribute('data-days')) || 3;
+            const itemId = select.id.split('_')[1]; 
+            updateEstimationDate(itemId, days);
+
+            cartItemCount++; 
         });
 
-        let grandTotal = subtotal + totalShipping + insurance + appFee - discount;
+        const totalInsurance = insurance * cartItemCount;
+
+        let grandTotal = subtotal + totalShipping + totalInsurance + appFee - discount;
         
         if(grandTotal < 0) grandTotal = 0;
 
@@ -361,6 +393,23 @@
         document.getElementById('display_total').innerText = formatRupiah(grandTotal);
         
         document.getElementById('input_total').value = grandTotal;
+    }
+
+    function updateEstimationDate(itemId, days) {
+        const estimateElement = document.getElementById('estimate_' + itemId);
+        if (estimateElement) {
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            
+            const options = { day: 'numeric', month: 'long' };
+            const formattedDate = date.toLocaleDateString('id-ID', options); // Format Indonesia (cth: 29 Desember)
+            
+            if(days === 0) {
+                estimateElement.innerText = "Estimated Arrival: HARI INI (Instant)";
+            } else {
+                estimateElement.innerText = "Estimated Arrival: " + formattedDate;
+            }
+        }
     }
 
     function formatRupiah(number) {

@@ -23,8 +23,10 @@
                     {{-- GAMBAR PRODUK --}}
                     <div class="col-md-5">
                         <div class="border rounded bg-white text-center overflow-hidden position-relative">
-                            <img src="{{ $product->product_image }}"
-                                alt="{{ $product->name }}" class="img-fluid w-100 h-100 object-fit-cover"/>
+                            <img src="{{ $item->product->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" 
+                                alt="{{ $product->name }}" 
+                                class="img-fluid w-100 h-100 object-fit-cover"
+                                onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';"/>
                         </div>
                     </div>
 
@@ -124,7 +126,8 @@
                                         style="background-color: #ffe6e6;">
                                         <i class="fas fa-cart-plus me-2"></i> Add To Cart
                                     </button>
-                                    <button type="submit" name="action" value="buy_now"
+                                    <button type="submit" 
+                                        formaction="{{ route('buy.now', $product->id) }}" 
                                         class="btn btn-danger px-4 py-2 fw-bold">
                                         Buy Now
                                     </button>

@@ -169,14 +169,24 @@ class ProductController extends Controller
                 $unitPrice = $variant->price;
             }
 
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'product_id' => $request->product_id,
-                'product_variant_id' => $request->variant_id,
-                'seller_id' => $product->seller_id,
-                'quantity' => $request->quantity,
-                'price' => $request->quantity * $unitPrice,
-            ]);
+            $existingItem = CartItem::where('cart_id', $cart->id)
+                ->where('product_id', $request->product_id)
+                ->where('product_variant_id', $request->variant_id) // Penting: cek varian juga
+                ->first();
+
+            if ($existingItem) {
+                $existingItem->quantity += $request->quantity;
+                $existingItem->save();
+            } else {
+                CartItem::create([
+                    'cart_id' => $cart->id,
+                    'product_id' => $request->product_id,
+                    'product_variant_id' => $request->variant_id,
+                    'seller_id' => $product->seller_id,
+                    'quantity' => $request->quantity,
+                    'price' => $unitPrice, 
+                ]);
+            }
 
             return redirect()->back()->with('success', 'Product added to cart successfully!');
         }

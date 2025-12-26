@@ -27,6 +27,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('seller/products', SellerProductController::class);
     Route::get('/start-selling', [SellerController::class, 'startSelling'])->name('start.selling');
     Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+    Route::delete('/cart/remove/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::post('/cart/voucher/apply', [CartController::class, 'applyVoucher'])->name('cart.voucher.apply');
     Route::delete('/cart/voucher/remove', [CartController::class, 'removeVoucher'])->name('cart.voucher.remove');
     Route::get('/seller/home', [SellerController::class, 'index'])->name('seller.home');

@@ -59,10 +59,10 @@
                                 <input class="form-check-input" type="checkbox" style="width: 1.2em; height: 1.2em;">
                             </div>
                             <div class="col-2">
-                                <img src="{{ asset('storage/' . $item->product->product_image) }}" 
-                                     class="img-fluid rounded" 
-                                     alt="Produk"
-                                     style="width: 100%; aspect-ratio: 1/1; object-fit: contain; border: 1px solid #eee;">
+                                <img src="{{ $item->product->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" 
+                                    class="rounded" 
+                                    style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
+                                    onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
                             </div>
                             <div class="col-5">
                                 <h6 class="mb-1 fw-normal">{{ $item->product->name }}</h6>
@@ -76,9 +76,21 @@
                                 </div>
                                 <div class="d-flex justify-content-end align-items-center gap-3">
                                     <div class="input-group input-group-sm" style="width: 100px; border: 1px solid #dee2e6; border-radius: 5px;">
-                                        <button class="btn btn-white text-danger fw-bold px-2" type="button">-</button>
-                                        <input type="text" class="form-control text-center border-0 bg-transparent p-1" value="{{ $item->quantity }}">
-                                        <button class="btn btn-white text-danger fw-bold px-2" type="button">+</button>
+                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" 
+                                                type="button" 
+                                                data-action="decrease" 
+                                                data-id="{{ $item->id }}">-</button>
+                                        
+                                        <input type="text" 
+                                            class="form-control text-center border-0 bg-transparent p-1" 
+                                            value="{{ $item->quantity }}" 
+                                            id="qty-{{ $item->id }}" 
+                                            readonly>
+                                        
+                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" 
+                                                type="button" 
+                                                data-action="increase" 
+                                                data-id="{{ $item->id }}">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -157,8 +169,12 @@
                     </div>
 
                     <div class="d-grid">
-                        <a href="{{ route('checkout.index') }}" class="btn btn-danger fw-bold py-2 fs-5" style="border-radius: 8px;">
-                            Buy Now
+                        <a href="{{ route('checkout.index') }}" 
+                            class="btn btn-danger fw-bold py-2 fs-5" 
+                            style="border-radius: 8px;"
+                            id="btn-checkout"
+                            data-count="{{ $totalItems ?? 0 }}">
+                                Buy Now
                         </a>
                     </div>
 
@@ -209,5 +225,117 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        
+        $('.change-qty').click(function(e) {
+            e.preventDefault();
+            
+            let btn = $(this);
+            let id = btn.data('id');
+            let action = btn.data('action');
+            let input = $('#qty-' + id);
+            let currentQty = parseInt(input.val());
+            let newQty = currentQty;
+
+            if (action === 'increase') {
+                newQty = currentQty + 1;
+            } else if (action === 'decrease') {
+                if (currentQty > 1) {
+                    newQty = currentQty - 1;
+                } else {
+                    Swal.fire({
+                        title: 'Hapus produk?',
+                        text: "Jumlah barang sudah 1. Apakah Anda ingin menghapusnya dari keranjang?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6', 
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: 'Menghapus...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            $.ajax({
+                                url: "/cart/remove/" + id,
+                                type: "POST",
+                                data: {
+                                    _method: 'DELETE',
+                                    _token: "{{ csrf_token() }}"
+                                },
+                                success: function(response) {
+                                    location.reload(); 
+                                },
+                                error: function(xhr) {
+                                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus barang.', 'error');
+                                }
+                            });
+                        }
+                    });
+                    
+                    return;
+                }
+            }
+
+            input.val(newQty);
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: "/cart/update/" + id,
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    quantity: newQty
+                },
+                success: function(response) {
+                    location.reload(); 
+                },
+                error: function(xhr) {
+                    input.val(currentQty); 
+                    btn.prop('disabled', false);
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Gagal mengupdate keranjang'
+                    });
+                }
+            });
+        });
+
+        $('#btn-checkout').click(function(e) {
+            let totalItems = $(this).data('count');
+            if (!totalItems || totalItems <= 0) {
+                e.preventDefault(); 
+                Swal.fire({
+                    title: 'Keranjang Kosong!',
+                    text: "Anda belum memilih barang apapun. Yuk belanja dulu!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ke Halaman Belanja',
+                    cancelButtonText: 'Nanti Saja'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('home') }}"; 
+                    }
+                });
+            }
+        });
+    });
+</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 @endsection
