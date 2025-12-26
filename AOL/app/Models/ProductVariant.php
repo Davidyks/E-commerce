@@ -16,9 +16,12 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function flashSales()
+    public function activeFlashsale()
     {
-        return $this->hasMany(FlashSale::class);
+        return $this->hasOne(FlashSale::class)
+            ->where('start_time', "<=", now())
+            ->where('end_time', ">=", now())
+            ->where('flash_stock', '>', 0);
     }
 
 }

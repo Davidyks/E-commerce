@@ -46,23 +46,58 @@
                         </div>
 
                         {{-- Harga --}}
-                        <h2 class="text-danger fw-bold mb-4">
-                            $ <span id="product-price">{{ $product->display_price }}</span>
+                        <h2 class="text-danger fw-bold mb-1">
+                            $ <span id="product-price">
+                                {{ $product->activeFlashsale
+                                    ? $product->activeFlashsale->flash_price
+                                    : $product->display_price
+                                }}
+                            </span>
                         </h2>
+                        @if ($product->activeFlashsale)
+                            <p class="text-muted fw-bold text-decoration-line-through m-0" style="margin-top: -3px;">
+                                $ {{ $product->display_price }}
+                            </p>
+                            <p class="mt-1 mb-0">
+                                <span class="text-muted fw-medium">Flashsale stock: </span>
+                                <span class="text-danger fw-bold">{{ $product->activeFlashsale?->flash_stock }}</span>
+                                <span class="text-muted"> out of </span>
+                                <span class="text-muted fw-medium">{{ $product->activeFlashsale?->initial_stock }}</span>
+                            </p>
+                        @endif
 
+                        <div id="flashsale-info" class="d-none" style="margin-top: -3px;">
+                            <p class="text-muted m-0 fw-bold text-decoration-line-through">
+                                $ <span id="flashsale-before">{{ $product->display_price }}</span>
+                            </p>
+                            <p class="mt-1 mb-0">
+                                <span class="text-muted fw-medium">Flashsale stock: </span>
+                                <span class="text-danger fw-bold" id="flashsale-stock"></span>
+                                <span class="text-muted"> out of </span>
+                                <span class="text-muted fw-medium" id="flashsale-initial"></span>
+                            </p>
+                        </div>
                         {{-- FORM --}}
+
                         <form action="{{ route('cart.add') }}" method="POST">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
 
                             {{-- Varian --}}
                             @if ($product->variants->count() > 0)
+                                <hr class="text-secondary opacity-25 my-4">
+
                                 <div class="mb-3">
                                     <label class="fw-bold mb-2 text-secondary">Variant</label>
                                     <div class="d-flex flex-wrap gap-2">
                                         @foreach ($product->variants as $variant)
                                             <input type="radio" class="btn-check variant-radio" name="variant_id"
-                                                id="var_{{ $variant->id }}" value="{{ $variant->id }}" data-price="{{ $variant->price }}" data-stock="{{ $variant->stock }}">
+                                                id="var_{{ $variant->id }}" value="{{ $variant->id }}" 
+                                                data-price="{{ $variant->price }}" 
+                                                data-stock="{{ $variant->stock }}"
+                                                data-flashsale-price="{{ $variant->activeFlashsale?->flash_price }}"
+                                                data-flashsale-stock="{{ $variant->activeFlashsale?->flash_stock }}"
+                                                data-flashsale-initial="{{ $variant->activeFlashsale?->initial_stock }}">
                                             <label class="btn btn-outline-secondary px-4 py-2 rounded-pill"
                                                 for="var_{{ $variant->id }}">
                                                 {{ $variant->variant_name }}
@@ -371,16 +406,23 @@
 <script>
     let lastChecked = null;
 
+    const priceEl = document.getElementById('product-price');
+    const stockEl = document.getElementById('product-stock');
+    const flashInfoEl = document.getElementById('flashsale-info');
+    const flashStockEl = document.getElementById('flashsale-stock');
+    const flashInitialEl = document.getElementById('flashsale-initial');
+    const flashsaleBeforeEl = document.getElementById('flashsale-before')
+
     document.querySelectorAll('.variant-radio').forEach(radio => {
         radio.addEventListener('click', function(){
             if (lastChecked === this){
                 this.checked = false;
                 lastChecked = null;
 
-                document.getElementById('product-price').innerText =
-                    '{{ $product->display_price }}'
-                document.getElementById('product-stock').innerText =
-                    '{{ $product->stock }}'
+                priceEl.innerText = '{{ $product->display_price }}'
+                stockEl.innerText = '{{ $product->stock }}'
+
+                flashInfoEl.classList.add('d-none')
             } else {
                 lastChecked = this;
             }
@@ -389,10 +431,25 @@
             if (this.checked){
                 const price = this.dataset.price;
                 const stock = this.dataset.stock;
-                document.getElementById('product-price').innerText =
-                    price;
-                document.getElementById('product-stock').innerText =
-                    stock
+                const flashPrice = this.dataset.flashsalePrice;
+                const flashStock = this.dataset.flashsaleStock;
+                const flashInitial = this.dataset.flashsaleInitial;
+                
+                if(flashPrice){
+                    priceEl.innerText = flashPrice;
+                    stockEl.innerText = stock;
+
+                    flashStockEl.innerText = flashStock;
+                    flashInitialEl.innerText = flashInitial;
+                    flashsaleBeforeEl.innerText = price;
+
+                    flashInfoEl.classList.remove('d-none');
+                } else {
+                    priceEl.innerText = this.dataset.price;
+                    stockEl.innerText = this.dataset.stock;
+
+                    flashInfoEl.classList.add('d-none');
+                }
             }
         });
     });

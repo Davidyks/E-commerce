@@ -38,7 +38,7 @@
     <div class="container d-flex justify-content-between align-items-center">
 
         <!-- Logo -->
-        <a href="#">
+        <a href="{{ route('home') }}">
             <img src="{{ asset('asset/images/sebelum_login/Logobgputih.png') }}" height="100">
         </a>
 
