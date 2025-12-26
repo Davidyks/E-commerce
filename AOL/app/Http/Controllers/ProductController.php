@@ -91,7 +91,7 @@ class ProductController extends Controller
     public function productDetail($id)
     {
         $user = Auth::user();
-        $product = Product::with(['variants', 'ratings.user', 'category'])->findOrFail($id);
+        $product = Product::with(['activeFlashsale','variants.activeFlashsale', 'ratings.user', 'category'])->findOrFail($id);
         $seller = SellerDetail::where('id', $product->seller_id)->with(['storeVouchers'])->first();
         $sellerProducts = Product::where('seller_id', $seller->id)->count();
         $sellerRating = Product::where('seller_id', $seller->id)->average('rating');
