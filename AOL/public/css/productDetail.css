@@ -31,3 +31,42 @@
     overflow: hidden;
     color: #f5c518;
 }
+
+.content-scroll {
+    max-height: 360px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.content-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.rating-input {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
+    flex-direction: row-reverse;
+}
+
+.rating-input input {
+    display: none;
+}
+
+.rating-input label {
+    font-size: 28px;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating-input label:last-child {
+    color: #ffc107;
+}
+
+.rating-input input:checked ~ label,
+.rating-input label:hover,
+.rating-input label:hover ~ label {
+    color: #ffc107;
+}
