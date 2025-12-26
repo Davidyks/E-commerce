@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\FlashSale;
 use App\Models\Product;
+use App\Models\ProductRating;
 use App\Models\ProductVariant;
 use App\Models\SellerDetail;
 use Auth;
@@ -89,12 +90,14 @@ class ProductController extends Controller
 
     public function productDetail($id)
     {
-
+        $user = Auth::user();
         $product = Product::with(['variants', 'ratings.user', 'category'])->findOrFail($id);
-        $seller = SellerDetail::where('id', $product->seller_id)->first();
+        $seller = SellerDetail::where('id', $product->seller_id)->with(['storeVouchers'])->first();
         $sellerProducts = Product::where('seller_id', $seller->id)->count();
         $sellerRating = Product::where('seller_id', $seller->id)->average('rating');
         $sellerJoined = $this->sellerJoinedLabel($seller->created_at);
+        $userReview = ProductRating::where('product_id', $product->id)->orderByDesc('updated_at')->get();
+        $ownedReview = ProductRating::where('product_id', $product->id)->where('user_id', $user->id)->first();
 
         $ratingCounts = [
             5 => $product->ratings->where('rating', 5)->count(),
@@ -104,7 +107,7 @@ class ProductController extends Controller
             1 => $product->ratings->where('rating', 1)->count(),
         ];
 
-        return view('user.productDetail', compact('product', 'ratingCounts', 'seller', 'sellerProducts', 'sellerRating', 'sellerJoined'));
+        return view('user.productDetail', compact('product', 'ratingCounts', 'ownedReview' , 'userReview', 'seller', 'sellerProducts', 'sellerRating', 'sellerJoined', 'user'));
     }
 
     private function sellerJoinedLabel($createdAt)
@@ -190,5 +193,36 @@ class ProductController extends Controller
 
             return redirect()->back()->with('success', 'Product added to cart successfully!');
         }
+    }
+
+    public function storeRating(Request $request, Product $product){
+        $request->validate([
+            'rating' => 'nullable|integer|min:1|max:5',
+            'review' => 'nullable|string|max:500',
+        ]);
+
+        ProductRating::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'product_id' => $product->id,
+            ],
+            [
+                'rating' => $request->rating ?? 1,
+                'review' => $request->review,
+                'updated_at' => Carbon::now(),
+            ]
+        );
+
+        return back()->with('success', 'Review submitted!');
+    }
+
+    public function destroyRating(ProductRating $review){
+        if ($review->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $review->delete();
+
+        return back()->with('success', 'Review deleted.');
     }
 }

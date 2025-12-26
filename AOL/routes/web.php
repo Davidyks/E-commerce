@@ -42,4 +42,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/checkout/apply-voucher', [App\Http\Controllers\CheckoutController::class, 'applyVoucher'])->name('checkout.apply.voucher');
     Route::post('/buy-now/{id}', [App\Http\Controllers\CartController::class, 'buyNow'])->name('buy.now');
     Route::post('/checkout/remove-voucher', [App\Http\Controllers\CheckoutController::class, 'removeVoucher'])->name('checkout.remove.voucher');
+    Route::post('/products/{product}/rating', [ProductController::class, 'storeRating'])->name('rating.store');
+    Route::delete('/reviews/{review}/delete', [ProductController::class, 'destroyRating'])->name('rating.destroy');
 });

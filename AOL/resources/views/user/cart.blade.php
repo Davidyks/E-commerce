@@ -24,7 +24,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="text-danger fw-bold mb-0">Cart</h3>
-        <a href="{{ url()->previous() }}" class="fs-5 fw-semibold text-decoration-none" style="color: #e63939;">
+        <a href="{{ route('home') }}" class="fs-5 fw-semibold text-decoration-none" style="color: #e63939;">
             Back
         </a>
     </div>

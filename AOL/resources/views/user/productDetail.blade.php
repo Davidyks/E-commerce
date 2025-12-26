@@ -23,7 +23,7 @@
                     {{-- GAMBAR PRODUK --}}
                     <div class="col-md-5">
                         <div class="border rounded bg-white text-center overflow-hidden position-relative">
-                            <img src="{{ $item->product->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" 
+                            <img src="{{ $product->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" 
                                 alt="{{ $product->name }}" 
                                 class="img-fluid w-100 h-100 object-fit-cover"
                                 onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';"/>
@@ -184,6 +184,87 @@
             </div>
         </div>
 
+        {{-- Rating --}}
+        <div class="card shadow-sm border-0 h-100 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Product Rating</h5>
+
+                @php
+                    $rating = $product->rating ?? 0;
+                    $percentage = ($rating / 5) * 100;
+                @endphp
+
+                {{-- Rating Header --}}
+                <div class="mb-3 bg-light p-4 rounded border d-flex align-items-center gap-5 justify-content-between">
+                    <div class="text-center">
+                        <h2 class="text-danger fw-bold mb-0">{{ number_format($product->rating,1) }} <span class="fs-6 text-muted">out of 5</span></h2>
+                    </div>
+                    <div class="star-rating">
+                        <div class="stars-filled" style="width: {{ $percentage }}%">
+                            ★★★★★
+                        </div>
+                        <div class="stars-empty">
+                            ★★★★★
+                        </div>
+                    </div>
+                </div>
+
+                @if ($ownedReview)
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex align-items-center mb-1">
+                            <div class="me-2 rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold fs-5"
+                                style="width: 40px; height: 40px">
+                                {{ substr($user->username ?? $user->name ?? 'U', 0, 1) }}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark" style="margin-bottom: -2px;">{{ $ownedReview->user->username ?? $ownedReview->user->name ?? 'User' }}</div>
+                                <div class="d-flex align-items-center gap-1" style="margin-top: -3px;">
+                                    <div class="d-inline text-muted" style="font-size:14px">{{ number_format($ownedReview->rating,1) }}</div>
+                                    <div class="star-rating" style="font-size: 20px">
+                                        <div class="stars-filled" style="width: {{ $ownedReview->rating * 20 }}%">
+                                            ★★★★★
+                                        </div>
+                                        <div class="stars-empty">
+                                            ★★★★★
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted ms-auto">{{ $ownedReview->updated_at->format('d-m-Y') }}</small>
+                        </div>
+                        <p class="text-secondary mt-2 mb-0">{{ $ownedReview->review }}</p>
+                        <button type="button" class="btn btn-outline-danger btn-sm px-4 py-2 mt-3" data-bs-toggle="modal" data-bs-target="#deleteReviewModal" data-review-id="{{ $ownedReview->id }}">
+                            Delete Review
+                        </button>
+                    </div>
+                @endif
+                
+                <form action="{{ route('rating.store', $product->id) }}" method="POST">
+                    @csrf
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-2 rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold fs-5"
+                            style="width: 40px; height: 40px">
+                            {{ substr($user->username ?? $user->name ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="fw-bold text-dark me-2">
+                            {{ $user->username ?? $user->name ?? 'User' }}
+                        </div>
+                        <div class="rating-input">
+                            @for ($i = 5; $i >= 1; $i--)
+                                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}">
+                                <label for="star{{ $i }}">★</label>
+                            @endfor
+                        </div>
+                    </div>
+                    <textarea name="review" class="form-control mb-3" rows="3" placeholder="Write your review..."></textarea>
+                    <button type="submit" class="btn btn-danger btn-sm px-4 py-2">
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+    
+
         {{-- REVIEW & VOUCHER --}}
         <div class="row g-4">
 
@@ -191,54 +272,35 @@
             <div class="col-md-8">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-4">Product Rating</h5>
-
-                        @php
-                            $rating = $product->rating ?? 0;
-                            $percentage = ($rating / 5) * 100;
-                        @endphp
-
-                        {{-- Rating Header --}}
-                        <div class="bg-light p-4 rounded mb-4 border d-flex align-items-center gap-5 justify-content-between">
-                            <div class="text-center">
-                                <h2 class="text-danger fw-bold mb-0">{{ number_format($product->rating,1) }} <span class="fs-6 text-muted">out of 5</span></h2>
-                            </div>
-                            <div class="star-rating">
-                                <div class="stars-filled" style="width: {{ $percentage }}%">
-                                    ★★★★★
-                                </div>
-                                <div class="stars-empty">
-                                    ★★★★★
-                                </div>
-                            </div>
-                        </div>
-
+                        <h6 class="fw-bold mb-3">Reviews</h6>
                         {{-- List Review --}}
-                        @forelse($product->ratings as $rate)
-                            <div class="border-bottom pb-3 mb-3">
-                                <div class="d-flex align-items-center mb-1">
-                                    <div class="bg-secondary rounded-circle me-2" style="width: 40px; height: 40px;"></div>
-                                    <div>
-                                        <div class="fw-bold text-dark" style="margin-bottom: -2px;">{{ $rate->user->username ?? $rate->user->name ?? 'User' }}</div>
-                                        <div class="d-flex align-items-center gap-1" style="margin-top: -3px;">
-                                            <div class="d-inline text-muted" style="font-size:14px">{{ number_format($rate->rating,1) }}</div>
-                                            <div class="star-rating" style="font-size: 20px">
-                                                <div class="stars-filled" style="width: {{ $rate->rating * 20 }}%">
-                                                    ★★★★★
-                                                </div>
-                                                <div class="stars-empty">
-                                                    ★★★★★
+                        <div class="content-scroll">
+                            @forelse($userReview as $review)
+                                <div class="border-bottom pb-3 mb-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <div class="bg-secondary rounded-circle me-2" style="width: 40px; height: 40px;"></div>
+                                        <div>
+                                            <div class="fw-bold text-dark" style="margin-bottom: -2px;">{{ $review->user->username ?? $review->user->name ?? 'User' }}</div>
+                                            <div class="d-flex align-items-center gap-1" style="margin-top: -3px;">
+                                                <div class="d-inline text-muted" style="font-size:14px">{{ number_format($review->rating,1) }}</div>
+                                                <div class="star-rating" style="font-size: 20px">
+                                                    <div class="stars-filled" style="width: {{ $review->rating * 20 }}%">
+                                                        ★★★★★
+                                                    </div>
+                                                    <div class="stars-empty">
+                                                        ★★★★★
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <small class="text-muted ms-auto">{{ $review->updated_at->format('d-m-Y') }}</small>
                                     </div>
-                                    <small class="text-muted ms-auto">{{ $rate->created_at->format('d-m-Y') }}</small>
+                                    <p class="text-secondary mt-2 mb-0">{{ $review->review }}</p>
                                 </div>
-                                <p class="text-secondary mt-2 mb-0">{{ $rate->review }}</p>
-                            </div>
-                        @empty
-                            <p class="text-muted fst-italic py-3">No ratings yet.</p>
-                        @endforelse
+                            @empty
+                                <p class="text-muted fst-italic py-3">No ratings yet.</p>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
@@ -248,20 +310,63 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body p-4">
                         <h6 class="fw-bold mb-3">Store Voucher</h6>
-
-                        <div class="p-3 rounded text-center position-relative"
-                            style="background-color: #ffe6e6; border: 1px dashed #dc3545;">
-                            <h6 class="fw-bold text-danger mb-1">Discount 12%</h6>
-                            <small class="d-block text-danger mb-3">Min. Spend Rp1.000.000</small>
-                            <button class="btn btn-danger btn-sm w-100 fw-bold">Claim</button>
+                        <div class="content-scroll">
+                            @foreach ($seller->storeVouchers as $voucher)
+                                <div class="p-3 rounded text-center position-relative" style="background-color: #ffe6e6; border: 1px dashed #dc3545;">
+                                    <h6 class="fw-bold text-danger mb-0">{{ $voucher->title }}</h6>
+                                    <small class="d-block text-danger mb-2">Min. Spend ${{ $voucher->min_purchase }}</small>
+                                    <small class="d-block text-muted" style="font-size: 12px;">
+                                        Valid until {{ $voucher->end_at->format('d M Y') }}
+                                    </small>
+                                </div>
+                                <br>
+                            @endforeach
                         </div>
-
                     </div>
                 </div>
             </div>
 
         </div>
     </div>
+
+    @if ($ownedReview)
+        <div class="modal fade" id="deleteReviewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-3">
+
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-danger fw-bold">Delete Review</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body border-0">
+                        <p class="mb-0">
+                            Are you sure you want to delete this review?
+                            <br>
+                            <small class="text-muted">This action cannot be undone.</small>
+                        </p>
+                    </div>
+
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <form action="{{ route('rating.destroy', $ownedReview->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+
+                            <button type="submit" class="btn btn-danger">
+                                Yes, Delete
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    @endif
+
 
 <script>
     let lastChecked = null;
