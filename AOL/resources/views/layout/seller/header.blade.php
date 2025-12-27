@@ -9,7 +9,22 @@
                  style="object-fit: contain;">
         </a>
         <div class="d-flex align-items-center gap-4">
-            
+            <form action="{{ route('locale.set', 'dummy') }}"
+                method="POST"
+                id="langForm">
+                @csrf
+                <select
+                    class="form-select form-select-sm bg-transparent text-white border-0"
+                    style="width: auto"
+                    onchange="submitLang(this.value)">
+                    <option value="id" {{ app()->getLocale() === 'id' ? 'selected' : '' }}>
+                        🇮🇩 ID
+                    </option>
+                    <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>
+                        🇺🇸 EN
+                    </option>
+                </select>
+            </form>
             <a href="#" class="text-white text-decoration-none" title="Notifications">
                 <img src="{{ asset('asset/images/sebelum_login/Icon.png') }}" width="25">
                 <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
@@ -37,4 +52,10 @@
     </div>
 </header>
 
- {{-- <div style="height: 80px;"></div> --}}
+<script>
+    function submitLang(lang) {
+        const form = document.getElementById('langForm');
+        form.action = form.action.replace('dummy', lang);
+        form.submit();
+    }
+</script>

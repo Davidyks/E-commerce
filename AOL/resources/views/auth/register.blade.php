@@ -15,7 +15,7 @@
       <img id="illustration" src="{{ asset('asset/images/login-register/image2.png') }}" alt="Illustration" />
       <div class="slogan">
           <p>BuyBuy.com</p>
-          <p>Semua kebutuhanmu, satu klik saja</p>
+          <p>@lang('messages.all_you_need')</p>
         </div>
     </div>
 
@@ -28,32 +28,32 @@
             {{ session('danger') }}
           </div>
         @endif
-        <input type="text" class="@error('identifier') is-invalid @enderror" name="identifier" placeholder="No.handphone/Email/Username" value="{{ old('identifier') }}"/>
+        <input type="text" class="@error('identifier') is-invalid @enderror" name="identifier" placeholder="@lang('messages.handphone')/@lang('messages.email')/@lang('messages.username')" value="{{ old('identifier') }}"/>
         @error('identifier')
           <div class="invalid-feedback" role="alert">
               {{ $message }}
           </div>
         @enderror
-        <input type="password" class="@error('password') is-invalid @enderror" name="password" style="margin-top:7px" placeholder="Password" value="{{ old('password') }}"/>
+        <input type="password" class="@error('password') is-invalid @enderror" name="password" style="margin-top:7px" placeholder="@lang('messages.password')" value="{{ old('password') }}"/>
         @error('password')
           <div class="invalid-feedback" role="alert">
               {{ $message }}
           </div>
         @enderror
-        <input type="password" class="@error('password_confirmation') is-invalid @enderror" name="password_confirmation" style="margin-top:7px" placeholder="Confirm Password" value="{{ old('password_confirmation') }}"/>
+        <input type="password" class="@error('password_confirmation') is-invalid @enderror" name="password_confirmation" style="margin-top:7px" placeholder="@lang('messages.confirm_pass')" value="{{ old('password_confirmation') }}"/>
         @error('password_confirmation')
           <div class="invalid-feedback" role="alert">
               {{ $message }}
           </div>
         @enderror
 
-        <button class="login-btn" type="submit">Create Account</button>
+        <button class="login-btn" type="submit">@lang('messages.create_acc')</button>
         
         <div class="small-text">
           Have an account? <a href="{{ route('login') }}" class="fw-bold">Login</a>
         </div>
         <div class="smaller-text">
-            By registering, I agree to <span class="highlight fw-semibold">BuyBuy Terms & Conditions</span> and <span class="highlight fw-semibold">Privacy Policy</span>
+            @lang('messages.agree_to') <span class="highlight fw-semibold">BuyBuy @lang('messages.tnc')</span> @lang('messages.and') <span class="highlight fw-semibold">@lang('messages.privacy_policy')</span>
         </div>
       </form>
         
@@ -66,7 +66,7 @@
   </div>
   <div class="position-absolute top-0 end-0" style="margin-top:32px">
       <a href="{{ route('show.beforelogin') }}" class="back fw-semibold">
-        Back
+        @lang('messages.back')
       </a>
   </div>
 </body>

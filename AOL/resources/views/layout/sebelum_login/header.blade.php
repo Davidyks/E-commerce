@@ -3,16 +3,33 @@
     <!-- Top bar -->
     <div class="container d-flex justify-content-end py-1 text-white small">
         <div class="d-flex gap-3 align-items-center">
+            <form action="{{ route('locale.set', 'dummy') }}"
+                method="POST"
+                id="langForm">
+                @csrf
+                <select
+                    class="form-select form-select-sm bg-transparent text-white border-0"
+                    style="width: auto"
+                    onchange="submitLang(this.value)">
+                    <option value="id" {{ app()->getLocale() === 'id' ? 'selected' : '' }}>
+                        🇮🇩 ID
+                    </option>
+                    <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>
+                        🇺🇸 EN
+                    </option>
+                </select>
+            </form>
+
             <a class="text-white text-decoration-none d-flex align-items-center gap-1" href="#">
-                <img src="{{ asset('asset/images/sebelum_login/Icon.png') }}" width="16"> Notification
+                <img src="{{ asset('asset/images/sebelum_login/Icon.png') }}" width="16"> @lang('messages.notification')
             </a>
 
             <a class="text-white text-decoration-none d-flex align-items-center gap-1" href="#">
-                <img src="{{ asset('asset/images/sebelum_login/Help Icon.png') }}" width="16"> Help
+                <img src="{{ asset('asset/images/sebelum_login/Help Icon.png') }}" width="16"> @lang('messages.help')
             </a>
 
-            <a class="text-white text-decoration-none fw-bold" href="{{ route('login') }}">Login</a>|
-            <a class="text-white text-decoration-none fw-bold" href="{{ route('register') }}">Register</a>
+            <a class="text-white text-decoration-none fw-bold" href="{{ route('login') }}">@lang('messages.login')</a>|
+            <a class="text-white text-decoration-none fw-bold" href="{{ route('register') }}">@lang('messages.register')</a>
         </div>
     </div>
 
@@ -45,3 +62,11 @@
         </a>
     </div>
 </header>
+
+<script>
+    function submitLang(lang) {
+        const form = document.getElementById('langForm');
+        form.action = form.action.replace('dummy', lang);
+        form.submit();
+    }
+</script>
