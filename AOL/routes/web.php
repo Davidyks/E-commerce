@@ -8,6 +8,8 @@ use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\LocaleController;
+use Illuminate\Support\Traits\Localizable;
 
 Route::get('/login', [AuthController::class, 'loginPage'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
@@ -45,3 +47,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/products/{product}/rating', [ProductController::class, 'storeRating'])->name('rating.store');
     Route::delete('/reviews/{review}/delete', [ProductController::class, 'destroyRating'])->name('rating.destroy');
 });
+
+Route::post('/locale/{lang}', [LocaleController::class, 'setLocale'])->name('locale.set');

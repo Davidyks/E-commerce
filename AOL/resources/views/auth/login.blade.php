@@ -16,10 +16,10 @@
     </div>
     <div class="d-flex flex-column justify-content-center">
       <a href="{{ route('show.beforelogin') }}" class="back fw-semibold">
-        Back
+        @lang('messages.back')
       </a>
       <div class="form-card">
-        <h2>Login to BuyBuy</h2>
+        <h2>@lang('messages.login') to BuyBuy</h2>
         <form action="{{ route('login.attempt') }}" method="POST">
           @csrf
           @if(session('danger'))
@@ -27,23 +27,23 @@
             {{ session('danger') }}
           </div>
           @endif
-          <input type="text" class="@error('username') is-invalid @enderror" name="username" placeholder="No.handphone/Email/Username" value="{{ old('username') }}"/>
+          <input type="text" class="@error('username') is-invalid @enderror" name="username" placeholder="@lang('messages.handphone')/@lang('messages.email')/@lang('messages.username')" value="{{ old('username') }}"/>
           @error('username')
           <div class="invalid-feedback" role="alert">
             {{ $message }}
           </div>
           @enderror
-          <input type="password" class="@error('password') is-invalid @enderror" name="password" style="margin-top:7px" placeholder="Password" value="{{ old('password') }}"/>
+          <input type="password" class="@error('password') is-invalid @enderror" name="password" style="margin-top:7px" placeholder="@lang('messages.password')" value="{{ old('password') }}"/>
           @error('password')
           <div class="invalid-feedback" role="alert">
             {{ $message }}
           </div>
           @enderror
           
-        <button class="login-btn" type="submit">Login</button>
+        <button class="login-btn" type="submit">@lang('messages.login')</button>
         
         <div class="small-text">
-          Don't have an account? <a href="{{ route('register') }}" class="fw-bold">Sign Up</a>
+          @lang('messages.dont_have_acc')<a href="{{ route('register') }}" class="fw-bold">@lang('messages.sign_up')</a>
         </div>
       </form>
       
