@@ -5,7 +5,7 @@
 <div class="container-fluid">
     <div class="mx-auto py-4 rounded shadow-sm" style="background: #fff; width: 95%;">
         <h4 class="fw-bold mb-0 ms-4">
-            Welcome, 
+            @lang('messages.welcome'), 
             <span style="color: #e63939">
                 {{ Auth::user()->name ?? Auth::user()->username ?? explode('@', Auth::user()->email)[0] }}
             </span>
@@ -14,7 +14,7 @@
 
     @if ($categories->isNotEmpty())
         <div class="category-container">
-            <div class="category-title">Category</div>
+            <div class="category-title">@lang('messages.category')</div>
             <div class="category-list">
                 @foreach ($categories as $c)
                     @php
@@ -33,7 +33,7 @@
         <div class="flashsale-header">
             <span class="flashsale-title">FlashSale</span>
             @if ($flashsales->isNotEmpty())
-                <a href="{{ route('flashsales') }}" class="see-all">See all</a>
+                <a href="{{ route('flashsales') }}" class="see-all">@lang('messages.see_all')</a>
             @endif
         </div>
        
@@ -46,7 +46,7 @@
                             <div class="image-wrapper">
                                 <img src="{{ $f->product->product_image ?? $f->variant->image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
                             </div>
-                            <span class="flashsale-stock">{{ $f->flash_stock }}/{{ $f->initial_stock }} left</span>
+                            <span class="flashsale-stock">{{ $f->flash_stock }}/{{ $f->initial_stock }} @lang('messages.left')</span>
                             <span class="flashsale-timer" data-end-time="{{ $f->end_time }}"></span>
                         </div>
                         <p class="product-name">{{ $f->variant ? $f->variant->product->name : $f->product->name }}
@@ -63,7 +63,7 @@
                                     ★ {{ number_format( $f->product->rating ?? $f->variant->product->rating,1) }}
                                 </div>
                             </div>
-                            <a class="restricted-btn" href="{{ route('products.detail', $f->product->id ?? $f->variant->product_id) }}">See Detail</a>
+                            <a class="restricted-btn" href="{{ route('products.detail', $f->product->id ?? $f->variant->product_id) }}">@lang('messages.see_detail')</a>
                         </div>
                         </a>
                     </div>
@@ -72,10 +72,10 @@
         @else
             <div class="text-center py-3">
                 <p class="fw-bold mb-1" style="color:#e63939; font-size:18px;">
-                    FlashSale belum ada
+                    @lang('messages.no_flashsale')
                 </p>
                 <p class="text-muted mb-0" style="margin-top: -3px">
-                    Nantikan promo menarik dalam waktu dekat
+                    @lang('messages.look_fw')
                 </p>
             </div>
         @endif
@@ -83,9 +83,9 @@
 
     <div class="flashsale-container">
         <div class="flashsale-header">
-            <span class="flashsale-title">Products</span>
+            <span class="flashsale-title">@lang('messages.products')</span>
             @if ($topProducts->isNotEmpty())
-                <a href="{{ route('products') }}" class="see-all">See all</a>
+                <a href="{{ route('products') }}" class="see-all">@lang('messages.see_all')</a>
             @endif
         </div>
        
@@ -110,15 +110,15 @@
                                 @endif
                             </p>
                             <div class="align-items-center d-flex justify-content-between">
-                                <p class="before-discount text-muted text-decoration-none">{{ $p->sold_count }} Sold</p>
+                                <p class="before-discount text-muted text-decoration-none">{{ $p->sold_count }} @lang('messages.sold')</p>
                                 <div class="flashsale-rate">
                                     ★ {{ number_format($p->rating,1) }}
                                 </div>
                             </div>
                             <div class="estimate text-muted">
-                                <img src="{{ asset('asset/images/sebelum_login/delivery.png') }}" alt="delivery" style="width:28px;height:28px;object-fit:contain">Estimate: {{ $p->delivery_estimate_days }} days
+                                <img src="{{ asset('asset/images/sebelum_login/delivery.png') }}" alt="delivery" style="width:28px;height:28px;object-fit:contain">@lang('messages.estimate'): {{ $p->delivery_estimate_days }} @lang('messages.days')
                             </div>
-                            <a class="restricted-btn" href="{{ route('products.detail', $p->id) }}">See Detail</a>
+                            <a class="restricted-btn" href="{{ route('products.detail', $p->id) }}">@lang('messages.see_detail')</a>
                         </div>
                         </a>
                     </div>
@@ -127,10 +127,10 @@
         @else
             <div class="text-center py-3">
                 <p class="fw-bold mb-1" style="color:#e63939; font-size:18px;">
-                    Product belum ada
+                    @lang('messages.no_prod')
                 </p>
                 <p class="text-muted mb-0" style="margin-top: -3px">
-                    Nantikan product menarik dalam waktu dekat...
+                    @lang('messages.stay_tune')
                 </p>
             </div>
         @endif

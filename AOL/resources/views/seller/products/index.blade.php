@@ -10,12 +10,12 @@
 
     {{-- Header --}}
     <div class="d-flex align-items-center mb-3">
-        <h4 class="fw-bold text-danger mb-0">My Products</h4>
+        <h4 class="fw-bold text-danger mb-0">@lang('messages.my_prod')</h4>
 
         @if ($products->isNotEmpty())
             <a href="{{ route('products.create') }}"
                class="btn btn-sm btn-outline-danger ms-auto">
-                + Add Product
+                + @lang('messages.add') @lang('messages.products')
             </a>
         @endif
     </div>
@@ -24,14 +24,14 @@
     @if ($products->count() === 0)
         <div class="text-center py-5">
             <p class="fw-bold text-danger fs-5 mb-1">
-                Anda belum memiliki produk
+                @lang('messages.dont_have_prod')
             </p>
             <p class="text-muted">
-                Silakan tambahkan produk terlebih dahulu
+                @lang('messages.please_add')
             </p>
             <a href="{{ route('products.create') }}"
                class="btn btn-danger btn-sm mt-2">
-                + Tambah Produk
+                + @lang('messages.add') @lang('messages.products')
             </a>
         </div>
     @else
@@ -41,10 +41,10 @@
             <table class="table align-middle mb-0 product-table">
                 <thead class="table-light">
                     <tr>
-                        <th style="width:45%">Produk</th>
-                        <th>Harga</th>
-                        <th>Stok</th>
-                        <th style="width:12%">Aksi</th>
+                        <th style="width:45%">@lang('messages.products')</th>
+                        <th>@lang('messages.price')</th>
+                        <th>@lang('messages.stock')</th>
+                        <th style="width:12%">@lang('messages.action')</th>
                     </tr>
                 </thead>
 
@@ -103,7 +103,7 @@
                         <td>
                             <a href="{{ route('products.edit', $product->id) }}"
                                 class="text-primary text-decoration-none d-block ">
-                                Edit
+                                @lang('messages.edit')
                             </a>
                             <form action="{{ route('products.destroy', $product->id) }}"
                                 method="POST"
@@ -113,7 +113,7 @@
 
                                 <button type="button"
                                         class="text-danger border-0 bg-transparent p-0 delete-btn">
-                                    Delete
+                                    @lang('messages.delete')
                                 </button>
                             </form>
                         </td>
@@ -171,14 +171,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const form = this.closest('.delete-form');
 
             Swal.fire({
-                title: 'Hapus Produk?',
-                text: 'Produk yang dihapus tidak bisa dikembalikan.',
+                title: '@lang('messages.del_prod')?',
+                text: '@lang('messages.del_confirm').',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Hapus',
-                cancelButtonText: 'Batal'
+                confirmButtonText: '@lang('messages.yes_del')',
+                cancelButtonText: '@lang('messages.cancel')'
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();

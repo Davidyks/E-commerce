@@ -5,10 +5,10 @@
 <div class="container-fluid">
     <div class="mx-auto py-4 rounded shadow-sm d-flex justify-content-between" style="background: #fff; width: 95%;">
         <h4 class="fw-bold mb-0 ms-4" style="color:#e63939">
-            All Flashsales
+            @lang('messages.all_flashsale')
         </h4>
         <a class="mb-0 me-4 text-decoration-none" style="color: #e63939; font-size:20px; font-weight: 600;" href="{{ route('home') }}">
-            Back
+            @lang('messages.back')
         </a>
     </div>
 
@@ -30,7 +30,7 @@
                 Flashsales
                 @if(request('q'))
                     <span class="text-muted ms-2" style="font-size: 16px;">
-                        | Showing results for "<b>{{ request('q') }}</b>"
+                        | @lang('messages.show_res') "<b>{{ request('q') }}</b>"
                     </span>
                 @endif
             </span>
@@ -62,7 +62,7 @@
                                     ★ {{ number_format( $f->product->rating ?? $f->variant->product->rating,1) }}
                                 </div>
                             </div>
-                            <a class="restricted-btn" href="{{ route('products.detail', $f->product->id ?? $f->variant->product_id) }}">See Detail</a>
+                            <a class="restricted-btn" href="{{ route('products.detail', $f->product->id ?? $f->variant->product_id) }}">@lang('messages.see_detail')</a>
                         </div>
                         </a>
                     </div>
@@ -71,10 +71,10 @@
         @else
             <div class="text-center py-3">
                 <p class="fw-bold mb-1" style="color:#e63939; font-size:18px;">
-                    Flashsales belum ada
+                    @lang('messages.no_flashsale')
                 </p>
                 <p class="text-muted mb-0" style="margin-top: -3px">
-                    Nantikan promo menarik dalam waktu dekat...
+                    @lang('messages.look_fw')
                 </p>
             </div>
         @endif
