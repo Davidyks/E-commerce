@@ -8,6 +8,8 @@
 <div class="container py-4">
     <h3 class="fw-bold text-danger mb-4">Checkout</h3>
     
+    <h3 class="fw-bold text-danger mb-4">Checkout</h3>
+    
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
             <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
@@ -67,6 +69,13 @@
                                 }
                             @endphp
                             <img src="{{ $imgUrl }}" 
+                            @php
+                                $imgUrl = $item->product->product_image;
+                                if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
+                                    $imgUrl = asset('storage/' . $imgUrl);
+                                }
+                            @endphp
+                            <img src="{{ $imgUrl }}" 
                                 class="rounded" 
                                 style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
                                 onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
@@ -75,9 +84,9 @@
                                 <div>
                                     <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
                                     @if($item->variant)
-                                        <small class="text-muted d-block">Variant: {{ $item->variant->variant_name }}</small>
+                                        <small class="text-muted d-block">@lang('messages.variant'): {{ $item->variant->variant_name }}</small>
                                     @endif
-                                    <small class="text-muted">Quantity: {{ $item->quantity }}</small>
+                                    <small class="text-muted">@lang('messages.quantity'): {{ $item->quantity }}</small>
                                 </div>
                                 <div class="fw-bold text-danger">${{ number_format($item->price, 2) }}</div>
                             </div>
@@ -104,14 +113,14 @@
                             </select>
                             
                             <small class="text-muted d-block ms-1" id="estimate_{{ $loop->index }}">
-                                Estimated Arrival: {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
+                                @lang('messages.estimated_arrival'): {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
                             </small>
                         </div>
 
                         <div class="form-check mb-3 ms-1">
                             <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $loop->index }}" disabled>
                             <label class="form-check-label small" for="insurance_{{ $loop->index }}">
-                                Shipping Insurance (${{ number_format($insuranceFee ?? 0.50, 2) }})
+                                @lang('messages.shipping_insurance') (${{ number_format($insuranceFee ?? 0.50, 2) }})
                             </label>
                         </div>
                     </div>
@@ -160,7 +169,7 @@
                                 <div class="d-flex align-items-center text-danger">
                                     <i class="bi bi-ticket-perforated-fill fs-4 me-2"></i>
                                     <div style="line-height: 1.2;">
-                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">Voucher Applied:</span>
+                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">@lang('messages.voucher_applied'):</span>
                                         <span class="fw-bold">{{ implode(', ', session('applied_vouchers')) }}</span>
                                     </div>
                                 </div>
@@ -195,28 +204,28 @@
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4">@lang('messages.shopping_summary')</h5>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Total Price</span>
+                        <span class="text-muted">Total @lang('messages.price')</span>
                         <span class="fw-bold">${{ number_format($subtotal, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Total Shipping</span>
+                        <span class="text-muted">Total @lang('messages.shipping')</span>
                         <span class="fw-bold" id="display_shipping">${{ number_format($defaultShippingCost * $cartItems->count(), 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Application Fees</span>
+                        <span class="text-muted">@lang('messages.application_fee')</span>
                         <span class="fw-bold">${{ number_format($applicationFee, 2) }}</span>
                     </div>
                     
                     @if($discountAmount > 0)
                     <div class="d-flex justify-content-between mb-2 small text-success">
-                        <span>Discount</span>
+                        <span>@lang('messages.discount')</span>
                         <span class="fw-bold">- ${{ number_format($discountAmount, 2) }}</span>
                     </div>
                     @endif
                     
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold">Shopping Total</span>
+                        <span class="fw-bold">@lang('messages.shopping_total')</span>
                         <span class="fw-bold fs-5" id="display_total">${{ number_format($totalPay, 2) }}</span>
                     </div>
 
@@ -261,7 +270,7 @@
                         <div>
                             <label class="form-check-label fw-bold d-block" style="cursor: pointer;">{{ $payment['name'] }}</label>
                             @if($payment['fee'] > 0)
-                                <small class="text-muted">Fee: ${{ number_format($payment['fee'], 2) }}</small>
+                                <small class="text-muted">@lang('messages.fee'): ${{ number_format($payment['fee'], 2) }}</small>
                             @endif
                         </div>
                     </div>
@@ -303,17 +312,17 @@
                               </h6>
                               <small class="d-block fw-bold text-muted">{{ $voucher->title }}</small>
                               <small class="text-muted" style="font-size: 0.75rem;">
-                                  Min. Spend: ${{ number_format($voucher->min_purchase, 2) }}
+                                  @lang('messages.min_spend'): ${{ number_format($voucher->min_purchase, 2) }}
                               </small>
                           </div>
                           
                           @if($isUsed)
-                              <button class="btn btn-sm btn-secondary fw-bold" disabled>Applied</button>
+                              <button class="btn btn-sm btn-secondary fw-bold" disabled>@lang('messages.applied')</button>
                           @else
                               <form action="{{ route('checkout.apply.voucher') }}" method="POST">
                                   @csrf
                                   <input type="hidden" name="code" value="{{ $voucher->code }}">
-                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Apply</button>
+                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">@lang('messages.apply')</button>
                               </form>
                           @endif
                       </div>
@@ -369,7 +378,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger fw-bold">Save Address</button>
+                    <button type="submit" class="btn btn-danger fw-bold">@lang('messages.save_address')</button>
                 </div>
             </form>
         </div>
