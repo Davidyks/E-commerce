@@ -5,7 +5,7 @@
 @section('css', 'css/profile.css')
 <a href="{{ route('home') }}" class="position-absolute text-decoration-none fw-bold ms-5 mt-4"
     style="font-size: 20px;color: #e63939">
-    Back
+    @lang('messages.back')
 </a>
 <div id="container"
     class="container d-flex justify-content-center flex-column align-items-center mb-5 {{ session('success') ? 'pt-0' : 'pt-5' }}">
@@ -27,7 +27,7 @@
 
     <div class="card shadow-lg p-4" style="width: 500px; border-radius: 20px; border: none;">
 
-        <h4 class="text-center text-danger fw-bold mb-4">Personal Details</h4>
+        <h4 class="text-center text-danger fw-bold mb-4">@lang('messages.personal_detail')</h4>
 
         <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -54,7 +54,7 @@
                 <input type="text"
                     class="form-control form-control-custom @error('name') is-invalid
                 @enderror"
-                    name="name" placeholder="Display Name" value="{{ old('name', Auth::user()->name) }}">
+                    name="name" placeholder="@lang('messages.display') @lang('messages.name')" value="{{ old('name', Auth::user()->name) }}">
                 @error('name')
                     <div class="invalid-feedback" role="alert">
                         {{ $message }}
@@ -66,7 +66,7 @@
                 <input type="text"
                     class="form-control form-control-custom @error('address') is-invalid
                 @enderror"
-                    name="address" placeholder="Address" value="{{ old('address', Auth::user()->address) }}">
+                    name="address" placeholder="@lang('messages.address')" value="{{ old('address', Auth::user()->address) }}">
                 @error('address')
                     <div class="invalid-feedback" role="alert">
                         {{ $message }}
@@ -80,7 +80,7 @@
                 <input type="email"
                     class="form-control form-control-custom @error('email') is-invalid
                 @enderror"
-                    name="email" placeholder="Email" value="{{ old('email', Auth::user()->email) }}">
+                    name="email" placeholder="@lang('messages.email')" value="{{ old('email', Auth::user()->email) }}">
                 @error('email')
                     <div class="invalid-feedback" role="alert">
                         {{ $message }}
@@ -93,7 +93,7 @@
                 <input type="password"
                     class="form-control form-control-custom @error('password') is-invalid
                 @enderror"
-                    name="password" placeholder="Password (Isi jika ingin mengganti)">
+                    name="password" placeholder="@lang('messages.password') (@lang('messages.change_pass'))">
                 @error('password')
                     <div class="invalid-feedback" role="alert">
                         {{ $message }}
@@ -105,7 +105,7 @@
                 <input type="text"
                     class="form-control form-control-custom @error('phone_number') is-invalid
                 @enderror"
-                    name="phone_number" placeholder="Phone Number"
+                    name="phone_number" placeholder="@lang('messages.handphone')"
                     value="{{ old('phone_number', Auth::user()->phone_number) }}">
                 @error('phone_number')
                     <div class="invalid-feedback" role="alert">
@@ -117,14 +117,14 @@
             <div class="d-grid">
                 <button type="submit" class="btn btn-danger py-2 fw-bold"
                     style="border-radius: 10px; background-color: #e63939;">
-                    Save
+                    @lang('messages.save')
                 </button>
             </div>
 
         </form>
         <div class="d-grid mt-3">
             <button type="button" class="btn btn-outline-secondary py-2 fw-bold" style="border-radius: 10px;"
-                data-bs-toggle="modal" data-bs-target="#logoutModal"> Logout
+                data-bs-toggle="modal" data-bs-target="#logoutModal"> @lang('messages.logout')
             </button>
         </div>
 

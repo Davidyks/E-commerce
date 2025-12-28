@@ -20,7 +20,7 @@
     </div>
 
     <div class="form-card">
-      <h2>Register</h2>
+      <h2>@lang('messages.register')</h2>
       <form action="{{ route('register.attempt') }}" method="POST">
         @csrf
         @if(session('danger'))
@@ -50,7 +50,7 @@
         <button class="login-btn" type="submit">@lang('messages.create_acc')</button>
         
         <div class="small-text">
-          Have an account? <a href="{{ route('login') }}" class="fw-bold">Login</a>
+          @lang('messages.have_acc') <a href="{{ route('login') }}" class="fw-bold">@lang('messages.login')</a>
         </div>
         <div class="smaller-text">
             @lang('messages.agree_to') <span class="highlight fw-semibold">BuyBuy @lang('messages.tnc')</span> @lang('messages.and') <span class="highlight fw-semibold">@lang('messages.privacy_policy')</span>

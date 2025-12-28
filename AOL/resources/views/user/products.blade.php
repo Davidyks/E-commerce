@@ -5,10 +5,10 @@
 <div class="container-fluid">
     <div class="mx-auto py-4 rounded shadow-sm d-flex justify-content-between" style="background: #fff; width: 95%;">
         <h4 class="fw-bold mb-0 ms-4" style="color:#e63939">
-            All Products
+            @lang('messages.all_prod')
         </h4>
         <a class="mb-0 me-4 text-decoration-none" style="color: #e63939; font-size:20px; font-weight: 600;" href="{{ route('home') }}">
-            Back
+            @lang('messages.back')
         </a>
     </div>
 
@@ -54,25 +54,25 @@
         @endphp
 
         <a href="{{ route('products', array_filter(array_merge(request()->query(), ['sort' => $priceNext]))) }}" class="sort-item {{ $priceActive ? 'active' : '' }}">
-            Price
+            @lang('messages.price')
             <span>
                 {{ request('sort') === 'price_asc' ? ' (Low to High)' : (request('sort') === 'price_desc' ? ' (High to Low)' : '') }}
             </span>
         </a>
         <a href="{{ route('products', array_filter(array_merge(request()->query(), ['sort'=>$ratingNext]))) }}" class="sort-item {{ $ratingActive ? 'active' : ''}}">
-            Rating
+            @lang('messages.rating')
             <span>
                 {{ request('sort') === 'rating_asc' ? ' (Low to High)' : (request('sort') === 'rating_desc' ? ' (High to Low)' : '') }}
             </span>
         </a>
         <a href="{{ route('products', array_filter(array_merge(request()->query(), ['sort'=>$popularNext]))) }}" class="sort-item {{ $popularActive ? 'active' : ''}}">
-            Most Popular
+            @lang('messages.most_popular')
             <span>
                 {{ request('sort') === 'sold_count_asc' ? ' (Low to High)' : (request('sort') === 'sold_count_desc' ? ' (High to Low)' : '') }}
             </span>
         </a>
         <a href="{{ route('products', array_filter(array_merge(request()->query(), ['sort'=>$latestNext]))) }}" class="sort-item {{ $latestActive ? 'active' : ''}}">
-            Latest
+            @lang('messages.latest')
             <span>
                 {{ request('sort') === 'latest_asc' ? ' (Old to New)' : (request('sort') === 'latest_desc' ? ' (New to Old)' : '') }}
             </span>
@@ -83,7 +83,7 @@
     <div class="product-container">
         <div class="product-header">
             <span class="product-title d-flex align-items-center">
-                Products
+                @lang('messages.products')
                 @if(request('q'))
                     <span class="text-muted ms-2" style="font-size: 16px;">
                         | Showing results for "<b>{{ request('q') }}</b>"
@@ -117,15 +117,15 @@
                                 @endif
                             </p>
                             <div class="align-items-center d-flex justify-content-between">
-                                <p class="before-discount text-muted text-decoration-none">{{ $p->sold_count }} Sold</p>
+                                <p class="before-discount text-muted text-decoration-none">{{ $p->sold_count }} @lang('messages.sold')</p>
                                 <div class="product-rate">
                                     ★ {{ number_format($p->rating,1) }}
                                 </div>
                             </div>
                             <div class="estimate text-muted">
-                                <img src="{{ asset('asset/images/sebelum_login/delivery.png') }}" alt="delivery" style="width:28px;height:28px;object-fit:contain">Estimate: {{ $p->delivery_estimate_days }} days
+                                <img src="{{ asset('asset/images/sebelum_login/delivery.png') }}" alt="delivery" style="width:28px;height:28px;object-fit:contain">@lang('messages.estimate'): {{ $p->delivery_estimate_days }} @lang('messages.days')
                             </div>
-                            <a class="restricted-btn" href="{{ route('products.detail', $p->id) }}">See Detail</a>
+                            <a class="restricted-btn" href="{{ route('products.detail', $p->id) }}">@lang('messages.see_detail')</a>
                         </div>
                         </a>
                     </div>
@@ -134,10 +134,10 @@
         @else
             <div class="text-center py-3">
                 <p class="fw-bold mb-1" style="color:#e63939; font-size:18px;">
-                    Product belum ada
+                    @lang('messages.no_prod')
                 </p>
                 <p class="text-muted mb-0" style="margin-top: -3px">
-                    Nantikan product menarik dalam waktu dekat...
+                    @lang('messages.stay_tune')
                 </p>
             </div>
         @endif

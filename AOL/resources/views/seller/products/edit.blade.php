@@ -23,10 +23,10 @@
 {{-- INFO PRODUK --}}
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="fw-bold mb-3">Informasi Produk</h5>
+        <h5 class="fw-bold mb-3">@lang('messages.prod_info')</h5>
 
         <div class="mb-3">
-            <label>Nama Produk</label>
+            <label>@lang('messages.prod_name')</label>
             <input type="text"
                    name="name"
                    value="{{ $product->name }}"
@@ -34,14 +34,14 @@
         </div>
 
         <div class="mb-3">
-            <label>Deskripsi</label>
+            <label>@lang('messages.description')</label>
             <textarea name="description"
                       class="form-control"
                       rows="3">{{ $product->description }}</textarea>
         </div>
 
         <div class="mb-3">
-            <label>Kategori</label>
+            <label>@lang('messages.category')</label>
             <select name="category_id" class="form-control">
                 @foreach ($categories as $cat)
                     <option value="{{ $cat->id }}"
@@ -54,14 +54,14 @@
 
         <div class="row">
             <div class="col">
-                <label>Minimal Order</label>
+                <label>@lang('messages.min_order')</label>
                 <input type="number"
                        name="min_order_qty"
                        value="{{ $product->min_order_qty }}"
                        class="form-control">
             </div>
             <div class="col">
-                <label>Estimasi Pengiriman (Hari)</label>
+                <label>@lang('messages.est_day')</label>
                 <input type="number"
                        name="delivery_estimate_days"
                        value="{{ $product->delivery_estimate_days }}"
@@ -70,7 +70,7 @@
         </div>
 
         <div class="mt-3">
-            <label>Gambar Produk</label>
+            <label>@lang('messages.prod_pict')</label>
             <input type="file" name="product_image" class="form-control">
             @if ($product->product_image)
                 <img src="{{ asset($product->product_image) }}"
@@ -81,24 +81,22 @@
     </div>
 </div>
 
-{{-- =========================
-   JIKA TIDAK ADA VARIANT
-========================= --}}
+{{-- JIKA TIDAK ADA VARIANT--}}
 @if ($product->variants->count() === 0)
 
 <div class="card mb-3">
     <div class="card-body">
-        <h6 class="fw-bold mb-3">Harga & Stok</h6>
+        <h6 class="fw-bold mb-3">@lang('messages.price') & @lang('messages.stock')</h6>
         <div class="row">
             <div class="col">
-                <label>Harga</label>
+                <label>@lang('messages.price')</label>
                 <input type="number"
                        name="price"
                        value="{{ $product->price }}"
                        class="form-control">
             </div>
             <div class="col">
-                <label>Stok</label>
+                <label>@lang('messages.stock')</label>
                 <input type="number"
                        name="stock"
                        value="{{ $product->stock }}"
@@ -110,14 +108,12 @@
 
 @endif
 
-{{-- =========================
-   JIKA ADA VARIANT
-========================= --}}
+{{--JIKA ADA VARIANT--}}
 @if ($product->variants->count() > 0)
 
 <div class="card mb-3">
     <div class="card-body">
-        <h6 class="fw-bold mb-3">Varian Produk</h6>
+        <h6 class="fw-bold mb-3">@lang('messages.prod_var')</h6>
 
         <div id="variant-wrapper">
 
@@ -129,21 +125,21 @@
 
                 <div class="row">
                     <div class="col">
-                        <label>Nama Varian</label>
+                        <label>@lang('messages.var_name')</label>
                         <input type="text"
                                name="variants[{{ $i }}][variant_name]"
                                value="{{ $variant->variant_name }}"
                                class="form-control">
                     </div>
                     <div class="col">
-                        <label>Harga</label>
+                        <label>@lang('messages.price')</label>
                         <input type="number"
                                name="variants[{{ $i }}][price]"
                                value="{{ $variant->price }}"
                                class="form-control">
                     </div>
                     <div class="col">
-                        <label>Stok</label>
+                        <label>@lang('messages.stock')</label>
                         <input type="number"
                                name="variants[{{ $i }}][stock]"
                                value="{{ $variant->stock }}"
@@ -152,7 +148,7 @@
                 </div>
 
                 <div class="mt-2">
-                    <label>Gambar Varian</label>
+                    <label>@lang('messages.var_pict')</label>
                     <input type="file"
                            name="variants[{{ $i }}][image]"
                            class="form-control">
@@ -165,7 +161,7 @@
 
                 <button type="button"
                         class="btn btn-sm btn-outline-danger mt-2 remove-variant">
-                    Hapus Varian
+                    @lang('messages.del_var')
                 </button>
             </div>
             @endforeach
@@ -175,7 +171,7 @@
         <button type="button"
                 id="add-variant"
                 class="btn btn-sm btn-outline-primary">
-            + Tambah Varian
+            + @lang('messages.add_var')
         </button>
     </div>
 </div>
@@ -186,11 +182,11 @@
 <div class="d-flex justify-content-end mt-4">
     <a href="{{ route('products.index') }}"
        class="btn btn-secondary me-2">
-        Cancel
+        @lang('messages.cancel')
     </a>
     <button type="submit"
             class="btn btn-danger">
-        Update
+        @lang('messages.update')
     </button>
 </div>
 
@@ -208,33 +204,33 @@ if (wrapper) {
             <div class="border rounded p-3 mb-3 variant-item">
                 <div class="row">
                     <div class="col">
-                        <label>Nama Varian</label>
+                        <label>@lang('messages.var_name')</label>
                         <input type="text"
                                name="variants[${index}][variant_name]"
                                class="form-control">
                     </div>
                     <div class="col">
-                        <label>Harga</label>
+                        <label>@lang('messages.price')</label>
                         <input type="number"
                                name="variants[${index}][price]"
                                class="form-control">
                     </div>
                     <div class="col">
-                        <label>Stok</label>
+                        <label>@lang('messages.stock')</label>
                         <input type="number"
                                name="variants[${index}][stock]"
                                class="form-control">
                     </div>
                 </div>
                 <div class="mt-2">
-                    <label>Gambar Varian</label>
+                    <label>@lang('messages.var_pict')</label>
                     <input type="file"
                            name="variants[${index}][image]"
                            class="form-control">
                 </div>
                 <button type="button"
                         class="btn btn-sm btn-outline-danger mt-2 remove-variant">
-                    Hapus Varian
+                    @lang('messages.del_var')
                 </button>
             </div>
         `);
