@@ -188,7 +188,7 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="voucherModalLabel">Available Vouchers</h5>
+        <h5 class="modal-title fw-bold" id="voucherModalLabel">@lang('messages.avail_coupon')</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body bg-light">
@@ -208,7 +208,7 @@
                         <form action="{{ route('cart.voucher.apply') }}" method="POST">
                             @csrf
                             <input type="hidden" name="code" value="{{ $voucher->code }}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Apply</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">@lang('messages.apply')</button>
                         </form>
                     </div>
                 </div>

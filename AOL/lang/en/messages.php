@@ -143,7 +143,7 @@
         'shopping_page' => 'To Shopping Page' ,
         'later' => 'Later',
         'checkout' => 'Checkout',
-        'no_address' => 'There is no primary address yet',
+        'no_address' => 'No default address found',
         'quantity' => 'Quantity',
         'delivery_option' => 'Delivery Option',
         'estimated_arrival' => 'Estimated Arrival',
@@ -179,5 +179,10 @@
         'please_wait' => 'Please wait while we process your payment...',
         'payment_success' => 'Payment Successful',
         'order_success' => 'Your order has been placed successfully',
+        'fee' => 'Fee',
+        'add_address' => 'Add New Address',
+        'save_address' => 'Save Address',
+        'apply' => 'Apply',
+        'applied' => 'Applied',
     ]; 
 ?>

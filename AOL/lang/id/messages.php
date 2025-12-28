@@ -179,5 +179,10 @@
         'please_wait' => 'Mohon tunggu, kami sedang memproses pembayaran Anda...',
         'payment_success' => 'Pembayaran Berhasil',
         'order_success' => 'Pesanan Anda berhasil dibuat',
+        'fee' => 'Biaya',
+        'add_address' => 'Tambah Alamat Baru',
+        'save_address' => 'Simpan Alamat',
+        'apply' => 'Gunakan',
+        'applied' => 'Digunakan',
     ];
 ?>

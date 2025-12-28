@@ -6,7 +6,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="container py-4">
-    <h3 class="fw-bold text-danger mb-4">@lang('messages.checkout')</h3>
+    <h3 class="fw-bold text-danger mb-4">Checkout</h3>
+    
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
             <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
@@ -58,7 +59,13 @@
                         </div>
 
                         <div class="d-flex gap-3 mb-4">
-                            <img src="{{ $item->product->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" 
+                            @php
+                                $imgUrl = $item->product->product_image;
+                                if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
+                                    $imgUrl = asset('storage/' . $imgUrl);
+                                }
+                            @endphp
+                            <img src="{{ $imgUrl }}" 
                                 class="rounded" 
                                 style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
                                 onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
@@ -66,9 +73,12 @@
                             <div class="w-100 d-flex justify-content-between">
                                 <div>
                                     <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
+                                    @if($item->variant)
+                                        <small class="text-muted d-block">@lang('messages.variant'): {{ $item->variant->variant_name }}</small>
+                                    @endif
                                     <small class="text-muted">@lang('messages.quantity'): {{ $item->quantity }}</small>
                                 </div>
-                                <div class="fw-bold text-danger">Rp {{ number_format($item->price, 0, ',', '.') }}</div>
+                                <div class="fw-bold text-danger">${{ number_format($item->price, 2) }}</div>
                             </div>
                         </div>
                         
@@ -78,33 +88,34 @@
                             </div>
                             
                             <select class="form-select form-select-sm border-0 bg-white mb-2 fw-bold shipping-selector" 
-                                    name="shipping_id[{{ $item->id }}]" 
-                                    id="shipping_{{ $item->id }}"
+                                    name="shipping_id[{{ $item->id ?? 'buynow_'.$loop->index }}]" 
+                                    id="shipping_{{ $loop->index }}" 
+                                    data-index="{{ $loop->index }}"
                                     onchange="calculateTotal()">
                                 
                                 @foreach($shippings as $ship)
                                     <option value="{{ $ship->id }}" 
                                             data-cost="{{ $ship->base_cost }}" 
                                             data-days="{{ $ship->estimated_days }}">
-                                        {{ $ship->courier }} ({{ $ship->service }}) - Rp {{ number_format($ship->base_cost, 0, ',', '.') }}
+                                        {{ $ship->courier }} ({{ $ship->service }}) - ${{ number_format($ship->base_cost, 2) }}
                                     </option>
                                 @endforeach
                             </select>
                             
-                            <small class="text-muted d-block ms-1" id="estimate_{{ $item->id }}">
+                            <small class="text-muted d-block ms-1" id="estimate_{{ $loop->index }}">
                                 @lang('messages.estimated_arrival'): {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
                             </small>
                         </div>
 
                         <div class="form-check mb-3 ms-1">
-                            <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $item->id }}" disabled>
-                            <label class="form-check-label small" for="insurance_{{ $item->id }}">
-                                @lang('messages.shipping_insurance') (Rp {{ number_format($insuranceFee ?? 6000, 0, ',', '.') }})
+                            <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $loop->index }}" disabled>
+                            <label class="form-check-label small" for="insurance_{{ $loop->index }}">
+                                @lang('messages.shipping_insurance') (${{ number_format($insuranceFee ?? 0.50, 2) }})
                             </label>
                         </div>
                     </div>
                 </div>
-                @endforeach
+            @endforeach
         </div>
 
         <div class="col-md-4">
@@ -142,27 +153,26 @@
                     </div>
 
                     <div class="d-grid mt-2">
-                        @if(session('applied_voucher'))
+                        @if(session('applied_vouchers') && count(session('applied_vouchers')) > 0)
                             <div class="p-2 border border-danger rounded d-flex justify-content-between align-items-center" style="background-color: #ffeaea;">
                                 
                                 <div class="d-flex align-items-center text-danger">
                                     <i class="bi bi-ticket-perforated-fill fs-4 me-2"></i>
                                     <div style="line-height: 1.2;">
-                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">@lang('messages.applied_voucher'):</span>
-                                        <span class="fw-bold">{{ session('applied_voucher')['code'] }}</span>
+                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">@lang('messages.voucher_applied'):</span>
+                                        <span class="fw-bold">{{ implode(', ', session('applied_vouchers')) }}</span>
                                     </div>
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2">
                                     <button type="button" class="btn btn-sm btn-outline-danger fw-bold py-0 px-2" style="height: 28px;" 
                                             data-bs-toggle="modal" data-bs-target="#voucherModal">
-                                        @lang('messages.change')
+                                        +
                                     </button>
 
-                                    {{-- Tombol HAPUS (X) --}}
                                     <form action="{{ route('checkout.remove.voucher') }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm text-secondary p-0 ms-1" title="Lepas Voucher">
+                                        <button type="submit" class="btn btn-sm text-secondary p-0 ms-1" title="Remove Voucher">
                                             <i class="bi bi-x-circle-fill fs-6"></i>
                                         </button>
                                     </form>
@@ -185,28 +195,28 @@
                     <h5 class="fw-bold mb-4">@lang('messages.shopping_summary')</h5>
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">Total @lang('messages.price')</span>
-                        <span class="fw-bold">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                        <span class="fw-bold">${{ number_format($subtotal, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">Total @lang('messages.shipping')</span>
-                        <span class="fw-bold" id="display_shipping">Rp {{ number_format($defaultShippingCost * $cartItems->count(), 0, ',', '.') }}</span>
+                        <span class="fw-bold" id="display_shipping">${{ number_format($defaultShippingCost * $cartItems->count(), 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">@lang('messages.application_fee')</span>
-                        <span class="fw-bold">Rp {{ number_format($applicationFee, 0, ',', '.') }}</span>
+                        <span class="fw-bold">${{ number_format($applicationFee, 2) }}</span>
                     </div>
                     
                     @if($discountAmount > 0)
                     <div class="d-flex justify-content-between mb-2 small text-success">
                         <span>@lang('messages.discount')</span>
-                        <span class="fw-bold">- Rp {{ number_format($discountAmount, 0, ',', '.') }}</span>
+                        <span class="fw-bold">- ${{ number_format($discountAmount, 2) }}</span>
                     </div>
                     @endif
                     
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <span class="fw-bold">@lang('messages.shopping_total')</span>
-                        <span class="fw-bold fs-5" id="display_total">Rp {{ number_format($totalPay, 0, ',', '.') }}</span>
+                        <span class="fw-bold fs-5" id="display_total">${{ number_format($totalPay, 2) }}</span>
                     </div>
 
                     <div class="d-grid">
@@ -214,6 +224,12 @@
                             @csrf
                             <input type="hidden" name="total_price" id="input_total" value="{{ $totalPay }}">
                             <input type="hidden" name="payment_method" id="real_payment_method" value="{{ $paymentMethods[0]['code'] ?? '' }}">
+                            
+                            @foreach($cartItems as $item)
+                                @if($item->id)
+                                    <input type="hidden" name="cart_item_ids[]" value="{{ $item->id }}">
+                                @endif
+                            @endforeach
                             
                             <button type="button" onclick="confirmPayment()" class="btn btn-danger fw-bold py-2 w-100 fs-5">
                                 @lang('messages.pay_now')
@@ -244,7 +260,7 @@
                         <div>
                             <label class="form-check-label fw-bold d-block" style="cursor: pointer;">{{ $payment['name'] }}</label>
                             @if($payment['fee'] > 0)
-                                <small class="text-muted">Fee: Rp {{ number_format($payment['fee'],0,',','.') }}</small>
+                                <small class="text-muted">@lang('messages.fee'): ${{ number_format($payment['fee'], 2) }}</small>
                             @endif
                         </div>
                     </div>
@@ -273,7 +289,8 @@
           @if(isset($availableVouchers) && count($availableVouchers) > 0)
               @foreach($availableVouchers as $voucher)
                   @php
-                      $isUsed = session('applied_voucher') && session('applied_voucher')['code'] == $voucher->code;
+                      $applied = session('applied_vouchers', []);
+                      $isUsed = in_array($voucher->code, $applied);
                   @endphp
 
                   <div class="card mb-2 border-0 shadow-sm {{ $isUsed ? 'border border-danger' : '' }}">
@@ -285,17 +302,17 @@
                               </h6>
                               <small class="d-block fw-bold text-muted">{{ $voucher->title }}</small>
                               <small class="text-muted" style="font-size: 0.75rem;">
-                                  @lang('messages.discount'): Rp {{ number_format($voucher->discount_amount ?? 10000, 0, ',', '.') }}
+                                  @lang('messages.min_spend'): ${{ number_format($voucher->min_purchase, 2) }}
                               </small>
                           </div>
                           
                           @if($isUsed)
-                              <button class="btn btn-sm btn-secondary fw-bold" disabled>Terpakai</button>
+                              <button class="btn btn-sm btn-secondary fw-bold" disabled>@lang('messages.applied')</button>
                           @else
                               <form action="{{ route('checkout.apply.voucher') }}" method="POST">
                                   @csrf
                                   <input type="hidden" name="code" value="{{ $voucher->code }}">
-                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">@lang('messages.use')</button>
+                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">@lang('messages.apply')</button>
                               </form>
                           @endif
                       </div>
@@ -380,7 +397,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger fw-bold">Simpan</button>
+                    <button type="submit" class="btn btn-danger fw-bold">@lang('messages.save_address')</button>
                 </div>
             </form>
         </div>
@@ -391,7 +408,6 @@
     const subtotal = {{ $subtotal }};
     const insurance = {{ $insuranceFee }};
     const appFee = {{ $applicationFee }};
-    
     const discount = {{ isset($discountAmount) ? $discountAmount : 0 }};
 
     function calculateTotal() {
@@ -406,8 +422,9 @@
             totalShipping += cost;
 
             const days = parseInt(selectedOption.getAttribute('data-days')) || 3;
-            const itemId = select.id.split('_')[1]; 
-            updateEstimationDate(itemId, days);
+            const index = select.getAttribute('data-index'); 
+            
+            updateEstimationDate(index, days);
 
             cartItemCount++; 
         });
@@ -418,31 +435,31 @@
         
         if(grandTotal < 0) grandTotal = 0;
 
-        document.getElementById('display_shipping').innerText = formatRupiah(totalShipping);
-        document.getElementById('display_total').innerText = formatRupiah(grandTotal);
+        document.getElementById('display_shipping').innerText = formatCurrency(totalShipping);
+        document.getElementById('display_total').innerText = formatCurrency(grandTotal);
         
         document.getElementById('input_total').value = grandTotal;
     }
 
-    function updateEstimationDate(itemId, days) {
-        const estimateElement = document.getElementById('estimate_' + itemId);
+    function updateEstimationDate(index, days) {
+        const estimateElement = document.getElementById('estimate_' + index);
         if (estimateElement) {
             const date = new Date();
             date.setDate(date.getDate() + days);
             
             const options = { day: 'numeric', month: 'long' };
-            const formattedDate = date.toLocaleDateString('id-ID', options); // Format Indonesia (cth: 29 Desember)
+            const formattedDate = date.toLocaleDateString('en-US', options);
             
             if(days === 0) {
-                estimateElement.innerText = "Estimated Arrival: HARI INI (Instant)";
+                estimateElement.innerText = "Estimated Arrival: TODAY (Instant)";
             } else {
                 estimateElement.innerText = "Estimated Arrival: " + formattedDate;
             }
         }
     }
 
-    function formatRupiah(number) {
-        return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
+    function formatCurrency(number) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
