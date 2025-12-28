@@ -2,144 +2,156 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Voucher;
-use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Voucher;
+use App\Models\FlashSale;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\VoucherService;
-use App\Models\CartAppliedVoucher;
 
 class CartController extends Controller
 {
     public function index()
     {
         session()->forget('direct_buy');
-        $user = auth()->user();
 
+        $user = Auth::user();
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-        
-        $cartItems = $cart->items()->with(['product.seller', 'product'])->get();
+        $cartItems = $cart->items()->with(['product.seller', 'variant'])->get();
+
+        foreach ($cartItems as $item) {
+            $product = $item->product;
+            
+            $fs = FlashSale::where('product_id', $product->id)
+                ->where('start_time', '<=', now())
+                ->where('end_time', '>', now())
+                ->first();
+
+            $normalPrice = $item->variant ? $item->variant->price : $product->price;
+            $currentPrice = ($fs && $fs->flash_stock > 0) ? $fs->flash_price : $normalPrice;
+
+            if ($item->price != $currentPrice) {
+                $item->price = $currentPrice;
+                $item->save(); 
+            }
+        }
 
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
 
-        $appliedVoucher = CartAppliedVoucher::where('user_id', $user->id)
-                            ->with('voucher')
-                            ->first();
-
+        $appliedSession = session('applied_vouchers', []);
+        $validVouchers = [];
+        $appliedVoucherModels = collect([]);
         $discountAmount = 0;
-        $voucherCode = null;
+        $voucherRemoved = false;
 
-        if ($appliedVoucher && $appliedVoucher->voucher) {
-            if (method_exists($appliedVoucher->voucher, 'calculateDiscount')) {
-                $discountAmount = $appliedVoucher->voucher->calculateDiscount($subtotal);
+        foreach ($appliedSession as $type => $code) {
+            $voucher = Voucher::where('code', $code)->first();
+
+            if ($voucher && $subtotal >= $voucher->min_purchase && $voucher->isValid($user, $subtotal)) {
+                $validVouchers[$type] = $code;
+                $discountAmount += $voucher->calculateDiscount($subtotal);
+                $appliedVoucherModels->push($voucher); 
             } else {
-                $discountAmount = 0; 
+                $voucherRemoved = true;
             }
-            $voucherCode = $appliedVoucher->voucher->code;
+        }
+
+        session()->put('applied_vouchers', $validVouchers);
+
+        if ($voucherRemoved) {
+            session()->flash('error', 'Voucher dilepas otomatis karena total belanja kurang dari batas minimal.');
         }
 
         if ($discountAmount > $subtotal) $discountAmount = $subtotal;
-
         $finalTotal = $subtotal - $discountAmount;
         $totalItems = $cartItems->sum('quantity');
 
-        $groupedItems = $cartItems->groupBy(function ($item) {
-            return $item->product->seller_id;
-        });
-
+        $groupedItems = $cartItems->groupBy(fn($item) => $item->product->seller_id);
+        
         $usedVoucherIds = $user->vouchers->pluck('id')->toArray();
-
         $availableVouchers = Voucher::where('start_at', '<=', now())
             ->where('end_at', '>=', now())
-            ->where('usage_limit', '>', 0)
-            ->whereNotIn('id', $usedVoucherIds)
-            ->get();
+            ->whereNotIn('id', $usedVoucherIds)->get();
+
+        $voucherCode = !empty($validVouchers) ? implode(', ', $validVouchers) : null;
 
         return view('user.cart', compact(
-            'cartItems',
-            'groupedItems', 
-            'subtotal',
-            'discountAmount',
-            'finalTotal',
-            'voucherCode',
-            'totalItems', 
-            'availableVouchers'
+            'cartItems', 'groupedItems', 'subtotal', 'discountAmount', 
+            'finalTotal', 'totalItems', 'availableVouchers', 'voucherCode',
+            'appliedVoucherModels' 
         ));
     }
 
-    public function updateQuantity(Request $request, $id)
+    public function UpdateQuantity(Request $request, $id)
     {
-        $request->validate([
-            'quantity' => 'required|integer|min:1'
-        ]);
+        $request->validate(['quantity' => 'required|integer|min:1']);
+        $item = CartItem::find($id);
 
-        $item = CartItem::findOrFail($id);
+        if(!$item) return response()->json(['status' => 'error', 'message' => 'Item not found'], 404);
 
-        if ($item->cart->user_id !== auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        $product = $item->product;
+        $fs = FlashSale::where('product_id', $product->id)
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>', now())
+            ->first();
+
+        $limitStock = $item->variant ? $item->variant->stock : $product->stock;
+        if ($fs && $fs->flash_stock > 0) $limitStock = $fs->flash_stock;
+
+        if ($request->quantity > $limitStock) {
+            return response()->json(['status' => 'error', 'message' => 'Stok max: ' . $limitStock], 400);
         }
 
         $item->quantity = $request->quantity;
         $item->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Quantity updated'
-        ]);
+        return response()->json(['status' => 'success']);
     }
 
     public function destroy($id)
     {
-        $item = CartItem::findOrFail($id);
+        $cartItem = CartItem::findOrFail($id);
+        $cartItem->delete();
+        return redirect()->back()->with('success', 'Item removed from cart');
+    }
 
-        if ($item->cart->user_id !== auth()->id()) {
-            return back()->withErrors('Anda tidak memiliki akses untuk menghapus item ini.');
+    public function applyVoucher(Request $request) 
+    {
+        $request->validate(['code' => 'required']);
+        $user = Auth::user();
+        $voucher = Voucher::where('code', $request->code)->first();
+
+        if (!$voucher) return redirect()->back()->with('error', 'Kode voucher tidak valid!');
+
+        $cart = Cart::where('user_id', $user->id)->first();
+        if(!$cart || $cart->items->isEmpty()) return redirect()->back()->with('error', 'Keranjang kosong.');
+        
+        $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
+
+        if (!$voucher->isValid($user, $subtotal)) {
+            return redirect()->back()->with('error', 'Syarat voucher tidak terpenuhi (Min. Belanja kurang).');
         }
 
-        $item->delete();
+        $type = $voucher->seller_id ? 'store' : 'platform';
+        $appliedSession = session('applied_vouchers', []);
+        $appliedSession[$type] = $voucher->code;
+        session()->put('applied_vouchers', $appliedSession);
 
-        return back()->with('success', 'Produk berhasil dihapus dari keranjang.');
+        return redirect()->back()->with('success', 'Voucher berhasil digunakan!');
     }
-
-    public function applyVoucher(Request $request, VoucherService $voucherService)
+    
+    public function removeVoucher() 
     {
-        $request->validate([
-            'code' => 'required|string'
-        ]);
-
-        try {
-            $user = auth()->user();
-            
-            $cart = Cart::where('user_id', $user->id)->first();
-            
-            if (!$cart || $cart->items->isEmpty()) {
-                throw new \Exception("Keranjang belanja kosong.");
-            }
-
-            $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
-
-            $result = $voucherService->applyToCart($request->code, $user, $subtotal);
-
-            return back()->with('success', 'Voucher berhasil dipasang! Hemat: Rp ' . number_format($result['discount_amount']));
-
-        } catch (\Exception $e) {
-            return back()->withErrors(['voucher_error' => $e->getMessage()]); 
-        }
+        session()->forget('applied_vouchers');
+        return redirect()->back()->with('success', 'Voucher dilepas.');
     }
-
-    public function removeVoucher()
-    {
-        CartAppliedVoucher::where('user_id', auth()->id())->delete();
-
-        return back()->with('success', 'Voucher berhasil dilepas.');
-    }
+    
     public function buyNow(Request $request, $id)
     {
         session()->put('direct_buy', [
             'product_id' => $id,
             'quantity' => $request->quantity ?? 1,
-            'variant_id' => $request->variant_id ?? null 
+            'variant_id' => $request->variant_id ?? null,
         ]);
 
         return redirect()->route('checkout.index');
