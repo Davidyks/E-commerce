@@ -134,7 +134,7 @@
         'discount' => 'Discount',
         'min_purchase' => 'Min. Purchase',
         'no_voucher' => 'No vouchers available at the moment',
-        'del_item_confirm' => 'The number of items is 1. Do you want to remove it from the cart?',
+        'el_item_confirm' => 'The number of items is 1. Do you want to remove it from the cart?',
         'fail' => 'Fail',
         'error_del' => 'An error occurred while deleting the item',
         'fail_update_cart' => 'Fail Update Cart',
@@ -184,5 +184,10 @@
         'save_address' => 'Save Address',
         'apply' => 'Apply',
         'applied' => 'Applied',
+        'remove' => 'Remove',
+        'remove_voucher' => 'Are you sure you want to remove the applied voucher',
+        'item' => 'Item',
+        'remove_item' => 'Are you sure you want to remove this product from your cart',
+        'yes_remove' => 'Yes, remove it',
     ]; 
 ?>

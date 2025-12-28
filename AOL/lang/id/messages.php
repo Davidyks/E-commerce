@@ -184,5 +184,10 @@
         'save_address' => 'Simpan Alamat',
         'apply' => 'Gunakan',
         'applied' => 'Digunakan',
+        'remove' => 'Hapus',
+        'remove_voucher' => 'Apakah kamu yakin menghapus voucher yang digunakan',
+        'item' => 'Barang',
+        'remove_item' => 'Apakah kamu yakin menghapus produk ini',
+        'yes_remove' => 'Ya, Hapus Ini',
     ];
 ?>

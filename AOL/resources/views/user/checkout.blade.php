@@ -8,8 +8,6 @@
 <div class="container py-4">
     <h3 class="fw-bold text-danger mb-4">Checkout</h3>
     
-    <h3 class="fw-bold text-danger mb-4">Checkout</h3>
-    
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
             <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
@@ -43,7 +41,7 @@
                                     {{ $mainAddress->phone }}
                                 </p>
                             @else
-                                <div class="alert alert-warning mb-0">No default address found.</div>
+                                <div class="alert alert-warning mb-0">@lang('messages.no_address').</div>
                             @endif
                         </div>
                         <button type="button" class="btn btn-outline-danger btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addAddressModal">
@@ -340,42 +338,68 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">Add New Address</h5>
+                <h5 class="modal-title fw-bold">@lang('messages.add_address')</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('address.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
-                    <div class="row g-3">
-                         <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Label Address</label>
-                            <input type="text" name="label" class="form-control" placeholder="e.g. Home, Office" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Recipient Name</label>
-                            <input type="text" name="recipient_name" class="form-control" value="{{ Auth::user()->name }}" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Phone Number</label>
-                            <input type="text" name="phone" class="form-control" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">City</label>
-                            <input type="text" name="city" class="form-control" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Province</label>
-                            <input type="text" name="province" class="form-control" required>
-                         </div>
-                         <div class="col-4">
-                            <label class="form-label small fw-bold text-muted">Postal Code</label>
-                            <input type="text" name="postal_code" class="form-control" required>
-                         </div>
-                         <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Full Address</label>
-                            <textarea name="address" class="form-control" rows="3" placeholder="Street Name, House No..." required></textarea>
-                         </div>
-                    </div>
+                    <div class="col-12">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.address_label')
+                    </label>
+                    <input type="text" name="label" class="form-control"
+                        placeholder="@lang('messages.address_label_ph')" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.receiver_name')
+                    </label>
+                    <input type="text" name="recipient_name" class="form-control"
+                        placeholder="@lang('messages.receiver_name_ph')"
+                        value="{{ Auth::user()->name }}" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.handphone')
+                    </label>
+                    <input type="text" name="phone" class="form-control"
+                        placeholder="@lang('messages.phone_ph')" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.city')
+                    </label>
+                    <input type="text" name="city" class="form-control"
+                        placeholder="@lang('messages.city_ph')" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.province')
+                    </label>
+                    <input type="text" name="province" class="form-control"
+                        placeholder="@lang('messages.province_ph')" required>
+                </div>
+
+                <div class="col-4">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.postal_code')
+                    </label>
+                    <input type="text" name="postal_code" class="form-control"
+                        placeholder="@lang('messages.postal_code_ph')" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.full_address')
+                    </label>
+                    <textarea name="address" class="form-control" rows="3"
+                            placeholder="@lang('messages.full_address_ph')" required></textarea>
+                </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger fw-bold">@lang('messages.save_address')</button>
