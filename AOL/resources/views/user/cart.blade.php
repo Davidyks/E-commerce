@@ -23,9 +23,9 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="text-danger fw-bold mb-0">Cart</h3>
+        <h3 class="text-danger fw-bold mb-0">@lang('messages.cart')</h3>
         <a href="{{ route('home') }}" class="fs-5 fw-semibold text-decoration-none" style="color: #e63939;">
-            Back
+            @lang('messages.back')
         </a>
     </div>
 
@@ -36,10 +36,10 @@
                     <div class="form-check d-flex align-items-center gap-2">
                         <input class="form-check-input" type="checkbox" id="selectAll" style="width: 1.2em; height: 1.2em;">
                         <label class="form-check-label fw-bold" for="selectAll">
-                            Choose All <span class="text-muted fw-normal">({{ $totalItems ?? 0 }})</span>
+                            @lang('messages.choose_all') <span class="text-muted fw-normal">({{ $totalItems ?? 0 }})</span>
                         </label>
                     </div>
-                    <a href="#" class="text-danger fw-bold text-decoration-none">Delete</a>
+                    <a href="#" class="text-danger fw-bold text-decoration-none">@lang('messages.delete')</a>
                 </div>
             </div>
 
@@ -101,10 +101,10 @@
             @empty
                 <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 8px;">
                     <div class="card-body">
-                        <h4 class="fw-bold mt-3">Wow, your cart is empty!</h4>
-                        <p class="text-muted mb-4">Come on, fill it with your dream items.</p>
+                        <h4 class="fw-bold mt-3">@lang('messages.cart_empty_warn')!</h4>
+                        <p class="text-muted mb-4">@lang('messages.fill_item').</p>
                         <a href="{{ url('/home') }}" class="btn btn-danger px-5 py-2 fw-bold" style="border-radius: 8px;">
-                            Start Shopping
+                            @lang('messages.start_shopping')
                         </a>
                     </div>
                 </div>
@@ -114,10 +114,10 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm" style="border-radius: 8px;">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold text-danger mb-4">Shopping Summary</h5>
+                    <h5 class="fw-bold text-danger mb-4">@lang('messages.shopping_summary')</h5>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small">VOUCHER CODE</label>
+                        <label class="form-label fw-bold text-muted small">@lang('messages.voucher_code')</label>
                         
                         @if(isset($voucherCode) && $voucherCode)
                             <div class="d-flex justify-content-between align-items-center p-2 border border-success rounded bg-light">
@@ -132,7 +132,7 @@
                                     </button>
                                 </form>
                             </div>
-                            <small class="text-success fst-italic">Voucher applied successfully!</small>
+                            <small class="text-success fst-italic">@lang('messages.voucher_applied')!</small>
 
                         @else
                             <button type="button" class="btn d-flex justify-content-between align-items-center px-3 py-2 w-100" 
@@ -140,7 +140,7 @@
                                     data-bs-toggle="modal" data-bs-target="#voucherModal">
                                 <span class="d-flex align-items-center">
                                     <i class="bi bi-ticket-perforated-fill text-danger me-2"></i> 
-                                    Use coupons
+                                    @lang('messages.use_coupon')
                                 </span>
                                 <i class="bi bi-chevron-right text-muted"></i>
                             </button>
@@ -150,13 +150,13 @@
                     <hr class="text-muted">
 
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted">Subtotal</span>
+                        <span class="text-muted">@lang('messages.subtotal')</span>
                         <span class="fw-bold">Rp. {{ number_format($subtotal ?? 0, 0, ',', '.') }}</span>
                     </div>
 
                     @if(isset($discountAmount) && $discountAmount > 0)
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-success">Discount</span>
+                        <span class="text-success">@lang('messages.discount')</span>
                         <span class="fw-bold text-success">- Rp. {{ number_format($discountAmount, 0, ',', '.') }}</span>
                     </div>
                     @endif
@@ -174,7 +174,7 @@
                             style="border-radius: 8px;"
                             id="btn-checkout"
                             data-count="{{ $totalItems ?? 0 }}">
-                                Buy Now
+                                @lang('messages.buy_now')
                         </a>
                     </div>
 
@@ -201,7 +201,7 @@
                             <h6 class="fw-bold text-danger mb-1">{{ $voucher->code }}</h6>
                             <small class="d-block text-dark fw-bold">{{ $voucher->title }}</small>
                             <small class="text-muted" style="font-size: 0.8rem;">
-                                Min. Purchase: Rp {{ number_format($voucher->min_purchase, 0, ',', '.') }}
+                                @lang('messages.min_purchase'): Rp {{ number_format($voucher->min_purchase, 0, ',', '.') }}
                             </small>
                         </div>
 
@@ -216,7 +216,7 @@
         @else
             <div class="text-center py-5">
                 <i class="bi bi-ticket-perforated text-muted" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-3">No vouchers available at the moment.</p>
+                <p class="text-muted mt-3">@lang('messages.no_voucher').</p>
             </div>
         @endif
 
@@ -247,14 +247,14 @@
                     newQty = currentQty - 1;
                 } else {
                     Swal.fire({
-                        title: 'Hapus produk?',
-                        text: "Jumlah barang sudah 1. Apakah Anda ingin menghapusnya dari keranjang?",
+                        title: '@lang('messages.del_prod')?',
+                        text: '@lang('messages.del_item_confirm')?',
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#d33',
                         cancelButtonColor: '#3085d6', 
-                        confirmButtonText: 'Ya, Hapus!',
-                        cancelButtonText: 'Batal'
+                        confirmButtonText: '@lang('messages.yes_del')!',
+                        cancelButtonText: '@lang('messages.cancel')'
                     }).then((result) => {
                         if (result.isConfirmed) {
                             Swal.fire({
@@ -275,7 +275,7 @@
                                     location.reload(); 
                                 },
                                 error: function(xhr) {
-                                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus barang.', 'error');
+                                    Swal.fire('@lang('messages.fail')!', '@lang('messages.error_del').', 'error');
                                 }
                             });
                         }
@@ -309,7 +309,7 @@
                     });
                     Toast.fire({
                         icon: 'error',
-                        title: 'Gagal mengupdate keranjang'
+                        title: '@lang('messages.fail_update_cart')'
                     });
                 }
             });
@@ -320,14 +320,14 @@
             if (!totalItems || totalItems <= 0) {
                 e.preventDefault(); 
                 Swal.fire({
-                    title: 'Keranjang Kosong!',
-                    text: "Anda belum memilih barang apapun. Yuk belanja dulu!",
+                    title: '@lang('messages.cart_empty')!',
+                    text: '@lang('messages.havent_sellect')!',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ke Halaman Belanja',
-                    cancelButtonText: 'Nanti Saja'
+                    confirmButtonText: '@lang('messages.shoppping_page')',
+                    cancelButtonText: '@lang('messages.later')'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = "{{ route('home') }}"; 

@@ -6,7 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="container py-4">
-    <h3 class="fw-bold text-danger mb-4">Checkout</h3>
+    <h3 class="fw-bold text-danger mb-4">@lang('messages.checkout')</h3>
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
             <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
@@ -27,7 +27,7 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h5 class="fw-bold text-danger mb-3">Address</h5>
+                            <h5 class="fw-bold text-danger mb-3">@lang('messages.address')</h5>
                             @if($mainAddress)
                                 <div class="d-flex align-items-center mb-1">
                                     <i class="bi bi-geo-alt-fill text-danger me-2 fs-5"></i>
@@ -39,11 +39,11 @@
                                     {{ $mainAddress->phone }}
                                 </p>
                             @else
-                                <div class="alert alert-warning mb-0">Belum ada alamat utama.</div>
+                                <div class="alert alert-warning mb-0">@lang('messages.no_address').</div>
                             @endif
                         </div>
                         <button type="button" class="btn btn-outline-danger btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addAddressModal">
-                            Change
+                            @lang('messages.change')
                         </button>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                             <div class="w-100 d-flex justify-content-between">
                                 <div>
                                     <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
-                                    <small class="text-muted">Quantity: {{ $item->quantity }}</small>
+                                    <small class="text-muted">@lang('messages.quantity'): {{ $item->quantity }}</small>
                                 </div>
                                 <div class="fw-bold text-danger">Rp {{ number_format($item->price, 0, ',', '.') }}</div>
                             </div>
@@ -74,7 +74,7 @@
                         
                         <div class="bg-light p-3 rounded mb-3 border">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold small"><i class="bi bi-truck me-1"></i> Delivery Option</span>
+                                <span class="fw-bold small"><i class="bi bi-truck me-1"></i> @lang('messages.delivery_option')</span>
                             </div>
                             
                             <select class="form-select form-select-sm border-0 bg-white mb-2 fw-bold shipping-selector" 
@@ -92,14 +92,14 @@
                             </select>
                             
                             <small class="text-muted d-block ms-1" id="estimate_{{ $item->id }}">
-                                Estimated Arrival: {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
+                                @lang('messages.estimated_arrival'): {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
                             </small>
                         </div>
 
                         <div class="form-check mb-3 ms-1">
                             <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $item->id }}" disabled>
                             <label class="form-check-label small" for="insurance_{{ $item->id }}">
-                                Shipping Insurance (Rp {{ number_format($insuranceFee ?? 6000, 0, ',', '.') }})
+                                @lang('messages.shipping_insurance') (Rp {{ number_format($insuranceFee ?? 6000, 0, ',', '.') }})
                             </label>
                         </div>
                     </div>
@@ -112,10 +112,10 @@
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-bold text-danger mb-0">Payment Method</h5>
+                        <h5 class="fw-bold text-danger mb-0">@lang('messages.payment_method')</h5>
                         <button type="button" class="btn btn-link text-danger fw-bold small text-decoration-none p-0" 
                                 data-bs-toggle="modal" data-bs-target="#paymentModal">
-                            View All
+                            @lang('messages.view_all')
                         </button>
                     </div>
 
@@ -137,7 +137,7 @@
                     </div>
 
                     <div id="selected-payment-display" class="alert alert-light border d-none text-center">
-                        <small class="text-muted">Selected:</small><br>
+                        <small class="text-muted">@lang('messages.selected'):</small><br>
                         <strong id="selected-payment-name" class="text-danger"></strong>
                     </div>
 
@@ -148,7 +148,7 @@
                                 <div class="d-flex align-items-center text-danger">
                                     <i class="bi bi-ticket-perforated-fill fs-4 me-2"></i>
                                     <div style="line-height: 1.2;">
-                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">Voucher Terpasang:</span>
+                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">@lang('messages.applied_voucher'):</span>
                                         <span class="fw-bold">{{ session('applied_voucher')['code'] }}</span>
                                     </div>
                                 </div>
@@ -156,7 +156,7 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <button type="button" class="btn btn-sm btn-outline-danger fw-bold py-0 px-2" style="height: 28px;" 
                                             data-bs-toggle="modal" data-bs-target="#voucherModal">
-                                        Ganti
+                                        @lang('messages.change')
                                     </button>
 
                                     {{-- Tombol HAPUS (X) --}}
@@ -172,7 +172,7 @@
                             <button type="button" class="btn btn-danger bg-opacity-10 text-danger border-0 d-flex justify-content-between align-items-center py-2 px-3" 
                                     style="background-color: #ffeaea;"
                                     data-bs-toggle="modal" data-bs-target="#voucherModal">
-                                <span class="fw-bold small"><i class="bi bi-ticket-perforated-fill me-2"></i> Use coupons</span>
+                                <span class="fw-bold small"><i class="bi bi-ticket-perforated-fill me-2"></i> @lang('messages.use_coupon')</span>
                                 <i class="bi bi-chevron-right small"></i>
                             </button>
                         @endif
@@ -182,30 +182,30 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Shopping summary</h5>
+                    <h5 class="fw-bold mb-4">@lang('messages.shopping_summary')</h5>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Total Price</span>
+                        <span class="text-muted">Total @lang('messages.price')</span>
                         <span class="fw-bold">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Total Shipping</span>
+                        <span class="text-muted">Total @lang('messages.shipping')</span>
                         <span class="fw-bold" id="display_shipping">Rp {{ number_format($defaultShippingCost * $cartItems->count(), 0, ',', '.') }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Application Fees</span>
+                        <span class="text-muted">@lang('messages.application_fee')</span>
                         <span class="fw-bold">Rp {{ number_format($applicationFee, 0, ',', '.') }}</span>
                     </div>
                     
                     @if($discountAmount > 0)
                     <div class="d-flex justify-content-between mb-2 small text-success">
-                        <span>Discount</span>
+                        <span>@lang('messages.discount')</span>
                         <span class="fw-bold">- Rp {{ number_format($discountAmount, 0, ',', '.') }}</span>
                     </div>
                     @endif
                     
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold">Shopping Total</span>
+                        <span class="fw-bold">@lang('messages.shopping_total')</span>
                         <span class="fw-bold fs-5" id="display_total">Rp {{ number_format($totalPay, 0, ',', '.') }}</span>
                     </div>
 
@@ -216,7 +216,7 @@
                             <input type="hidden" name="payment_method" id="real_payment_method" value="{{ $paymentMethods[0]['code'] ?? '' }}">
                             
                             <button type="button" onclick="confirmPayment()" class="btn btn-danger fw-bold py-2 w-100 fs-5">
-                                Pay Now
+                                @lang('messages.pay_now')
                             </button>
                         </form>
                     </div>
@@ -230,7 +230,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">Select Payment Method</h5>
+          <h5 class="modal-title fw-bold">@lang('messages.select_payment')</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -256,7 +256,7 @@
             @endforeach
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">Confirm Selection</button>
+            <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">@lang('messages.confirm_selection')</button>
         </div>
       </div>
     </div>
@@ -266,7 +266,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">Available Coupons</h5>
+          <h5 class="modal-title fw-bold">@lang('messages.avail_coupon')</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body bg-light">
@@ -285,7 +285,7 @@
                               </h6>
                               <small class="d-block fw-bold text-muted">{{ $voucher->title }}</small>
                               <small class="text-muted" style="font-size: 0.75rem;">
-                                  Potongan: Rp {{ number_format($voucher->discount_amount ?? 10000, 0, ',', '.') }}
+                                  @lang('messages.discount'): Rp {{ number_format($voucher->discount_amount ?? 10000, 0, ',', '.') }}
                               </small>
                           </div>
                           
@@ -295,14 +295,14 @@
                               <form action="{{ route('checkout.apply.voucher') }}" method="POST">
                                   @csrf
                                   <input type="hidden" name="code" value="{{ $voucher->code }}">
-                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Pakai</button>
+                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">@lang('messages.use')</button>
                               </form>
                           @endif
                       </div>
                   </div>
               @endforeach
           @else
-              <div class="text-center py-4 text-muted">No coupons available.</div>
+              <div class="text-center py-4 text-muted">@lang('messages.no_coupon').</div>
           @endif
         </div>
       </div>
@@ -313,7 +313,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">Tambah Alamat Baru</h5>
+                <h5 class="modal-title fw-bold">@lang('messages.add_address')</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('address.store') }}" method="POST">
@@ -321,33 +321,62 @@
                 <div class="modal-body">
                     <div class="row g-3">
                          <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Label Alamat</label>
-                            <input type="text" name="label" class="form-control" placeholder="Contoh: Rumah, Kantor" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Nama Penerima</label>
-                            <input type="text" name="recipient_name" class="form-control" placeholder="Nama Lengkap Penerima" value="{{ Auth::user()->name }}" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Nomor HP</label>
-                            <input type="text" name="phone" class="form-control" placeholder="Contoh: 08123456789" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Kota</label>
-                            <input type="text" name="city" class="form-control" placeholder="Contoh: Jakarta Barat" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Provinsi</label>
-                            <input type="text" name="province" class="form-control" placeholder="Contoh: DKI Jakarta" required>
-                         </div>
-                         <div class="col-4">
-                            <label class="form-label small fw-bold text-muted">Kode Pos</label>
-                            <input type="text" name="postal_code" class="form-control" placeholder="Contoh: 11480" required>
-                         </div>
-                         <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Alamat Lengkap</label>
-                            <textarea name="address" class="form-control" rows="3" placeholder="Nama Jalan, No. Rumah, RT/RW, Patokan..." required></textarea>
-                         </div>
+                        <label class="form-label small fw-bold text-muted">
+                            @lang('messages.address_label')
+                        </label>
+                        <input type="text" name="label" class="form-control"
+                            placeholder="@lang('messages.address_label_ph')" required>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">
+                            @lang('messages.receiver_name')
+                        </label>
+                        <input type="text" name="recipient_name" class="form-control"
+                            placeholder="@lang('messages.receiver_name_ph')"
+                            value="{{ Auth::user()->name }}" required>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">
+                            @lang('messages.handphone')
+                        </label>
+                        <input type="text" name="phone" class="form-control"
+                            placeholder="@lang('messages.phone_ph')" required>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">
+                            @lang('messages.city')
+                        </label>
+                        <input type="text" name="city" class="form-control"
+                            placeholder="@lang('messages.city_ph')" required>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">
+                            @lang('messages.province')
+                        </label>
+                        <input type="text" name="province" class="form-control"
+                            placeholder="@lang('messages.province_ph')" required>
+                    </div>
+
+                    <div class="col-4">
+                        <label class="form-label small fw-bold text-muted">
+                            @lang('messages.postal_code')
+                        </label>
+                        <input type="text" name="postal_code" class="form-control"
+                            placeholder="@lang('messages.postal_code_ph')" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-muted">
+                            @lang('messages.full_address')
+                        </label>
+                        <textarea name="address" class="form-control" rows="3"
+                                placeholder="@lang('messages.full_address_ph')" required></textarea>
+                    </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -443,15 +472,15 @@
 
     function confirmPayment() {
         Swal.fire({
-            title: 'Processing Order',
-            text: 'Please wait while we process your payment...',
+            title: '@lang('messages.processing_order')',
+            text: '@lang('messages.please_wait')',
             icon: 'info',
             timer: 2000,
             showConfirmButton: false,
             willClose: () => {
                 Swal.fire({
-                    title: 'Payment Successful!',
-                    text: 'Your order has been placed successfully.',
+                    title: '@lang('messages.payment_success')!',
+                    text: '@lang('messages.order_success').',
                     icon: 'success',
                     confirmButtonColor: '#dc3545',
                     confirmButtonText: 'OK'
