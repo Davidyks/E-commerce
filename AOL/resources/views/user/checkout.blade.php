@@ -29,7 +29,7 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h5 class="fw-bold text-danger mb-3">Address</h5>
+                            <h5 class="fw-bold text-danger mb-3">@lang('messages.address')</h5>
                             @if($mainAddress)
                                 <div class="d-flex align-items-center mb-1">
                                     <i class="bi bi-geo-alt-fill text-danger me-2 fs-5"></i>
@@ -45,7 +45,7 @@
                             @endif
                         </div>
                         <button type="button" class="btn btn-outline-danger btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addAddressModal">
-                            Change
+                            @lang('messages.change')
                         </button>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                         
                         <div class="bg-light p-3 rounded mb-3 border">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold small"><i class="bi bi-truck me-1"></i> Delivery Option</span>
+                                <span class="fw-bold small"><i class="bi bi-truck me-1"></i> @lang('messages.delivery_option')</span>
                             </div>
                             
                             <select class="form-select form-select-sm border-0 bg-white mb-2 fw-bold shipping-selector" 
@@ -124,10 +124,10 @@
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-bold text-danger mb-0">Payment Method</h5>
+                        <h5 class="fw-bold text-danger mb-0">@lang('messages.payment_method')</h5>
                         <button type="button" class="btn btn-link text-danger fw-bold small text-decoration-none p-0" 
                                 data-bs-toggle="modal" data-bs-target="#paymentModal">
-                            View All
+                            @lang('messages.view_all')
                         </button>
                     </div>
 
@@ -149,7 +149,7 @@
                     </div>
 
                     <div id="selected-payment-display" class="alert alert-light border d-none text-center">
-                        <small class="text-muted">Selected:</small><br>
+                        <small class="text-muted">@lang('messages.selected'):</small><br>
                         <strong id="selected-payment-name" class="text-danger"></strong>
                     </div>
 
@@ -183,7 +183,7 @@
                             <button type="button" class="btn btn-danger bg-opacity-10 text-danger border-0 d-flex justify-content-between align-items-center py-2 px-3" 
                                     style="background-color: #ffeaea;"
                                     data-bs-toggle="modal" data-bs-target="#voucherModal">
-                                <span class="fw-bold small"><i class="bi bi-ticket-perforated-fill me-2"></i> Use coupons</span>
+                                <span class="fw-bold small"><i class="bi bi-ticket-perforated-fill me-2"></i> @lang('messages.use_coupon')</span>
                                 <i class="bi bi-chevron-right small"></i>
                             </button>
                         @endif
@@ -193,7 +193,7 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Shopping summary</h5>
+                    <h5 class="fw-bold mb-4">@lang('messages.shopping_summary')</h5>
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">Total Price</span>
                         <span class="fw-bold">${{ number_format($subtotal, 2) }}</span>
@@ -233,7 +233,7 @@
                             @endforeach
                             
                             <button type="button" onclick="confirmPayment()" class="btn btn-danger fw-bold py-2 w-100 fs-5">
-                                Pay Now
+                                @lang('messages.pay_now')
                             </button>
                         </form>
                     </div>
@@ -247,7 +247,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">Select Payment Method</h5>
+          <h5 class="modal-title fw-bold">@lang('messages.select_payment')</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -273,7 +273,7 @@
             @endforeach
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">Confirm Selection</button>
+            <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">@lang('messages.confirm_selection')</button>
         </div>
       </div>
     </div>
@@ -283,7 +283,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">Available Coupons</h5>
+          <h5 class="modal-title fw-bold">@lang('messages.avail_coupon')</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body bg-light">
@@ -320,7 +320,7 @@
                   </div>
               @endforeach
           @else
-              <div class="text-center py-4 text-muted">No coupons available.</div>
+              <div class="text-center py-4 text-muted">@lang('messages.no_coupon').</div>
           @endif
         </div>
       </div>
@@ -461,15 +461,15 @@
 
     function confirmPayment() {
         Swal.fire({
-            title: 'Processing Order',
-            text: 'Please wait while we process your payment...',
+            title: '@lang('messages.processing_order')',
+            text: '@lang('messages.please_wait')',
             icon: 'info',
             timer: 2000,
             showConfirmButton: false,
             willClose: () => {
                 Swal.fire({
-                    title: 'Payment Successful!',
-                    text: 'Your order has been placed successfully.',
+                    title: '@lang('messages.payment_success')!',
+                    text: '@lang('messages.order_success').',
                     icon: 'success',
                     confirmButtonColor: '#dc3545',
                     confirmButtonText: 'OK'

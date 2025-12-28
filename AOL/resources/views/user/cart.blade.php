@@ -20,9 +20,9 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="text-danger fw-bold mb-0">Cart</h3>
+        <h3 class="text-danger fw-bold mb-0">@lang('messages.cart')</h3>
         <a href="{{ route('home') }}" class="fs-5 fw-semibold text-decoration-none" style="color: #e63939;">
-            Back
+            @lang('messages.back')
         </a>
     </div>
 
@@ -33,7 +33,7 @@
                     <div class="form-check d-flex align-items-center gap-2">
                         <input class="form-check-input" type="checkbox" id="selectAll" style="width: 1.2em; height: 1.2em;">
                         <label class="form-check-label fw-bold" for="selectAll">
-                            Choose All <span class="text-muted fw-normal">({{ $totalItems ?? 0 }})</span>
+                            @lang('messages.choose_all') <span class="text-muted fw-normal">({{ $totalItems ?? 0 }})</span>
                         </label>
                     </div>
                 </div>
@@ -121,7 +121,7 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm" style="border-radius: 8px;">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold text-danger mb-4">Shopping Summary</h5>
+                    <h5 class="fw-bold text-danger mb-4">@lang('messages.shopping_summary')</h5>
                     
                     <div class="mb-4">
                         <label class="form-label fw-bold text-muted small">VOUCHER CODE</label>

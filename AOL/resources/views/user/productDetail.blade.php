@@ -10,7 +10,7 @@
         {{-- NOTIFIKASI --}}
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                <strong>Success!</strong> {{ session('success') }}
+                <strong>@lang('messages.success')!</strong> {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
@@ -40,9 +40,9 @@
                                 {{ number_format($product->rating_average,1) }} <i class="fas fa-star"></i>
                             </span>
                             <span class="text-muted mx-2">|</span>
-                            <span class="text-muted">{{ $product->sold_count }} Sold</span>
+                            <span class="text-muted">{{ $product->sold_count }} @lang('messages.sold')</span>
                             <span class="text-muted mx-2">|</span>
-                            <span class="text-muted">Stocks: <span id="product-stock">{{ $product->stock }}</span></span>
+                            <span class="text-muted">@lang('messages.stocks'): <span id="product-stock">{{ $product->stock }}</span></span>
                         </div>
 
                         {{-- Harga --}}
@@ -59,9 +59,9 @@
                                 $ {{ $product->display_price }}
                             </p>
                             <p class="mt-1 mb-0">
-                                <span class="text-muted fw-medium">Flashsale stock: </span>
+                                <span class="text-muted fw-medium">Flashsale @lang('messages.stocks'): </span>
                                 <span class="text-danger fw-bold">{{ $product->activeFlashsale?->flash_stock }}</span>
-                                <span class="text-muted"> out of </span>
+                                <span class="text-muted"> @lang('messages.out_of') </span>
                                 <span class="text-muted fw-medium">{{ $product->activeFlashsale?->initial_stock }}</span>
                             </p>
                         @endif
@@ -71,9 +71,9 @@
                                 $ <span id="flashsale-before">{{ $product->display_price }}</span>
                             </p>
                             <p class="mt-1 mb-0">
-                                <span class="text-muted fw-medium">Flashsale stock: </span>
+                                <span class="text-muted fw-medium">Flashsale @lang('messages.stocks'): </span>
                                 <span class="text-danger fw-bold" id="flashsale-stock"></span>
-                                <span class="text-muted"> out of </span>
+                                <span class="text-muted"> @lang('messages.out_of') </span>
                                 <span class="text-muted fw-medium" id="flashsale-initial"></span>
                             </p>
                         </div>
@@ -88,7 +88,7 @@
                                 <hr class="text-secondary opacity-25 my-4">
 
                                 <div class="mb-3">
-                                    <label class="fw-bold mb-2 text-secondary">Variant</label>
+                                    <label class="fw-bold mb-2 text-secondary">@lang('messages.variant')</label>
                                     <div class="d-flex flex-wrap gap-2">
                                         @foreach ($product->variants as $variant)
                                             <input type="radio" class="btn-check variant-radio" name="variant_id"
@@ -114,16 +114,16 @@
 
                             {{-- Detail --}}
                             <div class="mb-3">
-                                <h6 class="fw-bold text-dark mb-2">Detail Product</h6>
+                                <h6 class="fw-bold text-dark mb-2">@lang('messages.detail_prod')</h6>
                                 <hr class="text-secondary opacity-25 my-4">
                                 <ul class="list-unstyled text-secondary small mb-2">
-                                    <li>• Condition: New</li>
-                                    <li>• Min. Order: {{ $product->min_order_qty }} Piece</li>
+                                    <li>• @lang('messages.condition')</li>
+                                    <li>• @lang('messages.min_order'): {{ $product->min_order_qty }} @lang('messages.piece')</li>
                                 </ul>
                                 <div class="text-secondary small mb-0 desc-text">
                                     <span id="product-desc" class="desc-collapsed">{{ $product->description }}</span>
                                     <a href="#" id="toggle-desc" class="text-danger text-decoration-none fw-bold d-inline">
-                                        Read More
+                                        @lang('messages.read_more')
                                     </a>
                                 </div>
                             </div>
@@ -131,14 +131,14 @@
                             <hr class="text-secondary opacity-25 my-4">
                             {{-- Section 3: Delivery Info --}}
                             <div class="mb-3">
-                                <h6 class="fw-bold text-dark mb-2">Delivery</h6>
+                                <h6 class="fw-bold text-dark mb-2">@lang('messages.delivery')</h6>
                                 <hr class="text-secondary opacity-25 my-4">
                                 <div class="d-flex align-items-start gap-2 text-secondary small">
                                     <i class="fas fa-truck mt-1 fs-5"></i>
                                     <div>
-                                        <span class="fw-bold text-dark">Estimate
-                                            {{ $product->delivery_estimate_days ?? 2 }} Days</span><br>
-                                        Get a voucher up to IDR 10.000 if your order is late.
+                                        <span class="fw-bold text-dark">@lang('messages.estimate')
+                                            {{ $product->delivery_estimate_days ?? 2 }} @lang('messages.days')</span><br>
+                                        @lang('messages.get_voucher').
                                     </div>
                                 </div>
                             </div>
@@ -159,12 +159,12 @@
                                     <button type="submit" name="action" value="add_to_cart"
                                         class="btn btn-light text-danger border-danger px-4 py-2 fw-bold"
                                         style="background-color: #ffe6e6;">
-                                        <i class="fas fa-cart-plus me-2"></i> Add To Cart
+                                        <i class="fas fa-cart-plus me-2"></i> @lang('messages.add_cart')
                                     </button>
                                     <button type="submit" 
                                         formaction="{{ route('buy.now', $product->id) }}" 
                                         class="btn btn-danger px-4 py-2 fw-bold">
-                                        Buy Now
+                                        @lang('messages.buy_now')
                                     </button>
                                 </div>
                             </div>
@@ -193,7 +193,7 @@
                             <h5 class="fw-bold mb-0">{{ $product->seller->store_name ?? 'Official Store' }}</h5>
                             <div class="d-flex gap-2 mt-2">
                                 <button class="btn btn-outline-secondary btn-sm px-3"><i class="fas fa-store"></i>
-                                    Visit</button>
+                                    @lang('messages.visit')</button>
                             </div>
                         </div>
                     </div>
@@ -202,15 +202,15 @@
                     <div class="col-md-8">
                         <div class="d-flex justify-content-around text-center">
                             <div>
-                                <span class="text-secondary small">Products</span>
+                                <span class="text-secondary small">@lang('messages.products')</span>
                                 <h5 class="text-danger fw-bold mb-0">{{ $sellerProducts }}</h5>
                             </div>
                             <div>
-                                <span class="text-secondary small">Rating</span>
+                                <span class="text-secondary small">@lang('messages.rating')</span>
                                 <h5 class="text-danger fw-bold mb-0">{{ number_format($sellerRating,1) }}</h5>
                             </div>
                             <div>
-                                <span class="text-secondary small">Joined</span>
+                                <span class="text-secondary small">@lang('messages.joined')</span>
                                 <h5 class="text-danger fw-bold mb-0">{{ $sellerJoined }}</h5>
                             </div>
                         </div>
@@ -222,7 +222,7 @@
         {{-- Rating --}}
         <div class="card shadow-sm border-0 h-100 mb-4">
             <div class="card-body p-4">
-                <h5 class="fw-bold mb-4">Product Rating</h5>
+                <h5 class="fw-bold mb-4">@lang('messages.prod_rating')</h5>
 
                 @php
                     $rating = $product->rating ?? 0;
@@ -232,7 +232,7 @@
                 {{-- Rating Header --}}
                 <div class="mb-3 bg-light p-4 rounded border d-flex align-items-center gap-5 justify-content-between">
                     <div class="text-center">
-                        <h2 class="text-danger fw-bold mb-0">{{ number_format($product->rating,1) }} <span class="fs-6 text-muted">out of 5</span></h2>
+                        <h2 class="text-danger fw-bold mb-0">{{ number_format($product->rating,1) }} <span class="fs-6 text-muted">@lang('messages.out_of') 5</span></h2>
                     </div>
                     <div class="star-rating">
                         <div class="stars-filled" style="width: {{ $percentage }}%">
@@ -269,7 +269,7 @@
                         </div>
                         <p class="text-secondary mt-2 mb-0">{{ $ownedReview->review }}</p>
                         <button type="button" class="btn btn-outline-danger btn-sm px-4 py-2 mt-3" data-bs-toggle="modal" data-bs-target="#deleteReviewModal" data-review-id="{{ $ownedReview->id }}">
-                            Delete Review
+                            @lang('messages.delete') @lang('messages.review')
                         </button>
                     </div>
                 @endif
@@ -293,7 +293,7 @@
                     </div>
                     <textarea name="review" class="form-control mb-3" rows="3" placeholder="Write your review..."></textarea>
                     <button type="submit" class="btn btn-danger btn-sm px-4 py-2">
-                        Submit Review
+                        @lang('messages.submit') @lang('messages.review')
                     </button>
                 </form>
             </div>
@@ -307,7 +307,7 @@
             <div class="col-md-8">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body p-4">
-                        <h6 class="fw-bold mb-3">Reviews</h6>
+                        <h6 class="fw-bold mb-3">@lang('messages.reviews')</h6>
                         {{-- List Review --}}
                         <div class="content-scroll">
                             @forelse($userReview as $review)
@@ -333,7 +333,7 @@
                                     <p class="text-secondary mt-2 mb-0">{{ $review->review }}</p>
                                 </div>
                             @empty
-                                <p class="text-muted fst-italic py-3">No ratings yet.</p>
+                                <p class="text-muted fst-italic py-3">@lang('messages.no_rate').</p>
                             @endforelse
                         </div>
                     </div>
@@ -344,14 +344,14 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body p-4">
-                        <h6 class="fw-bold mb-3">Store Voucher</h6>
+                        <h6 class="fw-bold mb-3">@lang('messages.store_voucher')</h6>
                         <div class="content-scroll">
                             @foreach ($seller->storeVouchers as $voucher)
                                 <div class="p-3 rounded text-center position-relative" style="background-color: #ffe6e6; border: 1px dashed #dc3545;">
                                     <h6 class="fw-bold text-danger mb-0">{{ $voucher->title }}</h6>
-                                    <small class="d-block text-danger mb-2">Min. Spend ${{ $voucher->min_purchase }}</small>
+                                    <small class="d-block text-danger mb-2">@lang('messages.min_spend') ${{ $voucher->min_purchase }}</small>
                                     <small class="d-block text-muted" style="font-size: 12px;">
-                                        Valid until {{ $voucher->end_at->format('d M Y') }}
+                                        @lang('messages.valid_until') {{ $voucher->end_at->format('d M Y') }}
                                     </small>
                                 </div>
                                 <br>
@@ -376,15 +376,15 @@
 
                     <div class="modal-body border-0">
                         <p class="mb-0">
-                            Are you sure you want to delete this review?
+                            @lang('messages.review_del')
                             <br>
-                            <small class="text-muted">This action cannot be undone.</small>
+                            <small class="text-muted">@lang('messages.del_rev_confirm').</small>
                         </p>
                     </div>
 
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
+                            @lang('messages.cancel')
                         </button>
 
                         <form action="{{ route('rating.destroy', $ownedReview->id) }}" method="POST">
@@ -392,7 +392,7 @@
                             @method('DELETE')
 
                             <button type="submit" class="btn btn-danger">
-                                Yes, Delete
+                                @lang('messages.yes_del')
                             </button>
                         </form>
                     </div>
@@ -463,7 +463,7 @@
 
             desc.classList.toggle('desc-collapsed');
 
-            this.innerText = desc.classList.contains('desc-collapsed') ? 'Read More' : 'Read Less';
+            this.innerText = desc.classList.contains('desc-collapsed') ? '@lang('messages.read_more')' : '@lang('messages.read_less')';
         })
     })
 </script>
