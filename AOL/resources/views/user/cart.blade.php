@@ -1,6 +1,7 @@
 @extends('layout.sesudah_login.master')
 
-@section('title','Cart')
+@section('title', 'Cart')
+
 @section('content')
 <div class="container py-4">
 
@@ -11,13 +12,9 @@
         </div>
     @endif
 
-    @if($errors->any())
+    @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-            <ul class="mb-0 ps-3">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+            <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -39,7 +36,6 @@
                             Choose All <span class="text-muted fw-normal">({{ $totalItems ?? 0 }})</span>
                         </label>
                     </div>
-                    <a href="#" class="text-danger fw-bold text-decoration-none">Delete</a>
                 </div>
             </div>
 
@@ -47,50 +43,64 @@
                 <div class="card border-0 shadow-sm mb-3" style="border-radius: 8px;">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center mb-3">
-                            <input class="form-check-input me-3" type="checkbox" style="width: 1.2em; height: 1.2em;">
                             <span class="fw-bold fs-5">
-                                {{ $items->first()->seller->store_name ?? 'Nama Toko' }}
+                                <i class="bi bi-shop me-2"></i> {{ $items->first()->seller->store_name ?? 'Store Name' }}
                             </span>
                         </div>
 
                         @foreach($items as $item)
-                        <div class="row mb-4 align-items-center">
+                        <div class="row mb-4 align-items-center cart-item-row border-bottom pb-3">
                             <div class="col-1">
-                                <input class="form-check-input" type="checkbox" style="width: 1.2em; height: 1.2em;">
+                                <input class="form-check-input item-checkbox" 
+                                       type="checkbox" 
+                                       style="width: 1.2em; height: 1.2em;"
+                                       value="{{ $item->id }}"
+                                       data-price="{{ $item->price }}"
+                                       data-quantity="{{ $item->quantity }}">
                             </div>
                             <div class="col-2">
-                                <img src="{{ $item->product->product_image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" 
-                                    class="rounded" 
-                                    style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
-                                    onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
+                                @php
+                                    $imgUrl = $item->product->product_image;
+                                    if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
+                                        $imgUrl = asset('storage/' . $imgUrl);
+                                    }
+                                @endphp
+                                <img src="{{ $imgUrl }}" class="img-fluid rounded" 
+                                     style="width: 100%; aspect-ratio: 1/1; object-fit: contain; border: 1px solid #eee;"
+                                     onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
                             </div>
                             <div class="col-5">
                                 <h6 class="mb-1 fw-normal">{{ $item->product->name }}</h6>
+                                @if($item->variant)
+                                    <small class="text-muted d-block">Variant: {{ $item->variant->variant_name }}</small>
+                                @endif
+
+                                <form id="delete-form-{{ $item->id }}" action="{{ route('cart.destroy', $item->id) }}" method="POST" class="d-inline">
+                                    @csrf @method('DELETE')
+                                    <button type="button" class="btn btn-link text-muted p-0 text-decoration-none mt-1" 
+                                            style="font-size: 0.8rem;" 
+                                            onclick="confirmRemoveItem({{ $item->id }})">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </form>
                             </div>
                             <div class="col-4 text-end">
                                 <div class="text-danger fw-bold mb-1 fs-5">
-                                    Rp. {{ number_format($item->price, 0, ',', '.') }}
+                                    ${{ number_format($item->price, 2) }}
                                 </div>
-                                <div class="text-muted text-decoration-line-through small mb-2">
-                                    Rp. {{ number_format($item->price * 1.2, 0, ',', '.') }}
-                                </div>
-                                <div class="d-flex justify-content-end align-items-center gap-3">
+                                
+                                @php $originalPrice = $item->variant ? $item->variant->price : $item->product->price; @endphp
+                                @if($item->price < $originalPrice)
+                                    <div class="text-muted text-decoration-line-through small mb-2">
+                                        ${{ number_format($originalPrice, 2) }}
+                                    </div>
+                                @endif
+
+                                <div class="d-flex justify-content-end align-items-center gap-3 mt-2">
                                     <div class="input-group input-group-sm" style="width: 100px; border: 1px solid #dee2e6; border-radius: 5px;">
-                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" 
-                                                type="button" 
-                                                data-action="decrease" 
-                                                data-id="{{ $item->id }}">-</button>
-                                        
-                                        <input type="text" 
-                                            class="form-control text-center border-0 bg-transparent p-1" 
-                                            value="{{ $item->quantity }}" 
-                                            id="qty-{{ $item->id }}" 
-                                            readonly>
-                                        
-                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" 
-                                                type="button" 
-                                                data-action="increase" 
-                                                data-id="{{ $item->id }}">+</button>
+                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" type="button" data-action="decrease" data-id="{{ $item->id }}">-</button>
+                                        <input type="text" class="form-control text-center border-0 bg-transparent p-1" value="{{ $item->quantity }}" id="qty-{{ $item->id }}" readonly>
+                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" type="button" data-action="increase" data-id="{{ $item->id }}">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -99,13 +109,10 @@
                     </div>
                 </div>
             @empty
-                <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 8px;">
+                <div class="card border-0 shadow-sm text-center py-5">
                     <div class="card-body">
-                        <h4 class="fw-bold mt-3">Wow, your cart is empty!</h4>
-                        <p class="text-muted mb-4">Come on, fill it with your dream items.</p>
-                        <a href="{{ url('/home') }}" class="btn btn-danger px-5 py-2 fw-bold" style="border-radius: 8px;">
-                            Start Shopping
-                        </a>
+                        <h4 class="fw-bold mt-3">Cart is Empty</h4>
+                        <a href="{{ route('home') }}" class="btn btn-danger px-5 py-2 fw-bold mt-3">Start Shopping</a>
                     </div>
                 </div>
             @endforelse
@@ -118,81 +125,83 @@
                     
                     <div class="mb-4">
                         <label class="form-label fw-bold text-muted small">VOUCHER CODE</label>
-                        
-                        @if(isset($voucherCode) && $voucherCode)
+                        <div id="applied-voucher-view" class="{{ (isset($voucherCode) && $voucherCode) ? '' : 'd-none' }}">
                             <div class="d-flex justify-content-between align-items-center p-2 border border-success rounded bg-light">
-                                <span class="text-success fw-bold">
-                                    <i class="bi bi-ticket-fill me-1"></i> {{ $voucherCode }}
-                                </span>
-                                <form action="{{ route('cart.voucher.remove') }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm text-danger fw-bold p-0" title="Hapus Voucher">
+                                
+                                <div class="d-flex align-items-center text-success" style="overflow: hidden;">
+                                    <i class="bi bi-ticket-fill me-2 flex-shrink-0"></i> 
+                                    <span class="fw-bold text-truncate" title="{{ $voucherCode ?? '' }}" style="max-width: 140px;">
+                                        {{ $voucherCode ?? '' }}
+                                    </span>
+                                </div>
+                                
+                                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                    <button type="button" class="btn btn-sm btn-outline-success fw-bold py-0 px-2" 
+                                            style="height: 24px; line-height: 1;"
+                                            data-bs-toggle="modal" data-bs-target="#voucherModal"
+                                            title="Add another voucher">
+                                        +
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm text-danger fw-bold p-0" onclick="confirmRemoveVoucher()" title="Remove All">
                                         <i class="bi bi-x-circle-fill fs-5"></i>
                                     </button>
+                                </div>
+                                
+                                <form id="remove-voucher-form" action="{{ route('cart.voucher.remove') }}" method="POST" class="d-none">
+                                    @csrf @method('DELETE')
                                 </form>
                             </div>
-                            <small class="text-success fst-italic">Voucher applied successfully!</small>
+                        </div>
 
-                        @else
+                        <div id="no-voucher-view" class="{{ (isset($voucherCode) && $voucherCode) ? 'd-none' : '' }}">
                             <button type="button" class="btn d-flex justify-content-between align-items-center px-3 py-2 w-100" 
                                     style="background-color: #fcebeb; color: #333; border: 1px solid #f5c6cb; border-radius: 8px;"
                                     data-bs-toggle="modal" data-bs-target="#voucherModal">
-                                <span class="d-flex align-items-center">
-                                    <i class="bi bi-ticket-perforated-fill text-danger me-2"></i> 
-                                    Use coupons
-                                </span>
+                                <span class="d-flex align-items-center"><i class="bi bi-ticket-perforated-fill text-danger me-2"></i> Use coupons</span>
                                 <i class="bi bi-chevron-right text-muted"></i>
                             </button>
-                        @endif
+                        </div>
                     </div>
 
                     <hr class="text-muted">
 
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="text-muted">Subtotal</span>
-                        <span class="fw-bold">Rp. {{ number_format($subtotal ?? 0, 0, ',', '.') }}</span>
+                        <span class="fw-bold" id="summary-subtotal">$0.00</span>
                     </div>
 
-                    @if(isset($discountAmount) && $discountAmount > 0)
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-success">Discount</span>
-                        <span class="fw-bold text-success">- Rp. {{ number_format($discountAmount, 0, ',', '.') }}</span>
+                    <div id="summary-discount-row" class="d-flex justify-content-between align-items-center mb-2 text-success {{ (isset($discountAmount) && $discountAmount > 0) ? '' : 'd-none' }}">
+                        <span>Discount</span>
+                        <span class="fw-bold" id="summary-discount" data-val="{{ $discountAmount ?? 0 }}">
+                            - ${{ number_format($discountAmount ?? 0, 2) }}
+                        </span>
                     </div>
-                    @endif
 
                     <hr class="text-muted my-3">
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <span class="fw-bold fs-5">Total</span>
-                        <span class="fw-bold text-danger fs-4">Rp. {{ number_format($finalTotal ?? 0, 0, ',', '.') }}</span>
+                        <span class="fw-bold text-danger fs-4" id="summary-total">$0.00</span>
                     </div>
 
                     <div class="d-grid">
-                        <a href="{{ route('checkout.index') }}" 
-                            class="btn btn-danger fw-bold py-2 fs-5" 
-                            style="border-radius: 8px;"
-                            id="btn-checkout"
-                            data-count="{{ $totalItems ?? 0 }}">
-                                Buy Now
-                        </a>
+                        <button type="button" class="btn btn-danger fw-bold py-2 fs-5" style="border-radius: 8px;" id="btn-checkout">Buy Now</button>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalLabel" aria-hidden="true">
+<div class="modal fade" id="voucherModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="voucherModalLabel">Available Vouchers</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title fw-bold">Available Vouchers</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body bg-light">
-        
         @if(isset($availableVouchers) && count($availableVouchers) > 0)
             @foreach($availableVouchers as $voucher)
                 <div class="card mb-2 border-0 shadow-sm hover-shadow">
@@ -200,11 +209,8 @@
                         <div>
                             <h6 class="fw-bold text-danger mb-1">{{ $voucher->code }}</h6>
                             <small class="d-block text-dark fw-bold">{{ $voucher->title }}</small>
-                            <small class="text-muted" style="font-size: 0.8rem;">
-                                Min. Purchase: Rp {{ number_format($voucher->min_purchase, 0, ',', '.') }}
-                            </small>
+                            <small class="text-muted">Min. Purchase: ${{ number_format($voucher->min_purchase, 2) }}</small>
                         </div>
-
                         <form action="{{ route('cart.voucher.apply') }}" method="POST">
                             @csrf
                             <input type="hidden" name="code" value="{{ $voucher->code }}">
@@ -214,12 +220,8 @@
                 </div>
             @endforeach
         @else
-            <div class="text-center py-5">
-                <i class="bi bi-ticket-perforated text-muted" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-3">No vouchers available at the moment.</p>
-            </div>
+            <div class="text-center py-5"><p class="text-muted">No vouchers available.</p></div>
         @endif
-
       </div>
     </div>
   </div>
@@ -229,10 +231,99 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        
+        const appliedVouchers = @json($appliedVoucherModels ?? []);
+
+        function saveCheckedState() {
+            let checkedIds = [];
+            $('.item-checkbox:checked').each(function() { checkedIds.push($(this).val()); });
+            localStorage.setItem('cart_checked_items', JSON.stringify(checkedIds));
+        }
+
+        function restoreCheckedState() {
+            let saved = localStorage.getItem('cart_checked_items');
+            if (saved) {
+                let ids = JSON.parse(saved);
+                $('.item-checkbox').each(function() {
+                    if (ids.includes($(this).val())) $(this).prop('checked', true);
+                    else $(this).prop('checked', false);
+                });
+                
+                if ($('.item-checkbox:not(:checked)').length > 0) $('#selectAll').prop('checked', false);
+                else if ($('.item-checkbox').length > 0) $('#selectAll').prop('checked', true);
+            } else {
+                $('.item-checkbox').prop('checked', false);
+                $('#selectAll').prop('checked', false);
+            }
+            recalculateTotal();
+        }
+
+        function recalculateTotal() {
+            let subtotal = 0;
+            let totalItems = 0;
+
+            $('.item-checkbox:checked').each(function() {
+                let price = parseFloat($(this).data('price'));
+                let qty = parseInt($(this).data('quantity'));
+                subtotal += price * qty;
+                totalItems += qty;
+            });
+
+            let isVoucherValid = true;
+            if (appliedVouchers.length > 0) {
+                appliedVouchers.forEach(v => {
+                    let minP = parseFloat(v.min_purchase);
+                    if (subtotal < minP) isVoucherValid = false;
+                });
+            } else {
+                isVoucherValid = false;
+            }
+
+            if (isVoucherValid && appliedVouchers.length > 0) {
+                $('#applied-voucher-view').removeClass('d-none');
+                $('#no-voucher-view').addClass('d-none');
+                $('#summary-discount-row').removeClass('d-none');
+            } else {
+                $('#applied-voucher-view').addClass('d-none');
+                $('#no-voucher-view').removeClass('d-none');
+                $('#summary-discount-row').addClass('d-none');
+            }
+
+            let discountElem = $('#summary-discount');
+            let discount = 0;
+            if (isVoucherValid && discountElem.length > 0) {
+                discount = parseFloat(discountElem.data('val'));
+            } else {
+                discount = 0;
+            }
+
+            if(subtotal === 0) discount = 0;
+            else if(discount > subtotal) discount = subtotal;
+            
+            let finalTotal = subtotal - discount;
+
+            let formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+            $('#summary-subtotal').text(formatter.format(subtotal));
+            $('#summary-total').text(formatter.format(finalTotal));
+            $('#btn-checkout').data('count', totalItems);
+        }
+
+        $('#selectAll').change(function() {
+            $('.item-checkbox').prop('checked', $(this).is(':checked'));
+            recalculateTotal();
+            saveCheckedState();
+        });
+
+        $('.item-checkbox').change(function() {
+            if (!$(this).is(':checked')) $('#selectAll').prop('checked', false);
+            if ($('.item-checkbox:checked').length === $('.item-checkbox').length) $('#selectAll').prop('checked', true);
+            recalculateTotal();
+            saveCheckedState();
+        });
+
+        restoreCheckedState();
+
         $('.change-qty').click(function(e) {
             e.preventDefault();
-            
             let btn = $(this);
             let id = btn.data('id');
             let action = btn.data('action');
@@ -240,102 +331,73 @@
             let currentQty = parseInt(input.val());
             let newQty = currentQty;
 
-            if (action === 'increase') {
-                newQty = currentQty + 1;
-            } else if (action === 'decrease') {
-                if (currentQty > 1) {
-                    newQty = currentQty - 1;
-                } else {
-                    Swal.fire({
-                        title: 'Hapus produk?',
-                        text: "Jumlah barang sudah 1. Apakah Anda ingin menghapusnya dari keranjang?",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6', 
-                        confirmButtonText: 'Ya, Hapus!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            Swal.fire({
-                                title: 'Menghapus...',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            });
-                            $.ajax({
-                                url: "/cart/remove/" + id,
-                                type: "POST",
-                                data: {
-                                    _method: 'DELETE',
-                                    _token: "{{ csrf_token() }}"
-                                },
-                                success: function(response) {
-                                    location.reload(); 
-                                },
-                                error: function(xhr) {
-                                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus barang.', 'error');
-                                }
-                            });
-                        }
-                    });
-                    
+            if (action === 'increase') newQty = currentQty + 1;
+            else if (action === 'decrease') {
+                if (currentQty > 1) newQty = currentQty - 1;
+                else {
+                    confirmRemoveItem(id);
                     return;
                 }
             }
-
+            
             input.val(newQty);
             btn.prop('disabled', true);
+            saveCheckedState(); 
 
             $.ajax({
-                url: "/cart/update/" + id,
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    quantity: newQty
-                },
-                success: function(response) {
-                    location.reload(); 
-                },
-                error: function(xhr) {
-                    input.val(currentQty); 
-                    btn.prop('disabled', false);
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000
-                    });
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Gagal mengupdate keranjang'
-                    });
-                }
+                url: "/cart/update/" + id, type: "POST",
+                data: { _token: "{{ csrf_token() }}", quantity: newQty },
+                success: function() { location.reload(); },
+                error: function() { input.val(currentQty); btn.prop('disabled', false); }
             });
         });
 
         $('#btn-checkout').click(function(e) {
-            let totalItems = $(this).data('count');
-            if (!totalItems || totalItems <= 0) {
-                e.preventDefault(); 
-                Swal.fire({
-                    title: 'Keranjang Kosong!',
-                    text: "Anda belum memilih barang apapun. Yuk belanja dulu!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ke Halaman Belanja',
-                    cancelButtonText: 'Nanti Saja'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "{{ route('home') }}"; 
-                    }
-                });
+            e.preventDefault();
+            let selectedIds = [];
+            $('.item-checkbox:checked').each(function() { selectedIds.push($(this).val()); });
+
+            if (selectedIds.length === 0) {
+                Swal.fire({ title: 'No Items Selected!', text: "Please select an item.", icon: 'warning' });
+                return;
             }
+            localStorage.removeItem('cart_checked_items'); 
+            window.location.href = "{{ route('checkout.index') }}?items=" + selectedIds.join(',');
         });
     });
+
+    function confirmRemoveVoucher() {
+        Swal.fire({
+            title: 'Remove Voucher?',
+            text: "Are you sure you want to remove the applied voucher?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('remove-voucher-form').submit();
+            }
+        });
+    }
+
+    function confirmRemoveItem(itemId) {
+        Swal.fire({
+            title: 'Remove Item?',
+            text: "Are you sure you want to remove this product from your cart?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Removing...', didOpen: () => Swal.showLoading() });
+                document.getElementById('delete-form-' + itemId).submit();
+            }
+        });
+    }
 </script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 @endsection

@@ -21,7 +21,7 @@ class ShippingSeeder extends Seeder
             [
                 'courier' => 'JNE Express',
                 'service' => 'REG (Reguler)',
-                'base_cost' => 16000,
+                'base_cost' => 16,
                 'estimated_days' => 3,
                 'created_at' => now(), 
                 'updated_at' => now(),
@@ -29,7 +29,7 @@ class ShippingSeeder extends Seeder
             [
                 'courier' => 'SiCepat',
                 'service' => 'GOKIL (Kargo)',
-                'base_cost' => 20000,
+                'base_cost' => 20,
                 'estimated_days' => 2, 
                 'created_at' => now(), 
                 'updated_at' => now(),
@@ -37,7 +37,7 @@ class ShippingSeeder extends Seeder
             [
                 'courier' => 'GoSend',
                 'service' => 'Instant Delivery',
-                'base_cost' => 35000,
+                'base_cost' => 35,
                 'estimated_days' => 0,
                 'created_at' => now(), 
                 'updated_at' => now(),
@@ -45,7 +45,7 @@ class ShippingSeeder extends Seeder
             [
                 'courier' => 'J&T Express',
                 'service' => 'EZ',
-                'base_cost' => 18000,
+                'base_cost' => 18,
                 'estimated_days' => 3, 
                 'created_at' => now(), 
                 'updated_at' => now(),
@@ -53,7 +53,7 @@ class ShippingSeeder extends Seeder
             [
                 'courier' => 'Ninja Xpress',
                 'service' => 'Standard',
-                'base_cost' => 15000,
+                'base_cost' => 15,
                 'estimated_days' => 4, 
                 'created_at' => now(), 
                 'updated_at' => now(),

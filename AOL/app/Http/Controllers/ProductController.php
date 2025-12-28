@@ -172,13 +172,23 @@ class ProductController extends Controller
                 $unitPrice = $variant->price;
             }
 
+            $flashSale = FlashSale::where('product_id', $product->id)
+                ->where('start_time', '<=', now())
+                ->where('end_time', '>', now())
+                ->first();
+
+            if ($flashSale && $flashSale->flash_stock > 0) {
+                $unitPrice = $flashSale->flash_price;
+            }
+
             $existingItem = CartItem::where('cart_id', $cart->id)
                 ->where('product_id', $request->product_id)
-                ->where('product_variant_id', $request->variant_id) // Penting: cek varian juga
+                ->where('product_variant_id', $request->variant_id)
                 ->first();
 
             if ($existingItem) {
                 $existingItem->quantity += $request->quantity;
+                $existingItem->price = $unitPrice;
                 $existingItem->save();
             } else {
                 CartItem::create([
@@ -187,7 +197,7 @@ class ProductController extends Controller
                     'product_variant_id' => $request->variant_id,
                     'seller_id' => $product->seller_id,
                     'quantity' => $request->quantity,
-                    'price' => $unitPrice, 
+                    'price' => $unitPrice,
                 ]);
             }
 
