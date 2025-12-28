@@ -179,5 +179,15 @@
         'please_wait' => 'Mohon tunggu, kami sedang memproses pembayaran Anda...',
         'payment_success' => 'Pembayaran Berhasil',
         'order_success' => 'Pesanan Anda berhasil dibuat',
+        'fee' => 'Biaya',
+        'add_address' => 'Tambah Alamat Baru',
+        'save_address' => 'Simpan Alamat',
+        'apply' => 'Gunakan',
+        'applied' => 'Digunakan',
+        'remove' => 'Hapus',
+        'remove_voucher' => 'Apakah kamu yakin menghapus voucher yang digunakan',
+        'item' => 'Barang',
+        'remove_item' => 'Apakah kamu yakin menghapus produk ini',
+        'yes_remove' => 'Ya, Hapus Ini',
     ];
 ?>

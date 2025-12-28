@@ -80,7 +80,7 @@
                                     <button type="button" class="btn btn-link text-muted p-0 text-decoration-none mt-1" 
                                             style="font-size: 0.8rem;" 
                                             onclick="confirmRemoveItem({{ $item->id }})">
-                                        <i class="bi bi-trash"></i> Remove
+                                        <i class="bi bi-trash"></i> @lang('messages.remove')
                                     </button>
                                 </form>
                             </div>
@@ -112,7 +112,7 @@
                 <div class="card border-0 shadow-sm text-center py-5">
                     <div class="card-body">
                         <h4 class="fw-bold mt-3">Cart is Empty</h4>
-                        <a href="{{ route('home') }}" class="btn btn-danger px-5 py-2 fw-bold mt-3">Start Shopping</a>
+                        <a href="{{ route('home') }}" class="btn btn-danger px-5 py-2 fw-bold mt-3">@lang('messages.start_shopping')</a>
                     </div>
                 </div>
             @endforelse
@@ -124,7 +124,7 @@
                     <h5 class="fw-bold text-danger mb-4">@lang('messages.shopping_summary')</h5>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small">VOUCHER CODE</label>
+                        <label class="form-label fw-bold text-muted small">@lang('messages.voucher_code')</label>
                         <div id="applied-voucher-view" class="{{ (isset($voucherCode) && $voucherCode) ? '' : 'd-none' }}">
                             <div class="d-flex justify-content-between align-items-center p-2 border border-success rounded bg-light">
                                 
@@ -158,7 +158,7 @@
                             <button type="button" class="btn d-flex justify-content-between align-items-center px-3 py-2 w-100" 
                                     style="background-color: #fcebeb; color: #333; border: 1px solid #f5c6cb; border-radius: 8px;"
                                     data-bs-toggle="modal" data-bs-target="#voucherModal">
-                                <span class="d-flex align-items-center"><i class="bi bi-ticket-perforated-fill text-danger me-2"></i> Use coupons</span>
+                                <span class="d-flex align-items-center"><i class="bi bi-ticket-perforated-fill text-danger me-2"></i> @lang('messages.use_coupon')</span>
                                 <i class="bi bi-chevron-right text-muted"></i>
                             </button>
                         </div>
@@ -186,7 +186,7 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="button" class="btn btn-danger fw-bold py-2 fs-5" style="border-radius: 8px;" id="btn-checkout">Buy Now</button>
+                        <button type="button" class="btn btn-danger fw-bold py-2 fs-5" style="border-radius: 8px;" id="btn-checkout">@lang('messages.buy_now')</button>
                     </div>
                 </div>
             </div>
@@ -198,8 +198,8 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold">Available Vouchers</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title fw-bold" id="voucherModalLabel">@lang('messages.avail_coupon')</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body bg-light">
         @if(isset($availableVouchers) && count($availableVouchers) > 0)
@@ -214,13 +214,13 @@
                         <form action="{{ route('cart.voucher.apply') }}" method="POST">
                             @csrf
                             <input type="hidden" name="code" value="{{ $voucher->code }}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Apply</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">@lang('messages.apply')</button>
                         </form>
                     </div>
                 </div>
             @endforeach
         @else
-            <div class="text-center py-5"><p class="text-muted">No vouchers available.</p></div>
+            <div class="text-center py-5"><p class="text-muted">@lang('messages.no_voucher').</p></div>
         @endif
       </div>
     </div>
@@ -368,13 +368,13 @@
 
     function confirmRemoveVoucher() {
         Swal.fire({
-            title: 'Remove Voucher?',
-            text: "Are you sure you want to remove the applied voucher?",
+            title: '@lang('messages.remove') Voucher?',
+            text: '@lang('messages.remove_coucher')?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, remove it!'
+            confirmButtonText: '@lang('messages.yes_remove')!'
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById('remove-voucher-form').submit();
@@ -384,13 +384,13 @@
 
     function confirmRemoveItem(itemId) {
         Swal.fire({
-            title: 'Remove Item?',
-            text: "Are you sure you want to remove this product from your cart?",
+            title: '@lang('messages.remove') @lang('messages.item')?',
+            text: '@lang('messages.remove_item')?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, remove it!'
+            confirmButtonText: '@lang('messages.yes_remove')!'
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({ title: 'Removing...', didOpen: () => Swal.showLoading() });

@@ -41,7 +41,7 @@
                                     {{ $mainAddress->phone }}
                                 </p>
                             @else
-                                <div class="alert alert-warning mb-0">No default address found.</div>
+                                <div class="alert alert-warning mb-0">@lang('messages.no_address').</div>
                             @endif
                         </div>
                         <button type="button" class="btn btn-outline-danger btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addAddressModal">
@@ -67,6 +67,13 @@
                                 }
                             @endphp
                             <img src="{{ $imgUrl }}" 
+                            @php
+                                $imgUrl = $item->product->product_image;
+                                if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
+                                    $imgUrl = asset('storage/' . $imgUrl);
+                                }
+                            @endphp
+                            <img src="{{ $imgUrl }}" 
                                 class="rounded" 
                                 style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
                                 onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
@@ -75,9 +82,9 @@
                                 <div>
                                     <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
                                     @if($item->variant)
-                                        <small class="text-muted d-block">Variant: {{ $item->variant->variant_name }}</small>
+                                        <small class="text-muted d-block">@lang('messages.variant'): {{ $item->variant->variant_name }}</small>
                                     @endif
-                                    <small class="text-muted">Quantity: {{ $item->quantity }}</small>
+                                    <small class="text-muted">@lang('messages.quantity'): {{ $item->quantity }}</small>
                                 </div>
                                 <div class="fw-bold text-danger">${{ number_format($item->price, 2) }}</div>
                             </div>
@@ -104,14 +111,14 @@
                             </select>
                             
                             <small class="text-muted d-block ms-1" id="estimate_{{ $loop->index }}">
-                                Estimated Arrival: {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
+                                @lang('messages.estimated_arrival'): {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
                             </small>
                         </div>
 
                         <div class="form-check mb-3 ms-1">
                             <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $loop->index }}" disabled>
                             <label class="form-check-label small" for="insurance_{{ $loop->index }}">
-                                Shipping Insurance (${{ number_format($insuranceFee ?? 0.50, 2) }})
+                                @lang('messages.shipping_insurance') (${{ number_format($insuranceFee ?? 0.50, 2) }})
                             </label>
                         </div>
                     </div>
@@ -160,7 +167,7 @@
                                 <div class="d-flex align-items-center text-danger">
                                     <i class="bi bi-ticket-perforated-fill fs-4 me-2"></i>
                                     <div style="line-height: 1.2;">
-                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">Voucher Applied:</span>
+                                        <span class="d-block small text-muted" style="font-size: 0.7rem;">@lang('messages.voucher_applied'):</span>
                                         <span class="fw-bold">{{ implode(', ', session('applied_vouchers')) }}</span>
                                     </div>
                                 </div>
@@ -195,28 +202,28 @@
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4">@lang('messages.shopping_summary')</h5>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Total Price</span>
+                        <span class="text-muted">Total @lang('messages.price')</span>
                         <span class="fw-bold">${{ number_format($subtotal, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Total Shipping</span>
+                        <span class="text-muted">Total @lang('messages.shipping')</span>
                         <span class="fw-bold" id="display_shipping">${{ number_format($defaultShippingCost * $cartItems->count(), 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
-                        <span class="text-muted">Application Fees</span>
+                        <span class="text-muted">@lang('messages.application_fee')</span>
                         <span class="fw-bold">${{ number_format($applicationFee, 2) }}</span>
                     </div>
                     
                     @if($discountAmount > 0)
                     <div class="d-flex justify-content-between mb-2 small text-success">
-                        <span>Discount</span>
+                        <span>@lang('messages.discount')</span>
                         <span class="fw-bold">- ${{ number_format($discountAmount, 2) }}</span>
                     </div>
                     @endif
                     
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold">Shopping Total</span>
+                        <span class="fw-bold">@lang('messages.shopping_total')</span>
                         <span class="fw-bold fs-5" id="display_total">${{ number_format($totalPay, 2) }}</span>
                     </div>
 
@@ -261,7 +268,7 @@
                         <div>
                             <label class="form-check-label fw-bold d-block" style="cursor: pointer;">{{ $payment['name'] }}</label>
                             @if($payment['fee'] > 0)
-                                <small class="text-muted">Fee: ${{ number_format($payment['fee'], 2) }}</small>
+                                <small class="text-muted">@lang('messages.fee'): ${{ number_format($payment['fee'], 2) }}</small>
                             @endif
                         </div>
                     </div>
@@ -303,17 +310,17 @@
                               </h6>
                               <small class="d-block fw-bold text-muted">{{ $voucher->title }}</small>
                               <small class="text-muted" style="font-size: 0.75rem;">
-                                  Min. Spend: ${{ number_format($voucher->min_purchase, 2) }}
+                                  @lang('messages.min_spend'): ${{ number_format($voucher->min_purchase, 2) }}
                               </small>
                           </div>
                           
                           @if($isUsed)
-                              <button class="btn btn-sm btn-secondary fw-bold" disabled>Applied</button>
+                              <button class="btn btn-sm btn-secondary fw-bold" disabled>@lang('messages.applied')</button>
                           @else
                               <form action="{{ route('checkout.apply.voucher') }}" method="POST">
                                   @csrf
                                   <input type="hidden" name="code" value="{{ $voucher->code }}">
-                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Apply</button>
+                                  <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">@lang('messages.apply')</button>
                               </form>
                           @endif
                       </div>
@@ -331,45 +338,71 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">Add New Address</h5>
+                <h5 class="modal-title fw-bold">@lang('messages.add_address')</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('address.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
-                    <div class="row g-3">
-                         <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Label Address</label>
-                            <input type="text" name="label" class="form-control" placeholder="e.g. Home, Office" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Recipient Name</label>
-                            <input type="text" name="recipient_name" class="form-control" value="{{ Auth::user()->name }}" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Phone Number</label>
-                            <input type="text" name="phone" class="form-control" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">City</label>
-                            <input type="text" name="city" class="form-control" required>
-                         </div>
-                         <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">Province</label>
-                            <input type="text" name="province" class="form-control" required>
-                         </div>
-                         <div class="col-4">
-                            <label class="form-label small fw-bold text-muted">Postal Code</label>
-                            <input type="text" name="postal_code" class="form-control" required>
-                         </div>
-                         <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Full Address</label>
-                            <textarea name="address" class="form-control" rows="3" placeholder="Street Name, House No..." required></textarea>
-                         </div>
-                    </div>
+                    <div class="col-12">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.address_label')
+                    </label>
+                    <input type="text" name="label" class="form-control"
+                        placeholder="@lang('messages.address_label_ph')" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.receiver_name')
+                    </label>
+                    <input type="text" name="recipient_name" class="form-control"
+                        placeholder="@lang('messages.receiver_name_ph')"
+                        value="{{ Auth::user()->name }}" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.handphone')
+                    </label>
+                    <input type="text" name="phone" class="form-control"
+                        placeholder="@lang('messages.phone_ph')" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.city')
+                    </label>
+                    <input type="text" name="city" class="form-control"
+                        placeholder="@lang('messages.city_ph')" required>
+                </div>
+
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.province')
+                    </label>
+                    <input type="text" name="province" class="form-control"
+                        placeholder="@lang('messages.province_ph')" required>
+                </div>
+
+                <div class="col-4">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.postal_code')
+                    </label>
+                    <input type="text" name="postal_code" class="form-control"
+                        placeholder="@lang('messages.postal_code_ph')" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label small fw-bold text-muted">
+                        @lang('messages.full_address')
+                    </label>
+                    <textarea name="address" class="form-control" rows="3"
+                            placeholder="@lang('messages.full_address_ph')" required></textarea>
+                </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger fw-bold">Save Address</button>
+                    <button type="submit" class="btn btn-danger fw-bold">@lang('messages.save_address')</button>
                 </div>
             </form>
         </div>
