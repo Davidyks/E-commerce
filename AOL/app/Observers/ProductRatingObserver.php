@@ -8,6 +8,11 @@ class ProductRatingObserver
 {
     public function saved(ProductRating $rating)
     {
+        logger('ProductRatingObserver::saved', [
+            'rating_id' => $rating->id,
+            'product_id' => $rating->product_id,
+        ]);
+
         $this->updateProductRating($rating);
     }
 

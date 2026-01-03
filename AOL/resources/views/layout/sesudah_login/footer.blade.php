@@ -1,3 +1,21 @@
+<style>
+    @media (max-width: 767px){
+        footer {
+            font-size: 0.9rem;
+        }
+
+        footer h6 {
+            font-size: 0.85rem;
+        }
+
+        footer p,
+        footer li,
+        footer span {
+            font-size: 0.8rem;
+        }
+    };
+</style>
+
 <footer class="bg-light border-top mt-5 pt-5 pb-3">
     <div class="container">
         
@@ -14,7 +32,7 @@
 
         <div class="row">
 
-            <div class="col-lg-3 mb-4">
+            <div class="col-12 col-md-6 col-lg-3 mb-4">
                 <h6 class="fw-bold mb-3">Our Service</h6>
                 <ul class="list-unstyled small text-muted">
                     <li class="mb-1">• Fast & secure nationwide shipping</li>
@@ -24,7 +42,7 @@
                 </ul>
             </div>
 
-            <div class="col-lg-4 mb-4">
+            <div class="col-12 col-md-6 col-lg-4 mb-4">
                 <h6 class="fw-bold mb-3">Contact Us</h6>
                 <ul class="list-unstyled small text-muted">
                     <li class="d-flex mb-2">
@@ -46,7 +64,7 @@
                 </ul>
             </div>
 
-            <div class="col-lg-3 mb-4">
+            <div class="col-12 col-md-6 col-lg-3 mb-4">
                 <h6 class="fw-bold mb-2">Payment</h6>
                 <div class="d-flex flex-wrap gap-2 mb-4">
                     <img src="{{ asset('asset/images/sebelum_login/alfamart.png') }}" height="20">
@@ -73,7 +91,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-2 mb-4">
+            <div class="col-12 col-md-6 col-lg-2 mb-4">
                 <h6 class="fw-bold mb-2">Follow Us</h6>
                 <div class="d-flex flex-column gap-2 mb-4 small text-muted">
                     <div class="d-flex align-items-center gap-2">
