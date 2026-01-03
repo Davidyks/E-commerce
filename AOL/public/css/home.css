@@ -72,15 +72,15 @@ body {
 
 .flashsale-header {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     font-weight: bold;
     font-size: 18px;
+    margin-bottom: 10px;
 }
 
 .flashsale-title {
     font-size: 24px;
     color: #d62828;
-    margin-bottom: 10px;
 }
 
 .flashsale-timer {
@@ -256,4 +256,96 @@ body {
 .category-item:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     color: #b22222;
+}
+
+@media (max-width: 767px) {
+    #welcome {
+        font-size: 17px;
+    }
+
+    .category-title {
+        font-size: 18px;
+    }
+
+    .category-item {
+        font-size: 10px;
+        width: 60px;
+        height: 60px;
+    }
+
+    .category-list {
+        gap: 0px;
+    }
+
+    .category-item img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .flashsale-header {
+        font-size: 10px;
+    }
+
+    .flashsale-title {
+        font-size: 18px;
+    }
+
+    .flashsale-timer {
+        font-size: 10px;
+    }
+
+    .see-all {
+        font-size: 12px;
+    }
+
+    .flashsale-items {
+        gap: 0px;
+    }
+
+    .flashsale-card {
+        width: 140px;
+    }
+
+    .image-wrapper {
+        width: 140px;
+        height: 100px;
+        padding: 3px;
+    }
+
+    .product-name {
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    .price {
+        font-size: 12px;
+    }
+
+    .before-discount {
+        margin-top: -3px;
+        padding-left: 12px;
+        opacity: 0.8;
+        font-size: 11px;
+        text-decoration: line-through;
+        margin-bottom: 10px;
+    }
+
+    .restricted-btn {
+        padding: 3px 22px;
+        margin-top: 2px;
+        font-size: 10px;
+    }
+
+    .flashsale-stock {
+        font-size: 10px;
+    }
+
+    .flashsale-rate {
+        font-size: 12px;
+    }
+
+    .estimate {
+        margin-top: -5px;
+        font-size: 10px;
+    }
 }

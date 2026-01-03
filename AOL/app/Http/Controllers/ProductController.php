@@ -115,7 +115,7 @@ class ProductController extends Controller
         $createdAt = Carbon::parse($createdAt);
         $now = Carbon::now();
 
-        $days = $createdAt->diffInDays($now);
+        $days = (int) $createdAt->diffInDays($now);
 
         if ($days < 1) {
             return '1 day';
@@ -125,12 +125,12 @@ class ProductController extends Controller
             return $days . ' days';
         }
 
-        $months = $createdAt->diffInMonths($now);
+        $months = (int) $createdAt->diffInMonths($now);
         if ($months < 12) {
             return $months . ' months';
         }
 
-        $years = $createdAt->diffInYears($now);
+        $years = (int) $createdAt->diffInYears($now);
         return $years . ' years';
     }
 

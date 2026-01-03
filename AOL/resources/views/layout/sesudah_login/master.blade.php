@@ -9,7 +9,19 @@
     @include('layout.sesudah_login.bootstrap')
 </head>
 
-<body style="padding-top: 150px">
+<style>
+    body {
+        padding-top: 110px;
+    }
+
+    @media (min-width: 768px) {
+        body {
+            padding-top: 170px;
+        }
+    }
+</style>
+
+<body>
 
     {{-- HEADER --}}
     @include('layout.sesudah_login.header')

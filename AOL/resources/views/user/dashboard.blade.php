@@ -4,7 +4,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="mx-auto py-4 rounded shadow-sm" style="background: #fff; width: 95%;">
-        <h4 class="fw-bold mb-0 ms-4">
+        <h4 class="fw-bold mb-0 ms-4" id="welcome">
             @lang('messages.welcome'), 
             <span style="color: #e63939">
                 {{ Auth::user()->name ?? Auth::user()->username ?? explode('@', Auth::user()->email)[0] }}

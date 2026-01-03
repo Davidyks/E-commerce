@@ -14,7 +14,7 @@
       <img id="logo" src="{{ asset('asset/images/Logo.png') }}" alt="Illustration" />
       <img id="illustration" src="{{ asset('asset/images/login-register/image1.png') }}" alt="Illustration" />
     </div>
-    <div class="d-flex flex-column justify-content-center">
+    <div class="d-flex flex-column justify-content-center py-3">
       <a href="{{ route('show.beforelogin') }}" class="back fw-semibold">
         @lang('messages.back')
       </a>
