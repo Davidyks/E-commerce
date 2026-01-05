@@ -7,7 +7,6 @@
 
 <div class="container py-4">
     <h3 class="fw-bold text-danger mb-4">Checkout</h3>
-    
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
             <i class="bi bi-exclamation-circle-fill me-2"></i> {{ session('error') }}
@@ -51,44 +50,40 @@
                 </div>
             </div>
 
-            @foreach($cartItems as $item)
+            @foreach($groupedItems as $sellerId => $items)
                 <div class="card shadow-sm mb-4" style="border: 2px solid #0d6efd;">
                     <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <i class="bi bi-patch-check-fill text-danger me-2"></i>
-                            <span class="fw-bold">{{ $item->product->seller->store_name ?? 'Seller Store' }}</span>
+                        
+                        <div class="d-flex align-items-center mb-3 border-bottom pb-2">
+                            <i class="bi bi-shop text-danger me-2 fs-5"></i>
+                            <span class="fw-bold fs-5">{{ $items->first()->product->seller->store_name ?? 'Seller Store' }}</span>
                         </div>
 
-                        <div class="d-flex gap-3 mb-4">
-                            @php
-                                $imgUrl = $item->product->product_image;
-                                if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
-                                    $imgUrl = asset('storage/' . $imgUrl);
-                                }
-                            @endphp
-                            <img src="{{ $imgUrl }}" 
-                            @php
-                                $imgUrl = $item->product->product_image;
-                                if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
-                                    $imgUrl = asset('storage/' . $imgUrl);
-                                }
-                            @endphp
-                            <img src="{{ $imgUrl }}" 
-                                class="rounded" 
-                                style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
-                                onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
-                            
-                            <div class="w-100 d-flex justify-content-between">
-                                <div>
-                                    <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
-                                    @if($item->variant)
-                                        <small class="text-muted d-block">@lang('messages.variant'): {{ $item->variant->variant_name }}</small>
-                                    @endif
-                                    <small class="text-muted">@lang('messages.quantity'): {{ $item->quantity }}</small>
+                        @foreach($items as $item)
+                            <div class="d-flex gap-3 mb-4">
+                                @php
+                                    $imgUrl = $item->product->product_image;
+                                    if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
+                                        $imgUrl = asset('storage/' . $imgUrl);
+                                    }
+                                @endphp
+                                <img src="{{ $imgUrl }}" 
+                                    class="rounded" 
+                                    style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eee;"
+                                    onerror="this.onerror=null;this.src='{{ asset('asset/images/sesudah_login/shirt.jpg') }}';">
+                                
+                                <div class="w-100 d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="fw-semibold mb-1">{{ $item->product->name }}</h6>
+                                        @if($item->variant)
+                                            <small class="text-muted d-block">@lang('messages.variant'): {{ $item->variant->variant_name }}</small>
+                                        @endif
+                                        <small class="text-muted">@lang('messages.quantity'): {{ $item->quantity }}</small>
+                                    </div>
+                                    <div class="fw-bold text-danger">${{ number_format($item->price, 2) }}</div>
                                 </div>
-                                <div class="fw-bold text-danger">${{ number_format($item->price, 2) }}</div>
                             </div>
-                        </div>
+                        @endforeach
                         
                         <div class="bg-light p-3 rounded mb-3 border">
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -96,11 +91,11 @@
                             </div>
                             
                             <select class="form-select form-select-sm border-0 bg-white mb-2 fw-bold shipping-selector" 
-                                    name="shipping_id[{{ $item->id ?? 'buynow_'.$loop->index }}]" 
-                                    id="shipping_{{ $loop->index }}" 
-                                    data-index="{{ $loop->index }}"
+                                    id="shipping_{{ $sellerId }}" 
+                                    data-seller="{{ $sellerId }}"
                                     onchange="calculateTotal()">
                                 
+                                <option value="" data-cost="0" disabled selected>Select Shipping Courier</option>
                                 @foreach($shippings as $ship)
                                     <option value="{{ $ship->id }}" 
                                             data-cost="{{ $ship->base_cost }}" 
@@ -110,17 +105,11 @@
                                 @endforeach
                             </select>
                             
-                            <small class="text-muted d-block ms-1" id="estimate_{{ $loop->index }}">
-                                @lang('messages.estimated_arrival'): {{ now()->addDays($shippings->first()->estimated_days ?? 3)->format('d F') }}
+                            <small class="text-muted d-block ms-1" id="estimate_{{ $sellerId }}">
+                                @lang('messages.estimated_arrival'): -
                             </small>
                         </div>
 
-                        <div class="form-check mb-3 ms-1">
-                            <input class="form-check-input bg-danger border-danger" type="checkbox" checked id="insurance_{{ $loop->index }}" disabled>
-                            <label class="form-check-label small" for="insurance_{{ $loop->index }}">
-                                @lang('messages.shipping_insurance') (${{ number_format($insuranceFee ?? 0.50, 2) }})
-                            </label>
-                        </div>
                     </div>
                 </div>
             @endforeach
@@ -163,7 +152,6 @@
                     <div class="d-grid mt-2">
                         @if(session('applied_vouchers') && count(session('applied_vouchers')) > 0)
                             <div class="p-2 border border-danger rounded d-flex justify-content-between align-items-center" style="background-color: #ffeaea;">
-                                
                                 <div class="d-flex align-items-center text-danger">
                                     <i class="bi bi-ticket-perforated-fill fs-4 me-2"></i>
                                     <div style="line-height: 1.2;">
@@ -171,13 +159,7 @@
                                         <span class="fw-bold">{{ implode(', ', session('applied_vouchers')) }}</span>
                                     </div>
                                 </div>
-
                                 <div class="d-flex align-items-center gap-2">
-                                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold py-0 px-2" style="height: 28px;" 
-                                            data-bs-toggle="modal" data-bs-target="#voucherModal">
-                                        +
-                                    </button>
-
                                     <form action="{{ route('checkout.remove.voucher') }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm text-secondary p-0 ms-1" title="Remove Voucher">
@@ -207,7 +189,7 @@
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">Total @lang('messages.shipping')</span>
-                        <span class="fw-bold" id="display_shipping">${{ number_format($defaultShippingCost * $cartItems->count(), 2) }}</span>
+                        <span class="fw-bold" id="display_shipping">$0.00</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">@lang('messages.application_fee')</span>
@@ -239,6 +221,7 @@
                                 @endif
                             @endforeach
                             
+                            
                             <button type="button" onclick="confirmPayment()" class="btn btn-danger fw-bold py-2 w-100 fs-5">
                                 @lang('messages.pay_now')
                             </button>
@@ -249,6 +232,7 @@
         </div>
     </div>
 </div>
+
 
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -334,6 +318,7 @@
     </div>
 </div>
 
+{{-- 3. MODAL TAMBAH ALAMAT --}}
 <div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -344,62 +329,36 @@
             <form action="{{ route('address.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
-                    <div class="col-12">
-                    <label class="form-label small fw-bold text-muted">
-                        @lang('messages.address_label')
-                    </label>
-                    <input type="text" name="label" class="form-control"
-                        placeholder="@lang('messages.address_label_ph')" required>
-                </div>
-
-                <div class="col-6">
-                    <label class="form-label small fw-bold text-muted">
-                        @lang('messages.receiver_name')
-                    </label>
-                    <input type="text" name="recipient_name" class="form-control"
-                        placeholder="@lang('messages.receiver_name_ph')"
-                        value="{{ Auth::user()->name }}" required>
-                </div>
-
-                <div class="col-6">
-                    <label class="form-label small fw-bold text-muted">
-                        @lang('messages.handphone')
-                    </label>
-                    <input type="text" name="phone" class="form-control"
-                        placeholder="@lang('messages.phone_ph')" required>
-                </div>
-
-                <div class="col-6">
-                    <label class="form-label small fw-bold text-muted">
-                        @lang('messages.city')
-                    </label>
-                    <input type="text" name="city" class="form-control"
-                        placeholder="@lang('messages.city_ph')" required>
-                </div>
-
-                <div class="col-6">
-                    <label class="form-label small fw-bold text-muted">
-                        @lang('messages.province')
-                    </label>
-                    <input type="text" name="province" class="form-control"
-                        placeholder="@lang('messages.province_ph')" required>
-                </div>
-
-                <div class="col-4">
-                    <label class="form-label small fw-bold text-muted">
-                        @lang('messages.postal_code')
-                    </label>
-                    <input type="text" name="postal_code" class="form-control"
-                        placeholder="@lang('messages.postal_code_ph')" required>
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label small fw-bold text-muted">
-                        @lang('messages.full_address')
-                    </label>
-                    <textarea name="address" class="form-control" rows="3"
-                            placeholder="@lang('messages.full_address_ph')" required></textarea>
-                </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">@lang('messages.address_label')</label>
+                            <input type="text" name="label" class="form-control" placeholder="@lang('messages.address_label_ph')" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">@lang('messages.receiver_name')</label>
+                            <input type="text" name="recipient_name" class="form-control" placeholder="@lang('messages.receiver_name_ph')" value="{{ Auth::user()->name }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">@lang('messages.handphone')</label>
+                            <input type="text" name="phone" class="form-control" placeholder="@lang('messages.phone_ph')" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">@lang('messages.city')</label>
+                            <input type="text" name="city" class="form-control" placeholder="@lang('messages.city_ph')" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted">@lang('messages.province')</label>
+                            <input type="text" name="province" class="form-control" placeholder="@lang('messages.province_ph')" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small fw-bold text-muted">@lang('messages.postal_code')</label>
+                            <input type="text" name="postal_code" class="form-control" placeholder="@lang('messages.postal_code_ph')" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">@lang('messages.full_address')</label>
+                            <textarea name="address" class="form-control" rows="3" placeholder="@lang('messages.full_address_ph')" required></textarea>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger fw-bold">@lang('messages.save_address')</button>
@@ -417,7 +376,7 @@
 
     function calculateTotal() {
         let totalShipping = 0;
-        let cartItemCount = 0; 
+        
         const selectors = document.querySelectorAll('.shipping-selector');
         
         selectors.forEach(select => {
@@ -427,17 +386,13 @@
             totalShipping += cost;
 
             const days = parseInt(selectedOption.getAttribute('data-days')) || 3;
-            const index = select.getAttribute('data-index'); 
+            const sellerId = select.getAttribute('data-seller'); 
+            updateEstimationDate(sellerId, days);
             
-            updateEstimationDate(index, days);
-
-            cartItemCount++; 
+            updateHiddenShippingInput(sellerId, select.value);
         });
 
-        const totalInsurance = insurance * cartItemCount;
-
-        let grandTotal = subtotal + totalShipping + totalInsurance + appFee - discount;
-        
+        let grandTotal = subtotal + totalShipping + appFee - discount; 
         if(grandTotal < 0) grandTotal = 0;
 
         document.getElementById('display_shipping').innerText = formatCurrency(totalShipping);
@@ -446,8 +401,23 @@
         document.getElementById('input_total').value = grandTotal;
     }
 
-    function updateEstimationDate(index, days) {
-        const estimateElement = document.getElementById('estimate_' + index);
+    function updateHiddenShippingInput(sellerId, shippingId) {
+        let form = document.getElementById('checkoutForm');
+        let inputId = 'hidden_shipping_' + sellerId;
+        let input = document.getElementById(inputId);
+        
+        if (!input) {
+            input = document.createElement('input');
+            input.type = 'hidden';
+            input.id = inputId;
+            input.name = 'shipping_id[' + sellerId + ']';
+            form.appendChild(input);
+        }
+        input.value = shippingId;
+    }
+
+    function updateEstimationDate(id, days) {
+        const estimateElement = document.getElementById('estimate_' + id);
         if (estimateElement) {
             const date = new Date();
             date.setDate(date.getDate() + days);
@@ -456,9 +426,9 @@
             const formattedDate = date.toLocaleDateString('en-US', options);
             
             if(days === 0) {
-                estimateElement.innerText = "Estimated Arrival: TODAY (Instant)";
+                estimateElement.innerText = "@lang('messages.estimated_arrival'): TODAY (Instant)";
             } else {
-                estimateElement.innerText = "Estimated Arrival: " + formattedDate;
+                estimateElement.innerText = "@lang('messages.estimated_arrival'): " + formattedDate;
             }
         }
     }
@@ -466,10 +436,6 @@
     function formatCurrency(number) {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(number);
     }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        calculateTotal();
-    });
 
     function selectPayment(code) {
         document.getElementById('real_payment_method').value = code;
@@ -493,6 +459,21 @@
     }
 
     function confirmPayment() {
+        const selectors = document.querySelectorAll('.shipping-selector');
+        let allSelected = true;
+        selectors.forEach(s => {
+            if(s.value === "") allSelected = false;
+        });
+
+        if(!allSelected) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Please select shipping for all stores.',
+                icon: 'error'
+            });
+            return;
+        }
+
         Swal.fire({
             title: '@lang('messages.processing_order')',
             text: '@lang('messages.please_wait')',
@@ -514,6 +495,10 @@
             }
         });
     }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        calculateTotal();
+    });
 </script>
 
 @endsection
