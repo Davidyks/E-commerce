@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\CartItem;
 use App\Models\UserAddress;
 use App\Models\Shipping;
 use App\Models\Voucher;
 use App\Models\FlashSale;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str; 
 use stdClass; 
 
 class CheckoutController extends Controller
@@ -19,13 +24,11 @@ class CheckoutController extends Controller
         $user = Auth::user();
         
         $directBuy = session('direct_buy'); 
+        $cartItems = collect([]);
 
         if ($directBuy) {
-            $product = \App\Models\Product::with('seller')->find($directBuy['product_id']);
-
-            if (!$product) {
-                return redirect()->back()->with('error', 'Product not found.');
-            }
+            $product = Product::with('seller')->find($directBuy['product_id']);
+            if (!$product) return redirect()->back()->with('error', 'Product not found.');
 
             $tempItem = new stdClass();
             $tempItem->id = null; 
@@ -33,97 +36,68 @@ class CheckoutController extends Controller
             $tempItem->product = $product; 
             
             $tempItem->variant_id = $directBuy['variant_id'] ?? null;
-            $tempItem->variant = $tempItem->variant_id ? \App\Models\ProductVariant::find($tempItem->variant_id) : null;
-            
+            $tempItem->variant = $tempItem->variant_id ? ProductVariant::find($tempItem->variant_id) : null;
             $tempItem->price = $tempItem->variant ? $tempItem->variant->price : $product->price;
 
             $cartItems = collect([$tempItem]);
-
         } else {
             $cart = $user->cart;
-            
             if ($cart) {
                 $query = $cart->items()->with(['product.seller', 'variant']);
-
                 if ($request->has('items')) {
                     $selectedIds = explode(',', $request->items);
                     $query->whereIn('id', $selectedIds);
                 }
-
                 $cartItems = $query->get();
-            } else {
-                $cartItems = collect([]);
             }
 
             if($cartItems->isEmpty()) {
-               return redirect()->route('cart.index')->with('error', 'No items selected for checkout.');
+               return redirect()->route('cart.index')->with('error', 'No items selected.');
             }
         }
 
         foreach ($cartItems as $item) {
             $product = $item->product;
-            
             $fs = FlashSale::where('product_id', $product->id)
-                ->where('start_time', '<=', now())
-                ->where('end_time', '>', now())
-                ->first();
+                ->where('start_time', '<=', now())->where('end_time', '>', now())->first();
 
             $normalPrice = $item->variant ? $item->variant->price : $product->price;
             $currentStock = $item->variant ? $item->variant->stock : $product->stock;
 
             if ($fs && $fs->flash_stock > 0) {
                 $item->price = $fs->flash_price;
-                
-                if ($item->quantity > $fs->flash_stock) {
-                    session()->flash('error', "Flash Sale stock for {$product->name} limited. Qty adjusted.");
-                    $item->quantity = $fs->flash_stock;
-                }
+                if ($item->quantity > $fs->flash_stock) $item->quantity = $fs->flash_stock;
             } else {
                 $item->price = $normalPrice;
-                
-                if ($item->quantity > $currentStock) {
-                    session()->flash('error', "Stock for {$product->name} limited. Qty adjusted.");
-                    $item->quantity = $currentStock;
-                }
+                if ($item->quantity > $currentStock) $item->quantity = $currentStock;
             }
-
-            if ($item->id) {
-                $item->save();
-            }
+            if ($item->id) $item->save();
         }
+
+        $groupedItems = $cartItems->groupBy(function ($item) {
+            return $item->product->seller_id;
+        });
 
         $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
 
         $appliedSession = session('applied_vouchers', []);
         $validVouchers = [];
         $discountAmount = 0;
-        $voucherRemoved = false;
 
-        foreach ($appliedSession as $type => $code) {
+        foreach ($appliedSession as $code) {
             $voucher = Voucher::where('code', $code)->first();
-            
             if ($voucher && $voucher->isValid($user, $subtotal)) {
-                $validVouchers[$type] = $code;
+                $validVouchers[] = $code;
                 $discountAmount += $voucher->calculateDiscount($subtotal);
-            } else {
-                $voucherRemoved = true;
             }
         }
-
         session()->put('applied_vouchers', $validVouchers);
-
-        if ($voucherRemoved) {
-            session()->flash('error', 'Some vouchers removed because minimum spend requirement not met.');
-        }
-
         if ($discountAmount > $subtotal) $discountAmount = $subtotal;
 
-        $mainAddress = UserAddress::where('user_id', $user->id)->where('is_default', true)->first();
-        if (!$mainAddress) {
-            $mainAddress = UserAddress::where('user_id', $user->id)->first();
-        }
+        $mainAddress = UserAddress::where('user_id', $user->id)->where('is_default', true)->first() 
+                       ?? UserAddress::where('user_id', $user->id)->first();
 
-        $shippings = Shipping::all();
+        $shippings = Shipping::all(); 
         foreach($shippings as $ship) {
             $courierName = strtolower($ship->courier);
              if(str_contains($courierName, 'jne')) $ship->logo = asset('asset/images/sebelum_login/jne.png');
@@ -141,9 +115,8 @@ class CheckoutController extends Controller
 
         $insuranceFee = 0.50;   
         $applicationFee = 0.20; 
-        $defaultShippingCost = $shippings->first()->base_cost ?? 0;
-
-        $totalPay = ($subtotal + $defaultShippingCost + $insuranceFee + $applicationFee) - $discountAmount;
+        
+        $totalPay = ($subtotal + $insuranceFee + $applicationFee) - $discountAmount;
         if($totalPay < 0) $totalPay = 0;
 
         $paymentMethods = [
@@ -152,13 +125,13 @@ class CheckoutController extends Controller
             ['code' => 'gosend_pay', 'name' => 'GoPay', 'logo' => asset('asset/images/sebelum_login/gopay.jpg'), 'fee' => 0],
             ['code' => 'bni_va', 'name' => 'BNI Virtual Account', 'logo' => asset('asset/images/sebelum_login/bni.png'), 'fee' => 0.10],
             ['code' => 'bri_va', 'name' => 'BRI Virtual Account', 'logo' => asset('asset/images/sebelum_login/bri.png'), 'fee' => 0.10],
-            ['code' => 'Indomaret', 'name' => 'Indomaret', 'logo' => asset('asset/images/sebelum_login/indomare.png'), 'fee' => 0.05],
-            ['code' => 'Alfamart', 'name' => 'Cash on Delivery', 'logo' => asset('asset/images/sebelum_login/alfamart.png'), 'fee' => 0.05],
+            ['code' => 'shopeepay', 'name' => 'ShopeePay', 'logo' => asset('asset/images/sebelum_login/shopeepay.png'), 'fee' => 0.05],
+            ['code' => 'cod', 'name' => 'Cash on Delivery', 'logo' => asset('asset/images/sebelum_login/cod.png'), 'fee' => 0],
         ];
 
         return view('user.checkout', compact(
-            'cartItems', 'subtotal', 'discountAmount', 'shippings', 'mainAddress', 
-            'insuranceFee', 'applicationFee', 'totalPay', 'defaultShippingCost',
+            'groupedItems', 'cartItems', 'subtotal', 'discountAmount', 'shippings', 'mainAddress', 
+            'insuranceFee', 'applicationFee', 'totalPay',
             'paymentMethods', 'availableVouchers'
         ));
     }
@@ -167,98 +140,166 @@ class CheckoutController extends Controller
     {
         $request->validate(['code' => 'required']);
         $user = Auth::user();
-        
         $voucher = Voucher::where('code', $request->code)->first();
 
-        if (!$voucher) {
-            return redirect()->back()->with('error', 'Kode voucher tidak valid!');
-        }
+        if (!$voucher) return redirect()->back()->with('error', 'Kode voucher tidak valid!');
 
         $directBuy = session('direct_buy');
         $subtotal = 0;
-
         if ($directBuy) {
             $product = Product::find($directBuy['product_id']);
-            if ($product) {
-                $fs = FlashSale::where('product_id', $product->id)->where('start_time', '<=', now())->where('end_time', '>', now())->first();
-                $price = ($fs && $fs->flash_stock > 0) ? $fs->flash_price : $product->price;
-
-                if(isset($directBuy['variant_id'])) {
-                    $variant = \App\Models\ProductVariant::find($directBuy['variant_id']);
-                    if($variant) $price = ($fs && $fs->flash_stock > 0) ? $fs->flash_price : $variant->price;
-                }
-                $subtotal = $price * $directBuy['quantity'];
+            $price = $product->price;
+            if(isset($directBuy['variant_id'])) {
+                $v = ProductVariant::find($directBuy['variant_id']);
+                if($v) $price = $v->price;
             }
+            $subtotal = $price * $directBuy['quantity'];
         } else {
             $cart = $user->cart;
-            if (!$cart || $cart->items->isEmpty()) return redirect()->back()->with('error', 'Keranjang kosong.');
-            
-            $subtotal = $cart->items->sum(fn($item) => $item->price * $item->quantity);
+            if($cart) $subtotal = $cart->items->sum(fn($i) => $i->price * $i->quantity);
         }
 
-        if (!$voucher->isValid($user, $subtotal)) {
-            return redirect()->back()->with('error', 'Voucher tidak valid (Minimal belanja kurang).');
-        }
-        
-        $type = $voucher->seller_id ? 'store' : 'platform';
-        $appliedSession = session('applied_vouchers', []);
-        $appliedSession[$type] = $voucher->code;
-        
-        session()->put('applied_vouchers', $appliedSession);
-
-        return redirect()->back()->with('success', 'Voucher berhasil dipasang!');
+        if (!$voucher->isValid($user, $subtotal)) return redirect()->back()->with('error', 'Min. belanja tidak terpenuhi.');
+        session()->put('applied_vouchers', [$voucher->code]);
+        return redirect()->back()->with('success', 'Voucher berhasil!');
     }
 
     public function removeVoucher()
     {
         session()->forget('applied_vouchers');
-        return redirect()->back()->with('success', 'Semua voucher dilepas.');
+        return redirect()->back()->with('success', 'Voucher dilepas.');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'total_price' => 'required',
             'payment_method' => 'required',
-        ]);
-
-        $user = Auth::user();
-
-        if ($request->has('cart_item_ids')) {
-            CartItem::whereIn('id', $request->cart_item_ids)
-                ->whereHas('cart', function($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                })
-                ->delete();
-        }
-
-        session()->forget('direct_buy');
-        session()->forget('applied_vouchers');
-
-        return redirect()->route('home')->with('success', 'Pesanan berhasil dibuat! Barang telah dihapus dari keranjang.');
-    }
-
-    public function addAddress(Request $request) { 
-        $request->validate([
-            'label' => 'required', 'recipient_name' => 'required', 'phone' => 'required',
-            'address' => 'required', 'city' => 'required', 'province' => 'required', 'postal_code' => 'required',
+            'shipping_id' => 'required|array' 
         ]);
         
         $user = Auth::user();
-        $isFirst = UserAddress::where('user_id', $user->id)->doesntExist();
 
-        UserAddress::create([
-            'user_id' => $user->id,
-            'label' => $request->label,
-            'recipient_name' => $request->recipient_name,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'city' => $request->city,
-            'province' => $request->province,
-            'postal_code' => $request->postal_code,
-            'is_default' => $isFirst,
-        ]);
+        DB::beginTransaction();
+        try {
+            $directBuy = session('direct_buy'); 
+            $itemsToProcess = collect([]);
 
-        return redirect()->back()->with('success', 'Alamat berhasil disimpan!');
+            if ($directBuy) {
+                $product = Product::find($directBuy['product_id']);
+                $itemObj = new stdClass();
+                $itemObj->product = $product;
+                $itemObj->product_id = $product->id;
+                $itemObj->variant_id = $directBuy['variant_id'] ?? null;
+                $itemObj->quantity = $directBuy['quantity'];
+                
+                if ($itemObj->variant_id) {
+                     $v = ProductVariant::find($itemObj->variant_id);
+                     $itemObj->price = $v->price;
+                } else {
+                     $itemObj->price = $product->price;
+                }
+                $itemObj->seller_id = $product->seller_id;
+                $itemsToProcess->push($itemObj);
+
+            } else {
+                if ($request->has('cart_item_ids')) {
+                    $cartItems = CartItem::with('product')->whereIn('id', $request->cart_item_ids)->get();
+                    foreach($cartItems as $cItem) {
+                        $itemObj = new stdClass();
+                        $itemObj->product = $cItem->product;
+                        $itemObj->product_id = $cItem->product_id;
+                        $itemObj->variant_id = $cItem->product_variant_id;
+                        $itemObj->quantity = $cItem->quantity;
+                        $itemObj->price = $cItem->price;
+                        $itemObj->seller_id = $cItem->product->seller_id;
+                        $itemsToProcess->push($itemObj);
+                    }
+                }
+            }
+
+            $groupedBySeller = $itemsToProcess->groupBy('seller_id');
+            
+            $transactionGroupId = 'TRX-' . time();
+
+            foreach ($groupedBySeller as $sellerId => $items) {
+                
+                $shippingId = $request->shipping_id[$sellerId] ?? null;
+                if(!$shippingId) throw new \Exception("Pengiriman untuk salah satu toko belum dipilih.");
+
+                $storeSubtotal = $items->sum(fn($i) => $i->price * $i->quantity);
+                
+                $shipping = Shipping::find($shippingId);
+                $shippingCost = $shipping ? $shipping->base_cost : 0;
+
+                $storeTotal = $storeSubtotal + $shippingCost; 
+
+                $order = new Order();
+                $order->user_id = $user->id;
+                $order->seller_id = $sellerId; 
+                $order->shipping_id = $shippingId;
+                $order->order_code = 'ORD-' . strtoupper(Str::random(8)) . '-' . $sellerId; 
+                
+                $order->subtotal = $storeSubtotal;
+                $order->shipping_cost = $shippingCost;
+                $order->total_price = $storeTotal;
+                
+                $order->payment_method = $request->payment_method;
+                $order->payment_status = 'pending'; 
+                $order->notes = $transactionGroupId; 
+                $order->save();
+
+                foreach ($items as $item) {
+                    $orderItem = new OrderItem();
+                    $orderItem->order_id = $order->id;
+                    $orderItem->product_id = $item->product_id;
+                    $orderItem->quantity = $item->quantity;
+                    $orderItem->price = $item->price;
+                    $orderItem->product_variant_id = $item->variant_id ?? null;
+                    $orderItem->seller_id = $sellerId; 
+                    $orderItem->save();
+
+                    $realProduct = Product::find($item->product_id); 
+                    $realProduct->increment('sold_count', $item->quantity);
+
+                    if ($item->variant_id) {
+                        $realVariant = ProductVariant::find($item->variant_id);
+                        if ($realVariant) {
+                            if ($realVariant->stock >= $item->quantity) {
+                                $realVariant->decrement('stock', $item->quantity);
+                            }
+                            if ($realProduct->stock >= $item->quantity) {
+                                $realProduct->decrement('stock', $item->quantity);
+                            }
+                        }
+                    } else {
+                        if ($realProduct->stock >= $item->quantity) {
+                            $realProduct->decrement('stock', $item->quantity);
+                        }
+                    }
+                }
+            }
+
+            if ($request->has('cart_item_ids')) {
+                CartItem::whereIn('id', $request->cart_item_ids)
+                    ->whereHas('cart', fn($q) => $q->where('user_id', $user->id))
+                    ->delete();
+            }
+
+            session()->forget('direct_buy');
+            session()->forget('applied_vouchers');
+
+            DB::commit(); 
+            return redirect()->route('home')->with('success', 'Transaksi berhasil! Pesanan telah dibuat per toko.');
+
+        } catch (\Exception $e) {
+            DB::rollBack(); 
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    public function addAddress(Request $request) { 
+        $user = Auth::user();
+        UserAddress::create(array_merge($request->all(), ['user_id' => $user->id, 'is_default' => false]));
+        return redirect()->back()->with('success', 'Address saved.');
     }
 }

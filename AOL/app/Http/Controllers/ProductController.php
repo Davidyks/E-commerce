@@ -156,7 +156,13 @@ class ProductController extends Controller
         }
 
         if ($request->input('action') === 'buy_now') {
-            return redirect()->route('checkout.index')->with('success', 'Please proceed with your payment!');
+            session()->put('direct_buy', [
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'variant_id' => $request->variant_id,
+            ]);
+            
+            return redirect()->route('checkout.index');
         } else {
             $user = Auth::user();
             $cart = Cart::firstOrCreate(['user_id' => $user->id]);
