@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Product;
 use App\Models\Voucher;
 use App\Models\FlashSale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class CartController extends Controller
 {
@@ -18,25 +20,49 @@ class CartController extends Controller
         $user = Auth::user();
         $cart = Cart::firstOrCreate(['user_id' => $user->id]);
         $cartItems = $cart->items()->with(['product.seller', 'variant'])->get();
+        $subtotal = 0;
 
         foreach ($cartItems as $item) {
             $product = $item->product;
             
-            $fs = FlashSale::where('product_id', $product->id)
-                ->where('start_time', '<=', now())
-                ->where('end_time', '>', now())
-                ->first();
+            $flashsale = Flashsale::where(function ($q) use ($item, $product){
+                if($item->product_variant_id){
+                    $q->where('product_variant_id', $item->product_variant_id);
+                } else {
+                    $q->where('product_id', $product->id)
+                        ->whereNull('product_variant_id');
+                }
+            })
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>', now())
+            ->where('flash_stock', '>', 0)
+            ->first();
 
             $normalPrice = $item->variant ? $item->variant->price : $product->price;
-            $currentPrice = ($fs && $fs->flash_stock > 0) ? $fs->flash_price : $normalPrice;
 
-            if ($item->price != $currentPrice) {
-                $item->price = $currentPrice;
-                $item->save(); 
+            $item->display_price = $normalPrice;
+            $item->line_total = 0;
+            $item->flash_info = null;
+
+            if($flashsale){
+                $flashQty = min($item->quantity, $flashsale->flash_stock);
+                $normalQty = $item->quantity - $flashQty;
+                $item->display_price = $flashsale->flash_price;
+                
+                $item->flash_info = [
+                    'flash_qty' => $flashQty,
+                    'normal_qty' => $normalQty,
+                    'flash_price' => $flashsale->flash_price,
+                    'normal_price' => $normalPrice,
+                ];
+
+                $item->line_total = ($flashQty * $flashsale->flash_price) + ($normalQty * $normalPrice);
+            } else {
+                $item->line_total = $normalPrice * $item->quantity;
             }
-        }
 
-        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
+            $subtotal += $item->line_total;
+        }
 
         $appliedSession = session('applied_vouchers', []);
         $validVouchers = [];
@@ -78,31 +104,26 @@ class CartController extends Controller
         return view('user.cart', compact(
             'cartItems', 'groupedItems', 'subtotal', 'discountAmount', 
             'finalTotal', 'totalItems', 'availableVouchers', 'voucherCode',
-            'appliedVoucherModels' 
+            'appliedVoucherModels',
         ));
     }
 
     public function UpdateQuantity(Request $request, $id)
     {
-        $request->validate(['quantity' => 'required|integer|min:1']);
         $item = CartItem::find($id);
+        $product = $item->product;
 
+        $request->validate(['quantity' => 'required|integer|min:'.$product->min_order_qty]);
         if(!$item) return response()->json(['status' => 'error', 'message' => 'Item not found'], 404);
 
-        $product = $item->product;
-        $fs = FlashSale::where('product_id', $product->id)
-            ->where('start_time', '<=', now())
-            ->where('end_time', '>', now())
-            ->first();
-
+        $newQty = $request->quantity;
         $limitStock = $item->variant ? $item->variant->stock : $product->stock;
-        if ($fs && $fs->flash_stock > 0) $limitStock = $fs->flash_stock;
 
         if ($request->quantity > $limitStock) {
             return response()->json(['status' => 'error', 'message' => 'Stok max: ' . $limitStock], 400);
         }
 
-        $item->quantity = $request->quantity;
+        $item->quantity = $newQty;
         $item->save();
 
         return response()->json(['status' => 'success']);
@@ -148,6 +169,26 @@ class CartController extends Controller
     
     public function buyNow(Request $request, $id)
     {
+        $product = Product::findOrFail(id: $request->product_id);
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:'.$product->min_order_qty,
+            'product_id' => 'required|exists:products,id',
+            'variant_id' => [
+                'nullable',
+                Rule::exists('product_variants','id')
+                    ->where('product_id', $product->id)
+            ],
+        ], [
+            'quantity.min' => 'Purchase at least :min item(s).',
+        ]);
+
+        if ($product->variants()->exists() && !$request->filled('variant_id')) {
+            return back()
+                ->withErrors(['variant_id' => 'Please select a variant first.'])
+                ->withInput();
+        }
+
         session()->put('direct_buy', [
             'product_id' => $id,
             'quantity' => $request->quantity ?? 1,

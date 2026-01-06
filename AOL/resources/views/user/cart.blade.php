@@ -55,8 +55,7 @@
                                        type="checkbox" 
                                        style="width: 1.2em; height: 1.2em;"
                                        value="{{ $item->id }}"
-                                       data-price="{{ $item->price }}"
-                                       data-quantity="{{ $item->quantity }}">
+                                       data-line-total="{{ $item->line_total }}">
                             </div>
                             <div class="col-2">
                                 @php
@@ -85,9 +84,24 @@
                                 </form>
                             </div>
                             <div class="col-4 text-end">
-                                <div class="text-danger fw-bold mb-1 fs-5">
-                                    ${{ number_format($item->price, 2) }}
+                                <div class="text-danger fw-bold fs-5">
+                                    ${{ number_format($item->display_price, 2) }}
                                 </div>
+                                @if($item->flash_info)
+                                    <small class="text-muted d-block" style="font-size:13px">
+                                        ${{  number_format($item->flash_info['flash_price'], 2) }} x{{ $item->flash_info['flash_qty'] }}
+                                    </small>
+
+                                    @if($item->flash_info['normal_qty'] > 0)
+                                        <small class="text-muted d-block" style="font-size:13px">
+                                            ${{  number_format($item->flash_info['normal_price'], 2) }} x{{ $item->flash_info['normal_qty'] }}
+                                        </small>
+                                    @endif
+                                @else
+                                    <small class="text-muted d-block" style="font-size:13px">
+                                        ${{ number_format($item->display_price, 2) }} x{{ $item->quantity }}
+                                    </small>
+                                @endif
                                 
                                 @php $originalPrice = $item->variant ? $item->variant->price : $item->product->price; @endphp
                                 @if($item->price < $originalPrice)
@@ -262,10 +276,8 @@
             let totalItems = 0;
 
             $('.item-checkbox:checked').each(function() {
-                let price = parseFloat($(this).data('price'));
-                let qty = parseInt($(this).data('quantity'));
-                subtotal += price * qty;
-                totalItems += qty;
+                let lineTotal = parseFloat($(this).data('line-total'));
+                subtotal += lineTotal;
             });
 
             let isVoucherValid = true;
@@ -369,7 +381,7 @@
     function confirmRemoveVoucher() {
         Swal.fire({
             title: '@lang('messages.remove') Voucher?',
-            text: '@lang('messages.remove_coucher')?',
+            text: '@lang('messages.remove_voucher')?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#d33',

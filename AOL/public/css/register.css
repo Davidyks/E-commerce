@@ -181,10 +181,9 @@ input {
 
     .back {
         position: fixed;
-        top: 290px;
-        right: 44px;
+        top: 30px;
+        right: 30px;
         margin-right: 0px;
         font-size: 16px;
-        color: black;
     }
 }

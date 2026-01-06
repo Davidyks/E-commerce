@@ -144,18 +144,17 @@ input {
 
     .form-card {
         width: 100%;
-        max-width: 360px;
         margin: 0;
+        width: 360px;
         padding: 24px;
         padding-top: 40px;
     }
 
     .back {
         position: fixed;
-        top: 330px;
-        right: 44px;
+        top: 30px;
+        right: 30px;
         margin-right: 0px;
         font-size: 16px;
-        color: black;
     }
 }

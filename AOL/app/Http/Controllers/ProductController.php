@@ -136,14 +136,15 @@ class ProductController extends Controller
 
     public function addToCart(Request $request)
     {
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::findOrFail(id: $request->product_id);
 
         $request->validate([
             'quantity' => 'required|numeric|min:'.$product->min_order_qty,
             'product_id' => 'required|exists:products,id',
             'variant_id' => [
                 'nullable',
-                Rule::exists('product_variants','id')->where('product_id', $product->id)
+                Rule::exists('product_variants','id')
+                    ->where('product_id', $product->id)
             ],
         ], [
             'quantity.min' => 'Purchase at least :min item(s).',
@@ -176,15 +177,6 @@ class ProductController extends Controller
                     ->firstOrFail();
 
                 $unitPrice = $variant->price;
-            }
-
-            $flashSale = FlashSale::where('product_id', $product->id)
-                ->where('start_time', '<=', now())
-                ->where('end_time', '>', now())
-                ->first();
-
-            if ($flashSale && $flashSale->flash_stock > 0) {
-                $unitPrice = $flashSale->flash_price;
             }
 
             $existingItem = CartItem::where('cart_id', $cart->id)

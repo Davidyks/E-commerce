@@ -35,8 +35,8 @@ class CheckoutController extends Controller
             $tempItem->quantity = $directBuy['quantity'];
             $tempItem->product = $product; 
             
-            $tempItem->variant_id = $directBuy['variant_id'] ?? null;
-            $tempItem->variant = $tempItem->variant_id ? ProductVariant::find($tempItem->variant_id) : null;
+            $tempItem->product_variant_id = $directBuy['variant_id'] ?? null;
+            $tempItem->variant = $tempItem->product_variant_id ? ProductVariant::find($tempItem->product_variant_id) : null;
             $tempItem->price = $tempItem->variant ? $tempItem->variant->price : $product->price;
 
             $cartItems = collect([$tempItem]);
@@ -56,29 +56,45 @@ class CheckoutController extends Controller
             }
         }
 
+        $subtotal = 0;
         foreach ($cartItems as $item) {
             $product = $item->product;
-            $fs = FlashSale::where('product_id', $product->id)
-                ->where('start_time', '<=', now())->where('end_time', '>', now())->first();
+            $flashsale = FlashSale::where(function ($q) use ($item){
+                    if($item->product_variant_id){
+                        $q->where('product_variant_id', $item->product_variant_id)
+                            ->whereNull('product_id');
+                    } else {
+                        $q->where('product_id', $item->product->id)
+                            ->whereNull('product_variant_id');
+                    }
+                })->where('start_time', '<=', now())->where('end_time', '>', now())->lockForUpdate()->first();
 
             $normalPrice = $item->variant ? $item->variant->price : $product->price;
-            $currentStock = $item->variant ? $item->variant->stock : $product->stock;
 
-            if ($fs && $fs->flash_stock > 0) {
-                $item->price = $fs->flash_price;
-                if ($item->quantity > $fs->flash_stock) $item->quantity = $fs->flash_stock;
+            $item->display_price = $normalPrice;
+            $item->flash_info = null;
+
+            if($flashsale && $flashsale->flash_stock > 0){
+                $flashPriceQuantity = min($item->quantity, $flashsale->flash_stock);
+                $normalPriceQuantity = $item->quantity - $flashPriceQuantity;
+
+                $item->display_price = $flashsale->flash_price;
+                $item->flash_info = [
+                    'flash_qty'   => $flashPriceQuantity,
+                    'normal_qty'  => $normalPriceQuantity,
+                    'flash_price' => $flashsale->flash_price,
+                    'normal_price'=> $normalPrice,
+                ];
+
+                $subtotal += ($flashPriceQuantity * $flashsale->flash_price) + ($normalPriceQuantity * $normalPrice);
             } else {
-                $item->price = $normalPrice;
-                if ($item->quantity > $currentStock) $item->quantity = $currentStock;
+                $subtotal += $item->quantity * $item->display_price;
             }
-            if ($item->id) $item->save();
         }
 
         $groupedItems = $cartItems->groupBy(function ($item) {
             return $item->product->seller_id;
         });
-
-        $subtotal = $cartItems->sum(fn($item) => $item->price * $item->quantity);
 
         $appliedSession = session('applied_vouchers', []);
         $validVouchers = [];
@@ -125,8 +141,6 @@ class CheckoutController extends Controller
             ['code' => 'gosend_pay', 'name' => 'GoPay', 'logo' => asset('asset/images/sebelum_login/gopay.jpg'), 'fee' => 0],
             ['code' => 'bni_va', 'name' => 'BNI Virtual Account', 'logo' => asset('asset/images/sebelum_login/bni.png'), 'fee' => 0.10],
             ['code' => 'bri_va', 'name' => 'BRI Virtual Account', 'logo' => asset('asset/images/sebelum_login/bri.png'), 'fee' => 0.10],
-            ['code' => 'shopeepay', 'name' => 'ShopeePay', 'logo' => asset('asset/images/sebelum_login/shopeepay.png'), 'fee' => 0.05],
-            ['code' => 'cod', 'name' => 'Cash on Delivery', 'logo' => asset('asset/images/sebelum_login/cod.png'), 'fee' => 0],
         ];
 
         return view('user.checkout', compact(
@@ -148,15 +162,36 @@ class CheckoutController extends Controller
         $subtotal = 0;
         if ($directBuy) {
             $product = Product::find($directBuy['product_id']);
-            $price = $product->price;
-            if(isset($directBuy['variant_id'])) {
-                $v = ProductVariant::find($directBuy['variant_id']);
-                if($v) $price = $v->price;
+            $variant = $directBuy['variant_id']
+                ? ProductVariant::find($directBuy['variant_id'])
+                : null;
+
+            $qty = $directBuy['quantity'];
+            $normalPrice = $variant ? $variant->price : $product->price;
+
+            $flashsale = FlashSale::where(function ($q) use ($directBuy, $product) {
+                if ($directBuy['variant_id']) {
+                    $q->where('product_variant_id', $directBuy['variant_id']);
+                } else {
+                    $q->where('product_id', $product->id)
+                    ->whereNull('product_variant_id');
+                }
+            })
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>', now())
+            ->where('flash_stock', '>', 0)
+            ->first();
+
+            if ($flashsale) {
+                $flashQty = min($qty, $flashsale->flash_stock);
+                $normalQty = $qty - $flashQty;
+
+                $subtotal =
+                    ($flashQty * $flashsale->flash_price) +
+                    ($normalQty * $normalPrice);
+            } else {
+                $subtotal = $qty * $normalPrice;
             }
-            $subtotal = $price * $directBuy['quantity'];
-        } else {
-            $cart = $user->cart;
-            if($cart) $subtotal = $cart->items->sum(fn($i) => $i->price * $i->quantity);
         }
 
         if (!$voucher->isValid($user, $subtotal)) return redirect()->back()->with('error', 'Min. belanja tidak terpenuhi.');
@@ -192,12 +227,9 @@ class CheckoutController extends Controller
                 $itemObj->variant_id = $directBuy['variant_id'] ?? null;
                 $itemObj->quantity = $directBuy['quantity'];
                 
-                if ($itemObj->variant_id) {
-                     $v = ProductVariant::find($itemObj->variant_id);
-                     $itemObj->price = $v->price;
-                } else {
-                     $itemObj->price = $product->price;
-                }
+                $v = ProductVariant::find($itemObj->variant_id);
+                $normalPrice = $itemObj->variant_id ? $v->price : $product->price;
+                $itemObj->price = $normalPrice;
                 $itemObj->seller_id = $product->seller_id;
                 $itemsToProcess->push($itemObj);
 
@@ -225,58 +257,98 @@ class CheckoutController extends Controller
                 
                 $shippingId = $request->shipping_id[$sellerId] ?? null;
                 if(!$shippingId) throw new \Exception("Pengiriman untuk salah satu toko belum dipilih.");
-
-                $storeSubtotal = $items->sum(fn($i) => $i->price * $i->quantity);
                 
                 $shipping = Shipping::find($shippingId);
                 $shippingCost = $shipping ? $shipping->base_cost : 0;
-
-                $storeTotal = $storeSubtotal + $shippingCost; 
 
                 $order = new Order();
                 $order->user_id = $user->id;
                 $order->seller_id = $sellerId; 
                 $order->shipping_id = $shippingId;
                 $order->order_code = 'ORD-' . strtoupper(Str::random(8)) . '-' . $sellerId; 
-                
-                $order->subtotal = $storeSubtotal;
-                $order->shipping_cost = $shippingCost;
-                $order->total_price = $storeTotal;
-                
+                $order->shipping_cost = $shippingCost;             
                 $order->payment_method = $request->payment_method;
                 $order->payment_status = 'pending'; 
-                $order->notes = $transactionGroupId; 
+                $order->notes = $transactionGroupId;
+                $order->subtotal=0;
+                $order->total_price=0;
                 $order->save();
 
+                $storeSubtotal = 0;
+
                 foreach ($items as $item) {
-                    $orderItem = new OrderItem();
-                    $orderItem->order_id = $order->id;
-                    $orderItem->product_id = $item->product_id;
-                    $orderItem->quantity = $item->quantity;
-                    $orderItem->price = $item->price;
-                    $orderItem->product_variant_id = $item->variant_id ?? null;
-                    $orderItem->seller_id = $sellerId; 
-                    $orderItem->save();
+                    $product = Product::lockForUpdate()->find($item->product_id);
+                    $variant = null;
 
-                    $realProduct = Product::find($item->product_id); 
-                    $realProduct->increment('sold_count', $item->quantity);
-
-                    if ($item->variant_id) {
-                        $realVariant = ProductVariant::find($item->variant_id);
-                        if ($realVariant) {
-                            if ($realVariant->stock >= $item->quantity) {
-                                $realVariant->decrement('stock', $item->quantity);
-                            }
-                            if ($realProduct->stock >= $item->quantity) {
-                                $realProduct->decrement('stock', $item->quantity);
-                            }
-                        }
+                    if($item->variant_id){
+                        $variant = ProductVariant::lockForUpdate()->find($item->variant_id);
+                        $availableStock = $variant->stock;
                     } else {
-                        if ($realProduct->stock >= $item->quantity) {
-                            $realProduct->decrement('stock', $item->quantity);
-                        }
+                        $availableStock = $product->stock;
                     }
+
+                    if($item->quantity > $availableStock){
+                        throw new \Exception("Stok produk tidak mencukupi.");
+                    }
+
+                    $flashsale = FlashSale::where(function ($q) use ($item){
+                        if($item->variant_id){
+                            $q->where('product_variant_id', $item->variant_id)
+                                ->whereNull('product_id');
+                        } else {
+                            $q->where('product_id', $item->product->id)
+                                ->whereNull('product_variant_id');
+                        }
+                    })->where('start_time', '<=', now())->where('end_time', '>', now())->lockForUpdate()->first();
+
+                    $flashPriceQuantity = 0;
+                    $normalPriceQuantity = $item->quantity;
+
+                    if($flashsale && $flashsale->flash_stock > 0){
+                        $flashPriceQuantity = min($item->quantity, $flashsale->flash_stock);
+                        $normalPriceQuantity = $item->quantity - $flashPriceQuantity;
+                    }
+
+                    if($flashPriceQuantity > 0){
+                        OrderItem::create([
+                            'order_id' => $order->id,
+                            'product_id' => $item->product_id,
+                            'product_variant_id' => $item->variant_id,
+                            'quantity' => $flashPriceQuantity,
+                            'price' => $flashsale->flash_price,
+                            'seller_id' => $sellerId,                            
+                        ]);
+
+                        $flashsale->decrement('flash_stock', $flashPriceQuantity);
+                        $storeSubtotal += $flashPriceQuantity * $flashsale->flash_price;
+                    }
+
+                    if($normalPriceQuantity > 0){
+                        OrderItem::create([
+                            'order_id' => $order->id,
+                            'product_id' => $item->product_id,
+                            'product_variant_id' => $item->variant_id,
+                            'quantity' => $normalPriceQuantity,
+                            'price' => $item->price,
+                            'seller_id' => $sellerId,
+                        ]);
+
+                        $storeSubtotal += $normalPriceQuantity * $item->price;
+                    }
+
+                    $totalQuantity = $flashPriceQuantity + $normalPriceQuantity;
+
+                    if($variant){
+                        $variant->decrement('stock', $totalQuantity);
+                    }
+
+                    $product->decrement('stock', $totalQuantity);
+                    $product->increment('sold_count', $totalQuantity);
                 }
+
+                $order->subtotal = $storeSubtotal;
+                $order->total_price = $storeSubtotal + $shippingCost;
+                $order->save();
             }
 
             if ($request->has('cart_item_ids')) {
