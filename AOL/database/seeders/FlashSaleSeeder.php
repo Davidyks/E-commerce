@@ -20,7 +20,7 @@ class FlashSaleSeeder extends Seeder
         $products = Product::with('variants')->get();
 
         foreach ($products as $product) {
-            if ($faker->boolean(50)) { // 30% produk masuk flash sale
+            if ($faker->boolean(50)) { // 50% produk masuk flash sale
                 $start = Carbon::now();
                 $end = (clone $start)->addDays(rand(1,3))->addHours(rand(2, 12));
 

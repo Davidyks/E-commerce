@@ -80,7 +80,27 @@
                                         @endif
                                         <small class="text-muted">@lang('messages.quantity'): {{ $item->quantity }}</small>
                                     </div>
-                                    <div class="fw-bold text-danger">${{ number_format($item->price, 2) }}</div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-danger fs-6">
+                                            ${{ number_format($item->display_price, 2) }}
+                                        </div>
+
+                                        @if($item->flash_info)
+                                            <small class="text-muted d-block" style="font-size:13px">
+                                                ${{  number_format($item->flash_info['flash_price'], 2) }} x{{ $item->flash_info['flash_qty'] }}
+                                            </small>
+
+                                            @if($item->flash_info['normal_qty'] > 0)
+                                                <small class="text-muted d-block" style="font-size:13px">
+                                                    ${{  number_format($item->flash_info['normal_price'], 2) }} x{{ $item->flash_info['normal_qty'] }}
+                                                </small>
+                                            @endif
+                                        @else
+                                            <small class="text-muted d-block" style="font-size:13px">
+                                                ${{ number_format($item->display_price, 2) }} x{{ $item->quantity }}
+                                            </small>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         @endforeach

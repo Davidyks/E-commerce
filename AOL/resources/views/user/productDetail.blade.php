@@ -153,7 +153,7 @@
                                         <input type="number" name="quantity"
                                             value="{{ old('quantity', $product->min_order_qty) }}"
                                             min="{{ $product->min_order_qty }}" class="form-control text-center fw-bold"
-                                            placeholder="{{ $product->min_order_qty }}">
+                                            placeholder="{{ $product->min_order_qty }}" id="qty-input" max="{{ $product->stock }}">
                                     </div>
 
                                     <button type="submit" name="action" value="add_to_cart"
@@ -411,7 +411,9 @@
     const flashInfoEl = document.getElementById('flashsale-info');
     const flashStockEl = document.getElementById('flashsale-stock');
     const flashInitialEl = document.getElementById('flashsale-initial');
-    const flashsaleBeforeEl = document.getElementById('flashsale-before')
+    const flashsaleBeforeEl = document.getElementById('flashsale-before');
+    const qtyInput = document.getElementById('qty-input')
+    const productStock = {{ $product->stock }};
 
     document.querySelectorAll('.variant-radio').forEach(radio => {
         radio.addEventListener('click', function(){
@@ -422,6 +424,11 @@
                 priceEl.innerText = '{{ $product->display_price }}'
                 stockEl.innerText = '{{ $product->stock }}'
 
+                qtyInput.max = productStock;
+                if (parseInt(qtyInput.value) > productStock) {
+                    qtyInput.value = productStock;
+                }
+
                 flashInfoEl.classList.add('d-none')
             } else {
                 lastChecked = this;
@@ -430,10 +437,15 @@
         radio.addEventListener('change', function () {
             if (this.checked){
                 const price = this.dataset.price;
-                const stock = this.dataset.stock;
+                const stock = parseInt(this.dataset.stock);
                 const flashPrice = this.dataset.flashsalePrice;
                 const flashStock = this.dataset.flashsaleStock;
                 const flashInitial = this.dataset.flashsaleInitial;
+
+                qtyInput.max = stock;
+                if(parseInt(qtyInput.value) > stock){
+                    qtyInput.value = stock;
+                }
                 
                 if(flashPrice){
                     priceEl.innerText = flashPrice;
