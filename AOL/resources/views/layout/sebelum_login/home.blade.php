@@ -31,33 +31,35 @@
         @if ($flashsales->isNotEmpty())
             <div class="flashsale-items">
                 @foreach ($flashsales as $f)
-                    <div class="flashsale-card">
-                        <a href="{{ route('products.detail', parameters: $f->product->id ?? $f->variant->product_id) }}" class="text-decoration-none" style="color: black">
-                        <div class="position-relative">
-                            <div class="image-wrapper">
-                                <img src="{{ $f->product->product_image ?? $f->variant->image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
-                            </div>
-                            <span class="flashsale-stock">{{ $f->flash_stock }}/{{ $f->initial_stock }} left</span>
-                            <span class="flashsale-timer" data-end-time="{{ $f->end_time }}"></span>
-                        </div>
-                        <p class="product-name">{{ $f->variant ? $f->variant->product->name : $f->product->name }}
-                            @if ($f->variant)
-                                <span class="fw-normal">- {{ $f->variant->variant_name }}</span>
-                            @endif
-                        </p>
-                        <br>
-                        <div class="card-bottom">
-                            <p class="price fw-bold">${{ $f->flash_price }}</p>
-                            <div class="align-items-center d-flex justify-content-between">
-                                <p class="before-discount text-muted">${{ $f->variant ? $f->variant->price : $f->product->price }} </p>
-                                <div class="flashsale-rate">
-                                    ★ {{ number_format($f->product->rating ?? $f->variant->product->rating, 1) }}
+                    @if ($f->flash_stock > 0)
+                        <div class="flashsale-card">
+                            <a href="{{ route('products.detail', parameters: $f->product->id ?? $f->variant->product_id) }}" class="text-decoration-none" style="color: black">
+                            <div class="position-relative">
+                                <div class="image-wrapper">
+                                    <img src="{{ $f->product->product_image ?? $f->variant->image ?? asset('asset/images/sesudah_login/shirt.jpg') }}" alt="Product">
                                 </div>
+                                <span class="flashsale-stock">{{ $f->flash_stock }}/{{ $f->initial_stock }} left</span>
+                                <span class="flashsale-timer" data-end-time="{{ $f->end_time }}"></span>
                             </div>
-                            <a class="restricted-btn" href="{{ route('products.detail', $f->product->id ?? $f->variant->product_id) }}">See Detail</a>
+                            <p class="product-name">{{ $f->variant ? $f->variant->product->name : $f->product->name }}
+                                @if ($f->variant)
+                                    <span class="fw-normal">- {{ $f->variant->variant_name }}</span>
+                                @endif
+                            </p>
+                            <br>
+                            <div class="card-bottom">
+                                <p class="price fw-bold">${{ $f->flash_price }}</p>
+                                <div class="align-items-center d-flex justify-content-between">
+                                    <p class="before-discount text-muted">${{ $f->variant ? $f->variant->price : $f->product->price }} </p>
+                                    <div class="flashsale-rate">
+                                        ★ {{ number_format($f->product->rating ?? $f->variant->product->rating, 1) }}
+                                    </div>
+                                </div>
+                                <a class="restricted-btn" href="{{ route('products.detail', $f->product->id ?? $f->variant->product_id) }}">See Detail</a>
+                            </div>
+                            </a>
                         </div>
-                        </a>
-                    </div>
+                    @endif
                 @endforeach
             </div>
         @else

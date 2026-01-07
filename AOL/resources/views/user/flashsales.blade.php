@@ -3,11 +3,11 @@
 @section('css', 'css/flashsales.css')
 @section('content')
 <div class="container-fluid">
-    <div class="mx-auto py-4 rounded shadow-sm d-flex justify-content-between" style="background: #fff; width: 95%;">
+    <div class="mx-auto py-3 py-md-4 rounded shadow-sm d-flex justify-content-between" style="background: #fff; width: 95%;">
         <h4 class="fw-bold mb-0 ms-4" style="color:#e63939">
             @lang('messages.all_flashsale')
         </h4>
-        <a class="mb-0 me-4 text-decoration-none" style="color: #e63939; font-size:20px; font-weight: 600;" href="{{ route('home') }}">
+        <a class="mb-0 me-4 text-decoration-none back" href="{{ route('home') }}">
             @lang('messages.back')
         </a>
     </div>
@@ -19,7 +19,7 @@
             @endphp
             <a href="{{ $isActive ? route('flashsales') : route('flashsales', array_merge(request()->query(), ['category' => $c->id])) }}" class="category-item {{ $isActive ? 'active' : '' }}">
                 <img src="{{ $c->category_image }}">
-                <div>{{ $c->category_name }}</div>
+                <div class="category-name">{{ $c->category_name }}</div>
             </a>
         @endforeach
     </div>

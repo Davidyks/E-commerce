@@ -189,5 +189,6 @@
         'item' => 'Barang',
         'remove_item' => 'Apakah kamu yakin menghapus produk ini',
         'yes_remove' => 'Ya, Hapus Ini',
+        'profile' => 'Profil',
     ];
 ?>

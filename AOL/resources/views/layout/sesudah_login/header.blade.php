@@ -23,6 +23,18 @@
         box-shadow: 0 2px 6px rgba(0,0,0,.08);
     }
 
+    #mobileMenu .menu-sell{
+        display: flex;
+        align-items: center;
+        padding-bottom: 16px;
+        margin-bottom: 12px;
+        background: #fff;
+        text-decoration: none;
+        font-style: italic;
+        color: #e63939;
+        font-weight: 700;
+    }
+
     #mobileMenu .menu-item:active {
         background: rgba(230,57,57,.15);
     }
@@ -156,10 +168,13 @@
                 </option>
             </select>
         </form>
-        <a href="{{ route('profile') }}" class="menu-item">Profile</a>
-        <a href="{{ route('cart.index') }}" class="menu-item">Cart</a>
-        <a href="#" class="menu-item">Notification</a>
-        <a href="#" class="menu-item">Help</a>
+        <a href="{{ route('start.selling') }}" class="menu-sell">
+            @lang('messages.start_selling')
+        </a>
+        <a href="{{ route('profile') }}" class="menu-item">@lang('messages.profile')</a>
+        <a href="{{ route('cart.index') }}" class="menu-item">@lang('messages.cart')</a>
+        <a href="#" class="menu-item">@lang('messages.notification')</a>
+        <a href="#" class="menu-item">@lang('messages.help')</a>
         <form action="{{ route('logout') }}" method="POST" class="pt-4">
             @csrf
             <button type="submit" class="btn btn-danger">Logout</button>

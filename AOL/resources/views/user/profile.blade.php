@@ -3,29 +3,28 @@
 @section('content')
 @section('title', 'Profile')
 @section('css', 'css/profile.css')
-<a href="{{ route('home') }}" class="position-absolute text-decoration-none fw-bold ms-5 mt-4"
-    style="font-size: 20px;color: #e63939">
-    @lang('messages.back')
-</a>
+<div class="mb-2">
+    <a href="{{ route('home') }}" class="text-decoration-none fw-bold ms-3 ms-md-5 mt-3 mt-md-5 back">
+        @lang('messages.back')
+    </a>
+</div>
 <div id="container"
     class="container d-flex justify-content-center flex-column align-items-center mb-5 {{ session('success') ? 'pt-0' : 'pt-5' }}">
     @if (session('success'))
-        <div id="alert" class="alert alert-success alert-dismissible fade show position-relative top-0" role="alert"
-            style="width: 500px;">
+        <div id="alert" class="alert alert-success alert-dismissible fade show position-relative top-0" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
     @if (session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show position-relative top-0" role="alert"
-            style="width: 500px;">
+        <div class="alert alert-warning alert-dismissible fade show position-relative top-0" role="alert">
             {{ session('warning') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
 
-    <div class="card shadow-lg p-4" style="width: 500px; border-radius: 20px; border: none;">
+    <div class="card shadow-lg p-4 profile-card">
 
         <h4 class="text-center text-danger fw-bold mb-4">@lang('messages.personal_detail')</h4>
 

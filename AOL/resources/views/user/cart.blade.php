@@ -1,9 +1,9 @@
 @extends('layout.sesudah_login.master')
 
 @section('title', 'Cart')
-
+@section('css', 'css/cart.css')
 @section('content')
-<div class="container py-4">
+<div class="container py-4 px-4">
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
@@ -21,7 +21,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="text-danger fw-bold mb-0">@lang('messages.cart')</h3>
-        <a href="{{ route('home') }}" class="fs-5 fw-semibold text-decoration-none" style="color: #e63939;">
+        <a href="{{ route('home') }}" class="fs-6 fw-bold text-decoration-none" style="color: #e63939;">
             @lang('messages.back')
         </a>
     </div>
@@ -40,16 +40,15 @@
             </div>
 
             @forelse($groupedItems as $sellerId => $items)
-                <div class="card border-0 shadow-sm mb-3" style="border-radius: 8px;">
+                <div class="card border-0 shadow-sm mb-3 cart-card" style="border-radius: 8px;">
                     <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="fw-bold fs-5">
-                                <i class="bi bi-shop me-2"></i> {{ $items->first()->seller->store_name ?? 'Store Name' }}
-                            </span>
+                        <div class="d-flex align-items-center mb-3 fw-bold store-name">
+                            <i class="bi bi-shop me-2"></i>
+                            <span>{{ $items->first()->seller->store_name ?? 'Store Name' }}</span>
                         </div>
 
                         @foreach($items as $item)
-                        <div class="row mb-4 align-items-center cart-item-row border-bottom pb-3">
+                        <div class="row border-bottom pb-3 mb-3">
                             <div class="col-1">
                                 <input class="form-check-input item-checkbox" 
                                        type="checkbox" 
@@ -57,7 +56,7 @@
                                        value="{{ $item->id }}"
                                        data-line-total="{{ $item->line_total }}">
                             </div>
-                            <div class="col-2">
+                            <div class="col-3 col-md-2">
                                 @php
                                     $imgUrl = $item->product->product_image;
                                     if (!Illuminate\Support\Str::startsWith($imgUrl, 'http')) {
@@ -83,38 +82,31 @@
                                     </button>
                                 </form>
                             </div>
-                            <div class="col-4 text-end">
-                                <div class="text-danger fw-bold fs-5">
+                            <div class="col-3 col-md-4 text-end">
+                                <div class="text-danger fw-bold price">
                                     ${{ number_format($item->display_price, 2) }}
                                 </div>
                                 @if($item->flash_info)
-                                    <small class="text-muted d-block" style="font-size:13px">
+                                    <small class="text-muted d-block qtyPrice">
                                         ${{  number_format($item->flash_info['flash_price'], 2) }} x{{ $item->flash_info['flash_qty'] }}
                                     </small>
 
                                     @if($item->flash_info['normal_qty'] > 0)
-                                        <small class="text-muted d-block" style="font-size:13px">
+                                        <small class="text-muted d-block qtyPrice">
                                             ${{  number_format($item->flash_info['normal_price'], 2) }} x{{ $item->flash_info['normal_qty'] }}
                                         </small>
                                     @endif
                                 @else
-                                    <small class="text-muted d-block" style="font-size:13px">
+                                    <small class="text-muted d-block qtyPrice">
                                         ${{ number_format($item->display_price, 2) }} x{{ $item->quantity }}
                                     </small>
                                 @endif
-                                
-                                @php $originalPrice = $item->variant ? $item->variant->price : $item->product->price; @endphp
-                                @if($item->price < $originalPrice)
-                                    <div class="text-muted text-decoration-line-through small mb-2">
-                                        ${{ number_format($originalPrice, 2) }}
-                                    </div>
-                                @endif
 
                                 <div class="d-flex justify-content-end align-items-center gap-3 mt-2">
-                                    <div class="input-group input-group-sm" style="width: 100px; border: 1px solid #dee2e6; border-radius: 5px;">
-                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" type="button" data-action="decrease" data-id="{{ $item->id }}">-</button>
+                                    <div class="input-group input-group-sm qtyInput">
+                                        <button class="btn btn-white text-danger fw-bold px-md-2 px-1 change-qty" type="button" data-action="decrease" data-id="{{ $item->id }}">-</button>
                                         <input type="text" class="form-control text-center border-0 bg-transparent p-1" value="{{ $item->quantity }}" id="qty-{{ $item->id }}" readonly>
-                                        <button class="btn btn-white text-danger fw-bold px-2 change-qty" type="button" data-action="increase" data-id="{{ $item->id }}">+</button>
+                                        <button class="btn btn-white text-danger fw-bold px-md-2 px-1 change-qty" type="button" data-action="increase" data-id="{{ $item->id }}">+</button>
                                     </div>
                                 </div>
                             </div>
