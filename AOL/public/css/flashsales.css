@@ -3,6 +3,12 @@ body {
     margin: 0;
 }
 
+.back {
+    color: #e63939;
+    font-weight: 600;
+    font-size: 20px;
+}
+
 .category-title {
     font-size: 24px;
     font-weight: bold;
@@ -165,6 +171,7 @@ body {
     font-weight: 600;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     line-height: 1.3;
@@ -269,4 +276,106 @@ body {
 
 .category-item:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 767px) {
+    .container-fluid h4 {
+        font-size: 19px;
+    }
+
+    .back {
+        font-size: 16px;
+    }
+
+    .category-item {
+        width: 70px;
+        height: 70px;
+        padding: 2px;
+    }
+
+    .category-name {
+        font-size: 10px;
+    }
+
+    .category-item img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .sort-bar {
+        margin-top: -8px;
+        gap: 8px;
+    }
+
+    .sort-item {
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+
+    .flashsale-header {
+        font-size: 10px;
+    }
+
+    .flashsale-title {
+        font-size: 18px;
+    }
+
+    .flashsale-container {
+        margin-top: 10px;
+    }
+
+    .flashsale-items {
+        gap: 0px;
+    }
+
+    .flashsale-items {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0px;
+    }
+
+    .flashsale-card {
+        width: 140px;
+    }
+
+    .image-wrapper {
+        width: 140px;
+        height: 100px;
+        padding: 3px;
+    }
+
+    .flashsale-name {
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    .price {
+        font-size: 12px;
+    }
+
+    .before-discount {
+        font-size: 11px;
+    }
+
+    .restricted-btn {
+        padding: 3px 22px;
+        margin-top: 2px;
+        font-size: 10px;
+    }
+
+    .flashsale-rate {
+        font-size: 12px;
+    }
+
+    .flashsale-stock {
+        font-size: 10px;
+    }
+
+    .estimate {
+        font-size: 10px;
+        margin-top: -5px;
+    }
+
+    .flashsale-timer {
+        font-size: 10px;
+    }
 }

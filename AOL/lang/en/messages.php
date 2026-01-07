@@ -189,5 +189,6 @@
         'item' => 'Item',
         'remove_item' => 'Are you sure you want to remove this product from your cart',
         'yes_remove' => 'Yes, remove it',
+        'profile' => 'Profile',
     ]; 
 ?>

@@ -5,7 +5,7 @@
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<div class="container py-4">
+<div class="container py-4 px-4">
     <h3 class="fw-bold text-danger mb-4">Checkout</h3>
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
@@ -28,9 +28,9 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h5 class="fw-bold text-danger mb-3">@lang('messages.address')</h5>
+                            <h5 class="fw-bold text-danger">@lang('messages.address')</h5>
                             @if($mainAddress)
-                                <div class="d-flex align-items-center mb-1">
+                                <div class="d-flex align-items-center mb-1 mt-4">
                                     <i class="bi bi-geo-alt-fill text-danger me-2 fs-5"></i>
                                     <span class="fw-bold">{{ $mainAddress->label }} - {{ $mainAddress->recipient_name }}</span>
                                 </div>
@@ -40,7 +40,7 @@
                                     {{ $mainAddress->phone }}
                                 </p>
                             @else
-                                <div class="alert alert-warning mb-0">@lang('messages.no_address').</div>
+                                <div class="alert alert-warning mb-0 mt-4">@lang('messages.no_address').</div>
                             @endif
                         </div>
                         <button type="button" class="btn btn-outline-danger btn-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#addAddressModal">

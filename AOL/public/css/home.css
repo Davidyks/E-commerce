@@ -322,12 +322,7 @@ body {
     }
 
     .before-discount {
-        margin-top: -3px;
-        padding-left: 12px;
-        opacity: 0.8;
         font-size: 11px;
-        text-decoration: line-through;
-        margin-bottom: 10px;
     }
 
     .restricted-btn {

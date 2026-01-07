@@ -1,0 +1,47 @@
+.store-name {
+    font-size: 20px;
+}
+
+.price {
+    font-size: 20px;
+}
+
+.bi-shop {
+    margin-bottom: 2px;
+}
+
+.qtyPrice {
+    font-size: 13px;
+}
+
+.qtyInput {
+    width: 100px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+}
+
+@media (max-width: 767px) {
+    .cart-card {
+        font-size: 0.8rem;
+    }
+
+    .cart-card h4 {
+        font-size: 0.9rem;
+    }
+
+    .cart-card h6 {
+        font-size: 0.9rem;
+    }
+
+    .store-name {
+        font-size: 18px;
+    }
+
+    .price {
+        font-size: 15px;
+    }
+
+    .qtyPrice {
+        font-size: 10px;
+    }
+}

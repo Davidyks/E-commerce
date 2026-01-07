@@ -1,13 +1,16 @@
-body {
+sbody {
     font-family: Arial, sans-serif;
     margin: 0;
 }
 
-.category-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #d62828;
-    margin-bottom: 10px;
+.container-fluid h4 {
+    color: #e63939;
+}
+
+.back {
+    color: #e63939;
+    font-weight: 600;
+    font-size: 20px;
 }
 
 .category-list {
@@ -257,4 +260,102 @@ body {
 
 .category-item:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 767px) {
+    .container-fluid h4 {
+        font-size: 19px;
+    }
+
+    .back {
+        font-size: 16px;
+    }
+
+    .category-item {
+        width: 70px;
+        height: 70px;
+        padding: 2px;
+    }
+
+    .category-name {
+        font-size: 10px;
+    }
+
+    .category-item img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .sort-bar {
+        margin-top: -8px;
+        gap: 8px;
+    }
+
+    .sort-item {
+        font-size: 12px;
+        padding: 6px 14px;
+    }
+
+    .product-header {
+        font-size: 10px;
+    }
+
+    .product-title {
+        font-size: 18px;
+    }
+
+    .product-container {
+        margin-top: 10px;
+    }
+
+    .product-items {
+        gap: 0px;
+    }
+
+    .product-items {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0px;
+    }
+
+    .product-card {
+        width: 140px;
+    }
+
+    .image-wrapper {
+        width: 140px;
+        height: 100px;
+        padding: 3px;
+    }
+
+    .product-name {
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    .price {
+        font-size: 12px;
+    }
+
+    .before-discount {
+        font-size: 11px;
+    }
+
+    .restricted-btn {
+        padding: 3px 22px;
+        margin-top: 2px;
+        font-size: 10px;
+    }
+
+    .product-rate {
+        font-size: 12px;
+    }
+
+    .product-stock {
+        font-size: 10px;
+    }
+
+    .estimate {
+        font-size: 10px;
+        margin-top: -5px;
+    }
 }

@@ -5,7 +5,7 @@
 @section('content')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <div class="container py-5">
+    <div class="container py-2 py-md-5">
 
         {{-- NOTIFIKASI --}}
         @if (session('success'))
@@ -18,7 +18,7 @@
         {{-- MAIN PRODUCT CARD --}}
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
-                <div class="row g-5">
+                <div class="row g-3 g-md-5">
 
                     {{-- GAMBAR PRODUK --}}
                     <div class="col-md-5">
@@ -147,24 +147,24 @@
 
                             {{-- Action Buttons & Share --}}
                             <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex gap-3 align-items-center me-4">
+                                <div class="d-flex gap-3 align-items-center me-4 w-100">
                                     {{-- Quantity --}}
                                     <div style="width: 70px;">
                                         <input type="number" name="quantity"
                                             value="{{ old('quantity', $product->min_order_qty) }}"
-                                            min="{{ $product->min_order_qty }}" class="form-control text-center fw-bold"
+                                            min="{{ $product->min_order_qty }}" class="form-control text-center fw-bold px-1 py-1 py-md-2"
                                             placeholder="{{ $product->min_order_qty }}" id="qty-input" max="{{ $product->stock }}">
                                     </div>
 
                                     <button type="submit" name="action" value="add_to_cart"
-                                        class="btn btn-light text-danger border-danger px-4 py-2 fw-bold"
+                                        class="btn btn-light text-danger border-danger px-3 px-md-4 py-1 py-md-2 fw-bold d-inline-flex align-items-center gap-2 text-nowrap"
                                         style="background-color: #ffe6e6;">
-                                        <i class="fas fa-cart-plus me-2"></i> @lang('messages.add_cart')
+                                        <i class="fas fa-cart-plus me-2"></i><span> @lang('messages.add_cart')</span>
                                     </button>
                                     <button type="submit" 
                                         formaction="{{ route('buy.now', $product->id) }}" 
-                                        class="btn btn-danger px-4 py-2 fw-bold">
-                                        @lang('messages.buy_now')
+                                        class="btn btn-danger px-3 px-md-4 py-1 py-md-2 fw-bold d-inline-flex align-items-center gap-2 text-nowrap">
+                                        <span>@lang('messages.buy_now')</span>
                                     </button>
                                 </div>
                             </div>
@@ -182,7 +182,7 @@
         {{-- SELLER INFO --}}
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
-                <div class="row align-items-center">
+                <div class="row align-items-center g-4 g-md-0">
                     {{-- Logo & Nama Toko --}}
                     <div class="col-md-4 d-flex align-items-center gap-3 border-end">
                         <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold fs-3"
@@ -200,7 +200,7 @@
 
                     {{-- Stat Toko --}}
                     <div class="col-md-8">
-                        <div class="d-flex justify-content-around text-center">
+                        <div class="d-flex justify-content-md-around justify-content-between text-center">
                             <div>
                                 <span class="text-secondary small">@lang('messages.products')</span>
                                 <h5 class="text-danger fw-bold mb-0">{{ $sellerProducts }}</h5>
