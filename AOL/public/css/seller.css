@@ -14,6 +14,13 @@
     border: 1px solid #eee;
 }
 
+.flashsale-row {
+    border-top: 0 !important;
+    border-bottom: 1px solid #eee;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
 .variant-list {
     margin-left: 52px;
 }
@@ -27,21 +34,21 @@
 }
 
 .pagination .page-link {
-    color: #E63939 !important;
-    border-color: #E63939 !important;
+    color: #e63939 !important;
+    border-color: #e63939 !important;
     border-radius: 8px;
     margin: 0 3px;
 }
 
 .pagination .page-link:hover {
-    background-color: #E63939 !important;
+    background-color: #e63939 !important;
     color: #ffffff !important;
-    border-color: #E63939 !important;
+    border-color: #e63939 !important;
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #E63939 !important;
-    border-color: #E63939 !important;
+    background-color: #e63939 !important;
+    border-color: #e63939 !important;
     color: #ffffff !important;
 }
 
@@ -53,4 +60,23 @@
 .pagination .page-link {
     background: red !important;
     color: white !important;
+}
+
+tr .btn {
+    width: 80px;
+}
+
+@media (max-width: 767px) {
+    th {
+        font-size: 0.7rem;
+    }
+
+    td {
+        font-size: 0.7rem;
+    }
+
+    tr .btn {
+        font-size: 10px;
+        width: 100%;
+    }
 }

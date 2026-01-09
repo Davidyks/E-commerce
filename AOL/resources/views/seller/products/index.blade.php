@@ -6,7 +6,14 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid px-4">
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissable fade show mb-3 d-flex justify-content-between align-items-center" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
     {{-- Header --}}
     <div class="d-flex align-items-center mb-3">
@@ -70,13 +77,13 @@
                                     {{-- Harga range / single --}}
                                     @if ($product->variants && $product->variants->count())
                                         <div class="small text-danger fw-semibold mt-1">
-                                            Rp{{ number_format($product->variants->min('price'),0,',','.') }}
+                                            ${{ number_format($product->variants->min('price'),2) }}
                                             -
-                                            Rp{{ number_format($product->variants->max('price'),0,',','.') }}
+                                            ${{ number_format($product->variants->max('price'),2) }}
                                         </div>
                                     @else
                                         <div class="small text-danger fw-semibold mt-1">
-                                            Rp{{ number_format($product->price ?? 0,0,',','.') }}
+                                            ${{ number_format($product->price ?? 0,2) }}
                                         </div>
                                     @endif
                                 </div>
@@ -86,7 +93,7 @@
                         {{-- Harga (kosong jika ada variant) --}}
                         <td>
                             @unless($product->variants && $product->variants->count())
-                                Rp{{ number_format($product->price ?? 0,0,',','.') }}
+                                ${{ number_format($product->price ??  0, 2) }}
                             @endunless
                         </td>
 
@@ -101,23 +108,77 @@
 
                         {{-- Aksi --}}
                         <td>
-                            <a href="{{ route('products.edit', $product->id) }}"
-                                class="text-primary text-decoration-none d-block ">
-                                @lang('messages.edit')
-                            </a>
-                            <form action="{{ route('products.destroy', $product->id) }}"
-                                method="POST"
-                                class="delete-form d-inline">
-                                @csrf
-                                @method('DELETE')
+                            <div class="d-flex flex-column flex-md-row gap-2">
+                                <a href="{{ route('products.edit', $product->id) }}"
+                                    class="btn btn-sm btn-primary text-white">
+                                    @lang('messages.edit')
+                                </a>
+                                <form action="{{ route('products.destroy', $product->id) }}"
+                                    method="POST"
+                                    class="delete-form d-inline">
+                                    @csrf
+                                    @method('DELETE')
 
-                                <button type="button"
-                                        class="text-danger border-0 bg-transparent p-0 delete-btn">
-                                    @lang('messages.delete')
-                                </button>
-                            </form>
+                                    <button type="button"
+                                            class="btn btn-sm btn-danger delete-btn text-white">
+                                        @lang('messages.delete')
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
+
+                    @php
+                        $flashsaleProduct = $flashsales->firstWhere('product_id', $product->id);
+                    @endphp
+
+                    @if ($flashsaleProduct)
+                        <tr class="flashsale-row">
+                            <td>
+                                <div class="d-block align-items-start">
+                                    <div class="text-danger fw-bold"><small>Flashsale</small></div>
+                                    <div class="small">
+                                        <small>@lang('messages.start'): {{ \Carbon\Carbon::parse($flashsaleProduct->start_time)->format('d M Y, H:i') }}</small>
+                                        <br>
+                                        <small>@lang('messages.end'): {{ \Carbon\Carbon::parse($flashsaleProduct->end_time)->format('d M Y, H:i') }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="fw-semibold">
+                                <small>${{ number_format($flashsaleProduct->flash_price, 2) }}</small>
+                            </td>
+                            <td class="fw-semibold">
+                                <small>{{ $flashsaleProduct->flash_stock }}/{{ $flashsaleProduct->initial_stock }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column flex-md-row gap-2">
+                                    <a href="{{ route('seller.flashsale.edit', $flashsaleProduct) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <small>@lang('messages.edit')</small>
+                                    </a>
+                                    <form action="{{ route('seller.flashsale.destroy', $flashsaleProduct) }}"
+                                        method="POST"
+                                        class="delete-flashsale-form d-inline">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger delete-btn flashsale-delete">
+                                            <small>@lang('messages.delete')</small>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>                        
+                    @else
+                        @if ($product->variants->count() === 0)
+                            <tr class="flashsale-row">
+                                <td>
+                                    <a href="{{ route('seller.flashsale.product.create', $product) }}" class="text-danger text-decoration-none fw-bold small">+ @lang('messages.add_flashsale')</a>
+                                </td>
+                            </tr>
+                        @endif
+                    @endif
 
                     {{--  VARIANT ROWS  --}}
                     @if ($product->variants && $product->variants->count())
@@ -139,18 +200,68 @@
                                 </td>
 
                                 {{-- Harga Variant --}}
-                                <td class="small">
-                                    Rp{{ number_format($variant->price ?? 0,0,',','.') }}
+                                <td>
+                                    <small>${{ number_format($variant->price ?? 0,2) }}</small>
                                 </td>
 
                                 {{-- Stok Variant --}}
-                                <td class="small">
-                                    {{ $variant->stock ?? 0 }}
+                                <td>
+                                    <small>{{ $variant->stock ?? 0 }}</small>
                                 </td>
 
                                 {{-- Aksi kosong --}}
                                 <td></td>
                             </tr>
+
+                            @php
+                                $flashsaleVariant = $flashsales->firstWhere('product_variant_id', $variant->id)
+                            @endphp
+                            
+                            @if ($flashsaleVariant)
+                                <tr class="flashsale-row">
+                                    <td>
+                                        <div class="d-block align-items-start ps-5">
+                                            <div class="text-danger fw-bold"><small>Flashsale</small></div>
+                                            <div class="small">
+                                                <small>@lang('messages.start'): {{ \Carbon\Carbon::parse($flashsaleVariant->start_time)->format('d M Y, H:i') }}</small>
+                                                <br>
+                                                <small>@lang('messages.end'): {{ \Carbon\Carbon::parse($flashsaleVariant->end_time)->format('d M Y, H:i') }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="fw-semibold">
+                                        <small>${{ number_format($flashsaleVariant->flash_price, 2) }}</small>
+                                    </td>
+                                    <td class="fw-semibold">
+                                        <small>{{ $flashsaleVariant->flash_stock }}/{{ $flashsaleVariant->initial_stock }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column flex-md-row gap-2">
+                                            <a href="{{ route('seller.flashsale.edit', $flashsaleVariant) }}"
+                                                class="btn btn-sm btn-outline-primary">
+                                                <small>@lang('messages.edit')</small>
+                                            </a>
+                                            <form action="{{ route('seller.flashsale.destroy', $flashsaleVariant) }}"
+                                                method="POST"
+                                                class="delete-flashsale-form d-inline">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger delete-btn flashsale-delete">
+                                                    <small>@lang('messages.delete')</small>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>                        
+                            @else
+                                <tr class="flashsale-row">
+                                    <td>
+                                        <a href="{{ route('seller.flashsale.variant.create', $variant) }}" class="text-danger text-decoration-none fw-bold small ps-5"><small>+ @lang('messages.add_flashsale')</small></a>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     @endif
                 @endforeach
@@ -186,6 +297,27 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    document.querySelectorAll('.flashsale-delete').forEach(button=>{
+        button.addEventListener('click', function(){
+            const form = this.closest('.delete-flashsale-form');
+
+            Swal.fire({
+                title: '@lang('messages.del_flash')?',
+                text: '@lang('messages.del_confirm_flash').',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '@lang('messages.yes_del')',
+                cancelButtonText: '@lang('messages.cancel')'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        })
+    })
 });
 </script>
 @endpush

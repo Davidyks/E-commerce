@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FlashSale;
 use App\Models\Product as ProductModel;
 use App\Models\ProductVariant as ProductVariantModel;
 use App\Models\Category as CategoryModel;
@@ -23,12 +24,17 @@ class SellerProductController extends Controller
 
         // Jika seller belum ada → collection kosong
         $products = $seller
-            ? ProductModel::with('variants')
+            ? ProductModel::with('variants', 'activeFlashsale')
             ->where('seller_id', $seller->id)
             ->latest()
             ->paginate(10)
             : ProductModel::whereRaw('1 = 0')->paginate(10);
-        return view('seller.products.index', compact('products'));
+
+
+        $flashsales = FlashSale::where('end_time', '>=', now())
+                            ->where('flash_stock', '>', '0')
+                            ->get();
+        return view('seller.products.index', compact('products', 'flashsales'));
     }
 
     /**
