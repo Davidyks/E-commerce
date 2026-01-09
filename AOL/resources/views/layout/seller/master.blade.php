@@ -8,11 +8,23 @@
     @yield('css')
     @include('layout.seller.bootstrap')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     @stack('scripts')
 </head>
 
-<body style="padding-top: 150px">
+<style>
+    body {
+        padding-top: 123px;
+    }
+
+    @media (min-width: 768px) {
+        body {
+            padding-top: 150px;
+        }
+    }
+</style>
+
+<body>
 
     {{-- HEADER --}}
     @include('layout.seller.header')
@@ -27,5 +39,6 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FlashsaleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,25 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::resource('seller/products', SellerProductController::class);
+    Route::prefix('seller/products/{product}/flashsale')
+        ->name('seller.flashsale.product.')
+        ->group(function () {
+            Route::get('create', [FlashsaleController::class, 'createByProduct'])->name('create');
+            Route::post('store', [FlashsaleController::class, 'storeByProduct'])->name('store');
+        });
+    Route::prefix('seller/variants/{variant}/flashsale')
+        ->name('seller.flashsale.variant.')
+        ->group(function () {
+            Route::get('create', [FlashsaleController::class, 'createByVariant'])->name('create');
+            Route::post('store', [FlashsaleController::class, 'storeByVariant'])->name('store');
+        });
+    Route::prefix('seller/flashsales/{flashsale}')
+        ->name('seller.flashsale.')
+        ->group(function () {
+            Route::get('edit', [FlashsaleController::class, 'edit'])->name('edit');
+            Route::put('update', [FlashsaleController::class, 'update'])->name('update');
+            Route::delete('destroy', [FlashsaleController::class, 'destroy'])->name('destroy');
+        });
     Route::get('/start-selling', [SellerController::class, 'startSelling'])->name('start.selling');
     Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
